@@ -1,5 +1,5 @@
 <?php
-//test 1,2,3...
+
 require("config.php");
 require("dbFuncties.php");
 require("faseFuncties.php");
