@@ -1,0 +1,751 @@
+===============
+     TODO:
+===============
+
+  * Opmerking:  als een Slet Verleid wordt, kan deze niet vermoord worden.
+  * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
+                aangevallen? (documenteer dit!)
+
+  * Testen:  kan een spel winnen?
+  * Testen:  mails
+  * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
+             Verleidster, Goochelaar en Klaas Vaak
+  * Testen:  nieuwe regelDood2, samen met fase-loops (naar fase 10 en fase 17)
+
+  * Mailen:  verhalen implementeren voor meerdere spelers/brandstapel
+  * Mailen:  stuurFoutStem maken voor specifieke rollen
+  * Mailen:  mail regelRollen (overdag)
+  * Mailen:  gewonnen en begin
+  * Mailen:  lijst van keuzes aan speler mailen (nodig voor Heks, handig voor 
+             anderen)
+  * Mailen:  infodump bij Onschuldige Meisje en Zondebok
+
+  * Verhaal: maak default verhalen
+  * Verhaal: geefVerhaal verbeteren/meerdere maken
+
+  * Nodig:   handleiding maken
+  * Nodig:   "or die" veranderen in "or stuurError" (in dbFuncties)
+  * Nodig:   alle echo's verwijderen... (is dit nodig?)
+  * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
+             (zelfde voor SID).
+
+  * Config:  upload verhaaltjes (.txt file)
+
+  * Extra:   mensen uitnodigen voor een nieuw spel/enkel specifieke mensen 
+             toelaten
+  * Extra:   anonieme help maken? (is dat de moeite waard?)
+  * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
+             (anders terugzetten op ongelezen...?)
+  * Extra:   optimaliseer gewonnenSpelers()
+  * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
+  * Extra:   bij queries/check op levend: voeg "AND LEVEND=1" toe aan query
+  * Extra:   speler-tabel: vat alle vlag-kolommen samen in één kolom (met 
+             bitflags)
+  * Extra:   scores implementeren
+  * Extra:   mooie documentatie
+  * Extra:   zijn execute-rechten nodig voor php-bestanden?
+  * Extra:   alle mails in Verzonden zetten
+
+
+==========================================
+     DOCUMENTATIE VAN WWautoVERTELLER
+==========================================
+
+----------
+Bestanden:
+----------
+
+Het programma bestaat uit de volgende bestanden:
+  * config.php (voor configuratie-mails)
+  * dbFuncties.php (alle functies met mysql erin)
+  * faseFuncties.php (hulp-functies voor fases.php)
+  * fases.php (regelt het spel)
+  * gmailConnect.php (maakt verbinding met de Gmail-account)
+  * gmailParse.php (doet het parsen van mails)
+  * parseFuncties.php (hierin staan allerlei hulp-functies voor gmailParse)
+  * parseStem.php (hulpfunctie om stemmen te parsen)
+  * regelRollen.php (functies voor het regelen van afzonderlijke rollen)
+  * rollen.php (verdeelt rollen onder de spelers)
+  * runWW.php (main)
+  * stuurMail.php (functies voor het mailen van spelers/admins)
+  * verhalen.php (voor het sturen van verhalen via mail)
+
+---------
+Database:
+---------
+
+De gebruikte database staat op de liacs-server (waar informatica-studenten 
+server-ruimte krijgen). Deze functioneert als het geheugen van het programma 
+en hier staat dus alles opgeslagen over verschillende spellen die hij regelt, 
+en alle spelers.
+
+De tabellen zijn (inclusief kolommen):
+  * Spellen  (SID,LEVEND,DOOD,INIT,FASE,DUUR,SNELHEID,STRENGHEID,THEMA,
+              BURGEMEESTER,TWEEDE_NACHT)
+  * Spelers  (NAAM,GESLACHT,SPEL,EMAIL,TO_MAIL,GEMIST,LEVEND,NIEUW_DOOD,ROL,
+              STEM,EXTRA_STEM,HEKS_DRANK,GELIEFDE,LIJFWACHT,BETOVERD,
+              EXTRA_LEVEN)
+  * Verhalen (VID,THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,VERHAAL,GESLACHT)
+  * Rollen   (RID,AANTAL,ROLLEN,BURGEMEESTER)
+  * Mails    (MID,ADRES,ONDERWERP,BERICHT,HEADERS)
+
+Deze worden nu kort behandeld, met uitleg bij verschillende kolommen.
+
+Spellen:
+--------
+
+Hierin staan alle spellen die gespeeld worden; het systeem kan meerdere 
+spellen tegelijkertijd leiden.
+
+SID:          Een ID om de spellen uit elkaar te houden.
+LEVEND:       Hoeveel levende spelers zitten er in het spel?
+DOOD:         Hoeveel dode spelers zitten er in het spel?
+INIT:         Is het spel aan het initialiseren? Hieronder valt: inschrijven, 
+              rollen verdelen, de Dief, Cupido en de Opdrachtgever (zie 
+              "Rollen").
+FASE:         Welke fase in het spel is het, oftewel: wie moet er gemaild 
+              worden, en welke rollen moeten er geregeld worden? (Ook zijn er 
+              wacht-fases tussen elke fase, om spelers tijd te geven om te 
+              stemmen.)
+DUUR:         Een datum ('yyyy-mm-dd') die wordt gebruikt om de duur van een 
+              fase te meten: deze wordt op de systeem-datum gezet wanneer er 
+              van fase wordt veranderd.
+SNELHEID:     Hoe snel is het spel, oftewel: hoeveel dagen krijgt een speler 
+              de tijd om zijn stem op te geven?
+STRENGHEID:   Hoe streng is het spel, oftewel: hoe vaak mag iemand vergeten te 
+              stemmen voordat hij wordt verwijderd vanwege inactiviteit?
+THEMA:        Het thema van het spel, bijv. Wild-West of Sci-Fi; enkel 
+              verhalen met dit thema worden gekozen uit de tabel "Verhalen".
+BURGEMEESTER: Hier staat de naam van de speler die Burgemeester is.
+TWEEDE_NACHT: Deze wordt gebruikt om aan te geven of er sprake is van een 
+              'tweede nacht' of juist niet. Dit, omdat de Witte Weerwolf elke 
+              tweede nacht wakker wordt.
+
+Spelers:
+--------
+
+Hierin staan alle spelers van alle spellen die worden gespeeld.
+
+NAAM:        De naam van de speler (deze is uniek!).
+GESLACHT:    Het geslacht van de speler, wellicht nodig voor verhaaltjes.
+SPEL:        Aan welk spel de speler toebehoord. Gelijk aan de SID van een 
+             spel.
+EMAIL:       Het email-adres van de speler. Hiermee wordt hij door het systeem 
+             herkend, deze is zeer belangrijk!
+TO_MAIL:     Als een speler niet meer door het systeem gemaild wil worden, 
+             staat deze vlag op 1, anders 0.
+GEMIST:      Hoeveel stem-rondes heeft de speler achter elkaar gemist? Hiermee 
+             wordt inactiviteit bepaald; elke stemronde die de speler meemaakt 
+             vanwege zijn rol wordt meegeteld.
+LEVEND:      Is de speler levend? (1 = ja, 0 = nee)
+NIEUW_DOOD:  Wanneer een speler 's nachts is vermoord, wordt deze vlag 
+             gebruikt: dan kan de Heks hem misschien nog redden.
+ROL:         De rol van een speler (deze kan in geval van de Dief, de Welp of 
+             de Grafrover nog veranderen na het verdelen van de rollen).
+STEM:        De stem van een speler, NULL als de speler niet heeft gestemd, 
+             "blanco" wanneer een blanco stem en een naam als hij op een 
+             andere speler heeft gestemd.
+EXTRA_STEM:  De extra stem van een speler, mocht hij twee stemmen nodig hebben 
+             (zie "Rollen": Cupido, Heks, Goochelaar, Witte Weerwolf, etc.). 
+             NULL als niet gebruikt, of niet gestemd, en een spelernaam als 
+             wel gestemd.
+HEKS_DRANK:  Welke dranken heeft deze speler nog? NULL als de speler geen Heks 
+             is, anders een integer (gebruikt als bitflag): 0 = geen drank, 
+             1 = levenselixer, 2 = gif, 3 = beide drankjes.
+GELIEFDE:    Is de speler een Geliefde? (Hierin staat de naam van zijn 
+             Geliefde, of NULL.)
+LIJFWACHT:   Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
+             Lijfwacht heeft.)
+BETOVERD:    Is de speler door de Fluitspeler betoverd, ja of nee?
+EXTRA_LEVEN: Heeft deze speler een extra leven (vanwege de Dorpsoudste)?
+ZONDE:       Is een Zondebok gedood vanwege een gelijkspel (en mag hij dus 
+             zijn actie doen)?
+GEK:         Is een Dorpsgek ontdekt (en verliest dus zijn stem in de 
+             Brandstapelronde)?
+SCHULD:      Heeft een speler een schuldgevoel door het doden van de Zondebok 
+             (en dus geen stem volgende Brandstapelronde)?
+
+Verhalen:
+---------
+
+VID:      Een ID om de verhalen uit elkaar te houden.
+THEMA:    Het thema van het verhaal (sluit aan bij het thema van een spel).
+AUTEUR:   De auteur van het verhaal.
+LEVEND:   Hoeveel levende spelers in het verhaal zitten.
+DOOD:     Hoeveel NIEUW_DODE spelers in het verhaal zitten.
+ROL:      Voor wie is het verhaal? (Ziener, Weerwolven, algemeen, etc.)
+FASE:     De fase van het spel.
+VERHAAL:  Het verhaal zelf.
+GESLACHT: Om geslachtsbepaalde woorden te regelen.
+
+Rollen:
+-------
+
+RID:          Een ID om de rolverdelingen uit elkaar te houden.
+AANTAL:       Het aantal rollen in deze verdeling.
+ROLLEN:       Geeft aan welke rollen er wel en niet in zitten; dit is een 
+              textstring bestaande uit getallen, gescheiden met een ",". De 
+              plek in de string bepaalt voor welke rol het getal aangeeft 
+              hoeveel spelers deze rol krijgen (*). Als een rol niet in de 
+              verdeling voorkomt, dan kan dit worden aangegeven met een 0, en 
+              'trailing zeroes' kunnen worden weggelaten.
+BURGEMEESTER: Zit er een Burgemeester in het spel?
+
+(*) De volgorde van rollen in de rolverdeling:
+1.  Burger
+2.  Weerwolf
+3.  Ziener
+4.  Heks
+5.  Cupido
+6.  Jager
+7.  Genezer
+8.  Slet
+9.  Dorpsoudste
+10. Dorpsgek
+11. Raaf
+12. Goochelaar
+13. Grafrover
+14. Vampier
+15. Welp
+16. Witte Weerwolf
+17. Klaas Vaak
+18. Zondebok
+19. Dwaas
+20. Schout
+21. Fluitspeler
+22. Onschuldige Meisje
+23. Priester
+24. Psychopaat
+25. Verleidster
+26. Opdrachtgever
+27. Dief
+28. Waarschuwer
+
+Mails:
+------
+
+Hierin staan alle pas uitgezonden mails in opgeslagen, totdat is 
+geverifieerd dat de mails daadwerkelijk zijn verzonden. 
+
+MID:       Een ID om de mails van elkaar te onderscheiden.
+ADRES:     Het bezorg-adres van de mail (CC.).
+ONDERWERP: Het onderwerp van de mail.
+BERICHT:   De inhoud van de mail.
+HEADERS:   De headers van de mail (meestal hetzelfde, maar voor zekerheid
+           worden ook deze opgeslagen).
+
+------------
+Inschrijven:
+------------
+
+Het inschrijven is een preciezer werk dan het stemmen (zie "Stemmen"); dit 
+vereist een standaard format van de mail van de gebruiker. Deze mail moet in 
+het onderwerp (onder andere, hoofdletterongevoelig) de naam van het spel (SID) 
+bevatten. In het bericht moet eerst de spelernaam (NAAM) staan, vervolgens een 
+"," en hierna het geslacht van de speler. De spelernaam en "," zijn 
+belangrijk, zonder dit wordt het geheel fout geparsed.
+Inschrijven kan (natuurlijk) alleen in een bepaalde fase van het spel, namelijk 
+de begin-fase. Hierna wordt de inschrijven gesloten, en begint het spel.
+
+--------
+Stemmen:
+--------
+
+Het inleveren van een stem gaat door een mail te sturen naar 
+WWautoVerteller@gmail.com; deze leest alle mails uit, en geeft ze door aan de 
+parse-functie. Mails die binnenkomen worden gecontroleert (in het onderwerp) 
+op de naam van het spel (SID), en (in het bericht) op de string "blanco", en op 
+de namen van alle spelers. Al deze controles zijn hoofdletterongevoelig, maar 
+alle woorden moeten wel aparte woorden zijn, niet onderdeel van een ander 
+woord.
+
+-----
+Dood:
+-----
+
+Als een speler dood is gegaan, dan krijgt hij 's nachts geen mails meer van 
+het systeem; enkel de algemene mails overdag ontvangt hij. Is een speler 
+vanwege inactiviteit uit het spel gehaald, dan ontvangt hij helemaal geen 
+mails van het systeem meer: MAIL_TO wordt op 0 gezet.
+
+Wordt een speler doodgemaakt, dan komt zijn NIEUW_DOOD parameter op 1 te staan.
+Pas na regelDood2() wordt de LEVEND parameter op 0 gezet (NIEUW_DOOD staat nog 
+wel op 1). Nadat de eerstvolgende algemene mail is verzonden wordt NIEUW_DOOD 
+voorgoed op 0 gezet.
+
+-------
+Rollen:
+-------
+
+De rollen die zijn geïmplementeerd, samen met keuzes die bij deze rollen 
+komen. Verder kan men ervanuitgaan dat, tenzij anders vermeld, de parser erop 
+toeziet dat alle stemmen goed in de database komen, en dat ze van tevoren 
+gecheckt zijn. Dit is aan de parser, niet aan de regelfuncties, omdat in geval 
+van een foute stem van enig geval, de speler moet worden teruggemaild, zodat 
+hij zijn stem kan herzien.
+
+Burgemeester:
+-------------
+
+Hoewel niet een echte rol, wel noemenswaardig: daarom is hier een speciaal 
+kopje aan besteed. Als een spel zonder Burgemeester gespeeld moet worden, dan 
+moet deze in het begin van het spel op "blanco" gezet worden (niet NULL; als 
+BURGEMEESTER op NULL staat, dan komen 's ochtends verkiezingen). Een 
+Burgemeester kan, wanneer hij dood gaat, een nieuwe Burgemeester aanwijzen, of 
+"blanco" stemmen en daarmee een nieuwe verkiezingsronde starten.
+De verkiezingsronde verloopt precies zoals de Brandstapelronde, met 
+uitzondering dat iedereen (inclusief Dorpsgek!) één stem heeft, ongeacht 
+Schout or Waarschuwer. Ook het Teken van de Raaf telt nog niet mee.
+
+Als een speler de meeste stemmen krijgt, wordt hij de nieuwe Burgemeester. Is 
+er een gelijkspel, dan pakt het systeem een willekeurige Burgemeester van 
+degenen die de meeste stemmen hebben. Is er niet gestemd op Burgemeester 
+(helemaal geen stemmen, of enkel "blanco" stemmen geteld), dan komt er geen 
+Burgemeester in de rest van het spel (deze wordt op "blanco" gezet).
+
+Als een Burgemeester dood gaat, moet hij zijn opvolger kiezen. Dit gaat door 
+een stem naar het gebruikelijke adres te sturen, met daarin (in het onderwerp 
+of het bericht) één of meerdere van de volgende (hoofdletter-ongevoelige) 
+woorden: "Burgemeester", "Testament", "Opvolger".
+
+Dief:
+-----
+
+De Dief kan, tijdens de initialisatie van het spel, direct na het verdelen van 
+de rollen, een speler kiezen wiens rol hij steelt. Deze speler wordt dan zelf 
+een gewone Burger en krijgt (als hij niet al een gewone Burger was) hierover 
+bericht. Dit is gekozen om problemen met het verdelen van rollen (met twee 
+extra rollen, die vervolgens door het systeem onthouden moeten worden) te 
+vermijden.
+Mocht het zo zijn dat een Dief de rol van een andere Dief steelt, dan wordt 
+deze eerste Dief een Burger (de tweede Dief wordt hierover niet bericht).
+
+Cupido:
+-------
+
+De twee Geliefden die Cupido aanwijst worden in zijn STEM en EXTRA_STEM 
+opgeslagen totdat het in het kopje GELIEFDE van de spelers zelf wordt 
+opgeslagen (gedaan door de regelfunctie). Wanneer er echter meerdere Cupido's 
+voorkomen in één spel, kan het gebeuren dat beide Cupido's dezelfde speler(s) 
+kiezen. Zo'n geval moet door de parser worden gevonden, en afgevangen door de 
+tweede Cupido (die het laatst zijn stemmen opgaf) te vragen om zijn stemmen te 
+herzien. Hierbij krijgt deze wel informatie over Geliefden die hij niet hoort 
+te hebben, maar dit is onvermijdelijk. Een andere optie zou zijn geweest om 
+per speler meerdere Geliefden bij te houden, maar dit zou dan óf in een 
+oneindig aantal kolommen moeten, óf in een text-kolom die moeilijker te parsen 
+zou worden. Daarom is voor de eerste optie gekozen.
+Cupido mag 'blanco' stemmen, zou hij hiervoor kiezen. 
+
+Opdrachtgever:
+--------------
+
+De speler die door de Opdrachtgever wordt aangewezen, opgeslagen in STEM, 
+wordt zijn Lijfwacht. Deze Lijfwacht zal voor zijn Opdrachtgever sterven, 
+wanneer deze dood zou gaan op welke manier dan ook, behalve inactiviteit, of 
+doordat de Geliefde van de Opdrachtgever sterft.
+Een speler is maximaal van één Opdrachtgever de Lijfwacht; mochten meerdere 
+Opdrachtgevers dezelfde speler als Lijfwacht willen, dan moet de tweede 
+Opdrachtgever zijn stem herzien.
+
+
+Weerwolf/Vampier:
+-----------------
+
+Voor de Vampiers geldt precies hetzelfde als voor de Weerwolven, met 
+uitzondering van alles over de Welp en de Witte Weerwolf, die enkel bij de 
+Weerwolven horen (of pretenderen bij de Weerwolven te horen). 
+
+Weerwolven mogen elk afzonderlijk stemmen op een slachtoffer; degene met de 
+meeste stemmen wordt uiteindelijk door de roedel opgegeten. Hier mag de Witte 
+Weerwolf ook bij stemmen (maar de Welp niet).
+Weerwolven moeten een levende speler als slachtoffer aanwijzen (natuurlijk mag 
+"blanco" stemmen ook), maar ze mogen geen andere Weerwolf, of Witte Weerwolf 
+doden (Welp kan wel per ongeluk gedood worden). Hier wordt op gecheckt door 
+de parser.
+
+Witte Weerwolf:
+---------------
+
+De Witte Weerwolf heeft elke tweede nacht een extra stem: hij mag een extra 
+speler doden (deze mag ook een Weerwolf zijn!). Deze stem komt terecht in zijn 
+EXTRA_STEM.
+De Witte Weerwolf kan zijn stem inleveren door (apart van zijn Weerwolf-stem!) 
+een mail te sturen naar het email-adres van het programma. In het onderwerp, 
+of het bericht van de mail moet hij het volgende woord (hoofdletter-ongevoelig)
+verwerken: "Witte".
+
+Heks:
+-----
+
+De Heks kan een pasoverleden (NIEUW_DOOD) speler weer tot leven wekken, en een 
+levende speler doden. De eerste komt in STEM terecht (NULL als niemand tot 
+leven wordt gewekt), de tweede in EXTRA_STEM. De parser moet checken of dit 
+goed gebeurt.
+Als twee Geliefden gedood zijn (of de Opdrachtgever), dan krijgt de heks van 
+enkel de ene Geliefde (of de Opdrachtgever) te zien dat deze dood is, en de 
+vraag of hij deze wil redden. Pas net voordat de dag begint wordt de tweede 
+Geliefde gedood, of de Lijfwacht in plaats van de Opdrachtgever. Ook over het 
+lot van inactieve spelers kan de Heks niets zeggen.
+Een Heks behoudt het recht om zichzelf te redden, maar kan zichzelf niet 
+vermoorden (net zoals een Weerwolf, Vampier of Psychopaat zichzelf niet kan 
+vermoorden).
+
+Fluitspeler:
+------------
+
+In het geval van meerdere Fluitspelers in één spel: deze Fluitspelers werken 
+samen. Om elk van hen apart te laten opereren zou voor elk van de 
+(ongedefineerd hoeveel) Fluitspelers moeten worden bijgehouden wie er Betoverd 
+is. Dit is uiterst moeilijk als niet onmogelijk. Hierom is besloten dat 
+meerdere Fluitspelers samenwerken zoals ook meerdere Weerwolven samenwerken. 
+Elk van hen stuurt apart zijn twee stemmen in, de twee spelers met de meeste 
+stemmen worden Betoverd.
+
+Er moet door de parser gecheckt worden of beide stemmen niet hetzelfde zijn, 
+en of er geen Fluitspeler tussen de stemmen staat; Fluitspelers kunnen 
+namelijk niet Betoverd worden. Ook kan een Fluitspeler niet stemmen op een 
+speler die al Betoverd is.
+
+Waarschuwer(, Schout en Raaf):
+------------------------------
+
+Voor de Waarschuwer (evenals de Schout en Raaf) is gekozen om zijn stem te 
+bewaren in EXTRA_STEM in plaats van STEM; op deze manier hoeven er geen aparte 
+vlaggen gezet te worden bij spelers, en kan de stem bewaard worden terwijl de 
+Waarschuwer zelf ook nog kan stemmen voor de Brandstapel. Voor alledrie de 
+rollen wordt bij het berekenen van de stemmen (en voor de Schout ook bij het 
+parsen) gekeken naar hun EXTRA_STEM (met functies isGewaarschuwd($naam,$sid), 
+isOpgesloten($naam,$sid) en isBeschuldigd($naam,$sid)).
+
+Jager:
+------
+
+De Jager mag ook "blanco" stemmen, mocht dit gewenst zijn.
+
+Dorpsoudste:
+------------
+
+De Dorpsoudste kan éénmaal een aanval van de Weerwolven, Vampiers, Psychopaat 
+of Witte Weerwolf overleven. Hij heeft wat dat betreft dus een extra leven. 
+Dit wordt bijgehouden in de kolom EXTRA_LEVEN van de spelers, en hierop wordt 
+gecheckt wanneer een van deze monsters hem probeert te vermoorden (in de 
+functie vermoord()).
+Als hij doodgaat, verliezen alle burger-rollen hun speciale gaven; zij worden 
+gewone Burgers. Hierbij gaat ook de Lijfwacht verloren; de Geliefden blijven 
+echter wel Geliefd. Al met al betreft het de rollen:
+Cupido, Genezer, Ziener, Slet, Verleidster, Heks, Jager, Klaas Vaak, Priester, 
+Goochelaar, Onschuldige Meisje, Grafrover, Waarschuwer, Raaf, Schout, 
+Dorpsoudste, Zondebok, Opdrachtgever, Dwaas en Dorpsgek.
+Bij de Dorpsgek, mocht deze al ontdekt zijn: hij wordt per onmiddelijk gedood.
+
+Dorpsgek:
+---------
+
+Deze rol heeft geen aparte regelfunctie; bij het regelen van de Brandstapel 
+wordt hij afgehandeld. Komt hij op de Brandstapel, dan wordt hij niet gedood, 
+maar een extra vlag wordt op 1 gezet; hij is ontdekt als Dorpsgek. In het 
+parsen van zijn stem moet hier ook op gelet worden.
+
+Dwaas:
+------
+
+De Dwaas denkt dat hij een Ziener is; hierom wordt hem aan het begin van het 
+spel verteld dat hij daadwerkelijk een Ziener is. Deze leugen wordt door het 
+programma door heel het spel heen opgehouden; hij wordt als een normale Ziener 
+behandeld, behalve wat betreft het resultaat van het bekijken van spelers.
+Als de Dwaas namelijk een speler's rol bekijkt, dan geeft het programma hem 
+expres een verkeerde rol. Dat is, het geeft hem een willekeurige rol die in 
+het spel zit, maar die niet overeenkomt met de rol van de aangewezen speler, 
+noch een "Dwaas" is (de Dwaas is te naief om zoiets ooit van een ander te 
+vermoeden).
+Zouden alle spelers in het spel dezelfde rol hebben (kleine kans, maar om 
+oneindige loops te voorkomen), namelijk die van Dwaas, dan ziet een Dwaas 
+dat een andere speler ook een Dwaas is.
+
+Goochelaar:
+-----------
+
+Deze verwisselt twee spelers (in STEM en EXTRA_STEM) van plek. Als er meerdere 
+Goochelaars zijn, en deze stemmen beiden op dezelfde speler, dan moet de 
+tweede (die als laatst zijn stem inlevert) zijn stem herzien: een speler kan 
+niet op twee plekken tegelijkertijd zijn.
+
+Verleidster:
+------------
+
+Als twee Verleidsters dezelfde speler willen verleiden, moet de tweede haar 
+stem herzien: een speler kan niet op twee plekken tegelijkertijd zijn.
+
+---------
+Doodgaan:
+---------
+
+Het sterven van spelers (op wat voor manier dan ook, Dag of Nacht, met 
+uitzondering van inactiviteit) gebeurt in stappen. Eerst wordt de speler op 
+NIEUW_DOOD gezet, terwijl LEVEND nog wel op true staat. Pas in de 
+ochtend/avond wordt dit veranderd: LEVEND staat op false, en NIEUW_DOOD ook. 
+Deze aanpak zorgt ervoor dat ook spelers die door de Weerwolven zijn vermoord 
+'s nachts nog aan de beurt komen (de Heks krijgt de kans zichzelf te genezen, 
+etc.). 
+Aan het eind van de Nacht wordt eerst regelDood1() aangeroepen, voordat de 
+Jager en Burgemeester (mogelijk) gemaild worden. Deze functie kijkt namelijk 
+naar alle nieuw_dode spelers, en checkt dan ook op Geliefden en Lijfwachten 
+(die ook op NIEUW_DOOD worden gezet). Pas nadat de Jager en Burgemeester 
+geregeld zijn, wordt regelDood2() aangeroepen, die daadwerkelijk alle 
+nieuw_dode spelers op DOOD zet.
+
+------------
+Brandstapel:
+------------
+
+De Brandstapelstemming gebeurt niet anoniem, maar de stemmen worden bekend 
+gemaakt aan de spelers. Dit, om het de Weerwolven (en andere kleine, 
+samenwerkende groepen) het moeilijker te maken om verborgen te blijven, en om 
+spelers iets te geven waarop ze hun volgende stemmen kunnen baseren.
+Ook op de Brandstapel kan er "blanco" worden gestemd. Zijn er uiteindelijk 
+geen stemmen geteld (buiten "blanco"), dan wordt er eerst gekeken of er een 
+levende Zondebok is, anders is er geen slachtoffer.
+Is er een gelijkspel in de stemming, dan wordt er ook eerst gecheckt op een 
+Zondebok. Is deze niet in het spel, dan wordt er blind gedaan wat de 
+Burgemeester heeft gekozen (ook als dit een "blanco" of NULL stem was). Dit 
+betekent dat als er geen Burgemeester in het spel zit, er geen slachtoffer 
+valt bij gelijkspel zonder Zondebok.
+Spelers met SCHULD=1 mogen niet stemmen (afgevangen door parser): zij zijn de 
+vorige ronde door de Zondebok aangewezen.
+
+-------
+Winnen:
+-------
+
+Een spel eindigt wanneer de winnende conditie voor een team is bereikt:
+
+FLUITSPELERS:   Als elke levende speler, met uitzondering van de Fluitspelers 
+                Betoverd zijn, hebben de Fluitspelers gewonnen.
+WEERWOLVEN:     Als de levende spelers enkel Weerwolven of Welpen zijn, hebben 
+                de Weerwolven gewonnen.
+VAMPIERS:       Als de levende spelers enkel Vampiers zijn, hebben de Vampiers
+                gewonnen.
+WITTE WEERWOLF: Als er enkel één Witte Weerwolf levend is, heeft deze Witte 
+                Weerwolf gewonnen.
+PSYCHOPAAT:     Als er enkel één Psychopaat levend is, heeft deze Psychopaat
+                gewonnen.
+BURGERS:        Als er enkel burgerrollen (Burger, Grafrover, Cupido, 
+                Opdrachtgever, Klaas Vaak, Genezer, Ziener, Priester, Slet, 
+                Verleidster, Goochelaar, Heks, Waarschuwer, Raaf, Schout, 
+                Onschuldig Meisje, Jager, Dorpsoudste, Dorpsgek en Zondebok) 
+                over zijn, hebben deze spelers gewonnen.
+
+Als er twee spelers van verschillende teams Geliefden zijn, dan moeten deze 
+de winnende conditie van beide teams volbrengen om te winnen; zo:
+
+B/WW: Als alle andere teams (niet Burgers en niet Weerwolven) dood zijn, en 
+      van de Burgers is slechts de eerste Geliefde over, en van de Weerwolven 
+      slechts de tweede Geliefde, dan hebben deze Geliefden gewonnen.
+
+B/FS: Als alle andere teams (niet Burgers en niet Fluitspelers) dood zijn, 
+      en van de Fluitspelers is slechts de tweede Geliefde over, en alle 
+      levende Burgers zijn Betoverd, dan hebben deze Geliefden gewonnen.
+
+Ook moet de Opdrachtgever in acht genomen worden: hoewel hij gewoon bij de 
+Burgers hoort, en er niets aan de hand is met zijn winnende conditie, is 
+die van zijn Lijfwacht mogelijk aangepast; deze telt wel als zijnde een 
+Geliefde:
+
+B(O)/WW(L): De Opdrachtgever wint als de Burgers winnen (met uitzondering van 
+            de Lijfwacht; deze mag nog wel leven, al is het niet noodzakelijk). 
+            De Lijfwacht wint wanneer enkel hij en zijn Opdrachtgever nog 
+            leven, en alle andere spelers dood zijn.
+
+WW(O)/B(L): De Opdrachtgever wint als de Weerwolven winnen. De Lijfwacht wint 
+            wanneer enkel hij en zijn Opdrachtgever nog leven, en alle andere 
+            spelers dood zijn.
+
+B(O)/FS(L): De Opdrachtgever wint als de Burgers winnen. De Lijfwacht wint 
+            wanneer de enige levenden de Burgers zijn, samen met hemzelf, en 
+            alle Burgers zijn Betoverd.
+
+FS(O)/B(L): De Opdrachtgever wint als iedereen (met uitzondering van de 
+            Fluitspelers) Betoverd is. De Lijfwacht wint als er enkel Burgers 
+            leven, samen met zijn Opdrachtgever, en alle Burgers zijn Betoverd.
+
+Tenslotte, echte chaos als de Opdrachtgever/Lijfwacht een Geliefde is. De
+Opdrachtgever wint nogmaals wanneer er aan zijn winnende conditie is voldaan,
+en de Lijfwacht wint wanneer er aan de zijne is voldaan en aan die van zijn 
+Opdrachtgever.
+
+---------
+Verhalen:
+---------
+
+De verhalen zijn standaard opgeslagen in de tabel "Verhalen", zodat het systeem
+eenvoudig een verhaal kan pakken, en het kan invullen met de juiste gegevens. 
+Is een specifiek verhaal van het benodigde thema niet aanwezig, dan pakt het 
+systeem het default-equivalent, dzw. een verhaal met dezelfde variabelen, maar 
+met het thema "default". De bedoeling is dat er van elke mogelijke vorm een 
+default verhaal is; mocht dit niet zo zijn, dan geeft het systeem een error en 
+worden de admins bericht.
+De verhalen hebben een rol en een fase, en met deze twee variabelen kan het 
+juiste soort verhaaltje bepaald worden:
+
+Rolverdeling        0 = Speler rol mailen
+Dief:               0 = Wakker worden
+                    1 = Burger geworden, niet gestolen (Dief)
+                    2 = Rol gestolen (Dief)
+                    3 = Burger geworden (slachtoffer)
+                    9 = Blanco gestemd
+Cupido:             0 = Wakker worden
+                    1 = Geliefden gemaakt (Cupido)
+                    2 = Geliefde geworden (Geliefden)
+                    9 = Blanco gestemd
+Opdrachtgever:      0 = Wakker worden
+                    1 = Lijfwacht aangesteld (Opdrachtgever en Lijfwacht)
+                    9 = Blanco gestemd
+Welp:               0 = Weerwolf geworden
+Grafrover:          0 = Wakker worden
+                    1 = Rol geroofd
+                    9 = Blanco gestemd
+Klaas Vaak:         0 = Wakker worden
+                    1 = Strooi zand (Klaas Vaak)
+                    2 = Blijf slapen (slachtoffer)
+                    9 = Blanco gestemd
+Genezer:            0 = Wakker worden
+                    1 = Beschermen
+                    9 = Blanco gestemd
+Ziener:             0 = Wakker worden
+(ook Dwaas)         1 = Rol gevonden
+                    9 = Blanco gestemd
+Priester:           0 = Wakker worden
+                    1 = Wijwater brandt
+                    2 = Wijwater brandt niet
+                    9 = Blanco gestemd
+Slet:               0 = Wakker worden
+                    1 = Slaapt bij speler
+                    9 = Blanco gestemd
+Verleidster:        0 = Wakker worden
+                    1 = Speler verleidt
+                    9 = Blanco gestemd
+Goochelaar:         0 = Wakker worden
+                    1 = Zichzelf met speler verwisseld
+                    2 = Twee spelers verwisseld
+                    9 = Blanco gestemd
+Weerwolf:           0 = Wakker worden
+                    1 = Speler vermoord
+                    9 = Niemand vermoord
+Vampier:            0 = Wakker worden
+                    1 = Speler vermoord
+                    9 = Niemand vermoord
+Onschuldige Meisje: 0 = Weerwolven bespied
+                    1 = Vampiers bespied
+                    2 = Weerwolven bespied (geen slachtoffer)
+                    3 = Vampiers bespied (geen slachtoffer)
+Psychopaat:         0 = Wakker worden
+                    1 = Speler vermoord
+                    9 = Blanco gestemd
+Witte Weerwolf:     0 = Wakker worden
+                    1 = Speler vermoord
+                    9 = Blanco gestemd
+Heks:               0 = Wakker worden
+(let op:            1 = Zichzelf gered
+onregelmatige       2 = Speler gered
+getallen            4 = Speler gedood
+ivm bitflags)       5 = Zichzelf gered en speler gedood
+                    6 = Speler gered en speler gedood
+                    9 = Blanco gestemd
+Fluitspeler:        0 = Wakker worden
+                    1 = Enkele speler betoverd
+                    2 = Spelers betoverd
+                    3 = Enkele Betoverde mailen
+                    4 = Betoverden mailen
+                    9 = Blanco gestemd (DOOD = 2)
+Waarschuwer:        0 = Wakker worden
+                    1 = Speler gewaarschuwd
+                    9 = Blanco gestemd
+Schout:             0 = Wakker worden
+                    1 = Zelf opgesloten
+                    2 = Speler opgesloten
+                    9 = Blanco gestemd
+Raaf:               0 = Wakker worden 
+                    1 = Zelf beschuldigd
+                    2 = Speler beschuldigd
+                    9 = Blanco gestemd
+Jager:              0 = Wakker worden
+                    1 = Speler neergeschoten, nacht
+                    2 = Speler neergeschoten, dag
+                    9 = Blanco gestemd
+Burgemeester:       0 = Wakker worden
+(testament)         1 = Speler gekozen
+                    9 = Blanco gestemd
+Burgemeester:
+(verkiezing)
+Brandstapel:
+Zondebok:           0 = Wakker worden
+                    1 = Speler(s) gekozen (hoeveel?)
+                    9 = Blanco gestemd
+
+Gewonnen:           0 = Burgers gewonnen
+                    1 = Weerwolven gewonnen
+                    2 = Vampiers gewonnen
+                    3 = Psychopaat gewonnen
+                    4 = Witte Weerwolf gewonnen
+                    5 = Fluitspelers gewonnen
+                    6 = Overig (Geliefden/Opdrachtgever gewonnen oid)
+
+Opbouw:
+-------
+
+Een standaard verhaaltje is van de vorm die de auteur (ook opgeslagen onder 
+AUTEUR zodat deze ook zijn eer krijgt) fijn vindt; het is zijn keuze hoe het 
+verteld wordt. Wel moeten de variabelen op een specifieke manier worden 
+weergegeven, anders worden ze niet door het systeem gepakt. Hierbij is "x" het 
+nummer van de speler (beginnend bij 0).
+
+Namen:      Deze worden weergegeven als "naam[x]".
+Rollen:     Deze worden weergegeven als "rol[x]".
+Geslachten: Woorden die afhangen van het geslacht van een speler (bijv. "hem" 
+            of "haar", "zijn" of "haar", etc.) staan opgeslagen in de kolom 
+            GESLACHT; hier staan steeds twee alternatieven (vrouwelijk, 
+            mannelijk) voor een woord, van elkaar gescheiden door een "&". Elk 
+            paar is van het volgende paar gescheiden door een "%". In het 
+            verhaal stat vervolgens "geslacht[x][y]", waarbij "y" het nummer is 
+            van het paar alternatieven.
+
+Opmerkingen:
+------------
+
+Bij Weerwolven, Vampiers en Fluitspelers wordt naam[0] (en voor Fluitspelers 
+eventueel ook naam[1]) gebruikt voor het slachtoffer, als deze er is. De rest 
+van de namen zijn de Weerwolven/Vampiers/Fluitspelers (in willekeurige 
+volgorde).
+Bij andere rollen begint het tellen (naam[0]) bij de betreffende speler, 
+daarna diens keuze(s).
+
+--------------
+Systeembeheer:
+--------------
+
+Het programma ondersteunt meerdere systeembeheerders, die elk gelijkwaardig 
+zijn. In het geval van een error worden al deze 'admins' gemaild, zodat de 
+error zo snel mogelijk opgelost kan worden met spelers/systeem. 
+Ook kunnen enkel de systeembeheerders spellen starten, of vroegtijdig stoppen 
+(wanneer ze dit nodig achten) of een gestopt spel uit de database verwijderen 
+om te voorkomen dat er te veel rommel staat. Het systeembeheer kan ook andere 
+commando's uitvoeren; elk van deze commando's wordt gemaild naar het systeem.
+Hierbij is van belang dat er gemaild wordt van het adres van een admin, en dat 
+het wachtwoord in het mailtje vermeld staat (anders doet het systeem niets). 
+In het onderwerp staat de opdracht gespecificeerd:
+
+config query:   Voert query in het bericht uit.
+config stop:    Stopt het spel met SID in het bericht (GEWONNEN wordt aangezet,
+                en FASE wordt 99).
+config delete:  Verwijdert spel met SID in het bericht (spel moet eerst gestopt 
+                zijn!).
+config start:   Begint een spel (in het bericht staan de details van het spel: 
+                de SID, het maximum aantal spelers, de snelheid, de strengheid 
+                en het thema van het spel, elk gescheiden door een enter).
+config players: Geeft alle spelernamen, emailadressen, geslachten voor een 
+                gegeven SID (in het bericht). Geeft ook voor elke speler of 
+                deze levend is, en of deze mails wil ontvangen.
+config nomail:  voor een gegeven SID en speler, zet deze speler's TO_MAIL op 0 
+                wanneer deze niet levend is. Als hij wel levend is, geeft 
+                foutmelding.
+config games:   Geeft alle informatie over alle spellen.
