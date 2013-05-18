@@ -133,8 +133,7 @@ function regelGrafrover($sid) {
 		$rol = $speler2['ROL'];
 		$waarde = "ROL='$rol'";
 		if($rol == "Heks") {
-			$drank = $speler2['HEKS_DRANK'];
-			$waarde .= ", HEKS_DRANK=$drank";
+			$waarde .= ", HEKS_DRANK=3";
 		}
 		else if($rol == "Dorpsoudste") {
 			$waarde .= ", EXTRA_LEVEN=1";
