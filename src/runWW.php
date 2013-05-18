@@ -20,7 +20,7 @@ $admin = "Victor Dekker <eudyptes.crestatus@gmail.com>";
 $admin2 = "Jenneke Buwalda <ciel.celestis@gmail.com>";
 $admins = array($admin,$admin2);
 $thuis = "WWautoVerteller@gmail.com";
-$handleiding = "http://www.liacs.nl/~vdekker/handleiding.pdf";
+$handleiding = "http://www.liacs.nl/~vdekker/WW/pdf/man.pdf";
 $dbconnect = dbConnect();
 $gmconnect = gmailConnect();
 
