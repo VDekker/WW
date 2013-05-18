@@ -1,0 +1,492 @@
+\documentclass[12pt]{article}
+
+\frenchspacing
+
+\usepackage[english,dutch]{babel}
+\usepackage{multirow}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{hyperref} %moet als laatste package staan!
+
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{lem}{}
+\titleformat{\subsection}[hang]{\large\bfseries}{}{1em}{}
+\titleformat{\subsubsection}[hang]{\small\bfseries}{}{1em}{}
+\setcounter{secnumdepth}{0}
+
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1.325in}
+\addtolength{\topmargin}{-.875in}
+\addtolength{\textheight}{1.75in}
+
+\author{Victor Dekker}
+\title{Weerwolven over de Mail:\\Automatische Verteller}
+\makeindex
+
+\begin{document}
+
+\selectlanguage{dutch}
+\titlespacing{\subsubsection}{0in}{0.2in}{0in}
+
+\maketitle
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Welp2.png}
+\end{figure}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Inleiding}
+
+  \subsection{Het spel}
+
+    Voor langere tijd ben ik een liefhebber van het spel \emph{Weerwolven van Wakkerdam}, uitgegeven door \emph{999Games}; de eerste keer dat ik het speelde heb ik het direct leuk gevonden, en wilde ik niet meer stoppen. Zo ook vrienden van mij, die elk zijn of haar eigen speelstijl met zich meebracht, sommigen met een grote bek en luide beschuldigingen, anderen met enkel een zacht gefluister waarmee ze een groep spelers konden overtuigen (en wellicht bedriegen...). Het spel, dat gaat over leugens, wantrouwen en verraad, blijkt steeds weer een fantastisch party-game voor een grote groep, die mij steeds verbonden heeft met mijn vrienden tijdens gezellige middagen en avonden met brullend gelach.
+
+    Omdat het spelen van dit spel een grote groep vereist (minimaal 7 spelers), is het altijd moeilijk om een afspraak te maken met mijn vrienden om het te spelen; altijd botsen agenda's, en nooit kan iedereen. Om het spel toch te spelen met deze groep vrienden, zijn we al lang geleden begonnen met het spelen van \emph{Weerwolven over de mail}. Dit is een eenvoudige adaptie van het originele spel, waarbij het nieuwe medium (e-Mail) ruimte bood voor de Verteller om een groter verhaal op te zetten, en voor de spelers om hierin meer te role-playen. Spellen kostten ook een langere tijd, een duur van meerdere weken veelal, omdat het dagelijks leven rustig doorging, en af en toe nieuwe mails de spelers waarschuwden van een nieuwe Brandstapelstemming of ander naderend onheil.
+
+    Vrijwilligers voor de rol van Verteller waren altijd te vinden, al hadden deze in de praktijk meestal te kampen met ongemak, moeilijke deadlines, of andere zaken die de voortgang van een mailspel verminderde. Het grote spelersaantal (de groep was over de mail gegroeid tot het op gegeven moment zelfs een record van 35 spelers en twee Vertellers bedroeg!) zorgde voor onoverzichtelijke spellen, en inactiviteit.
+
+    In een poging deze dingen af te weren, ben ik, gewapend met een milde kennis van PHP en SQL, en een droombeeld waarvan ik zelf ook wist dat het nooit waargemaakt kon worden, begonnen met het schrijven van een programma om zo'n dergelijk mailspel te regelen; dit moest volautomatisch gebeuren, zodat er geen menselijke Verteller bij hoefde te komen. Dit betekende namelijk dat deze Verteller zelf ook speler kon worden, en vrolijk mee kon spelen. Het systeem moest ook meerdere spellen tegelijk aankunnen, zodat ook een groot aantal spelers (te groot om \'e\'en overzichtelijk spel te behouden) alsnog vermaakt kon worden. 
+
+    Wonder boven wonder lukte de implementatie van dit programma veel beter dan verwacht; met hulp van vrienden die hun kennis, meningen en tips graag met me deelden, en die tijd maakten om zelf ook mee te helpen, is in slechts een paar maanden het werk gedaan waarvan ik origineel skeptisch was dat het ooit zou lukken. Ik heb zelf erg genoten van het maken van dit programma, en ook van de tijd die ik doorbracht met deze vrienden, en van de dingen die ik van hen leerde. Daarom dank ik Oscar Brandt, Jenneke Buwalda, Simon Klaver, en ook zeker Bert Peters, voor alle hulp en interesse in het programma.
+
+  \subsection{De handleiding}
+
+    Deze handleiding is bedoeld voor spelers, om hen uit te leggen hoe het programma werkt, en vooral hoe het op een juiste manier gebruikt moet worden. Ook worden de regels van het spel behandeld, iets dat vroeger bij ieder nieuw spel (en nieuwe Verteller) opnieuw gedaan werd. Aangezien dit programma gemaakt is voor een specifieke verzameling van regels, zullen deze niet veranderen, en zullen ze ook hier gedocumenteerd staan, zodat een speler op ieder moment eenvoudig kan vinden hoe het spel gespeeld kan worden.
+
+\section{Spelregels}
+
+  De regels van het originele spel, \emph{Weerwolven van Wakkerdam}, worden zo veel mogelijk aangehouden; als dit spel bekend is aan de speler, zal het niet moeilijk zijn om wegwijs te geraken met het automatische mailspel. Slechts kleine veranderingen hebben plaatsgevonden om automatisering te vergemakkelijken, of om nieuwe, interessante rollen toe te staan.
+
+  Het spel draait in feite om overleven: elke speler doet zijn of haar best om te overleven in het dorpje Wakkerdam (of welke andere willekeurige plek, dit hangt af van het thema van het spel). Helaas zijn er meerdere partijen aanwezig in het dorp, waarvan sommigen niet de beste bedoelingen hebben. De Weerwolven willen iedereen opeten, totdat er niemand meer over is in Wakkerdam! Het is aan de spelers om de Weerwolven te vinden, en hen te lynchen.
+
+  \subsection{Rollen} \label{subsec:rollen}
+
+    Alle ge\"implementeerde rollen worden hier uitgelegd, daarbij ook hun (speciale) eigenschappen, en bij welk team ze horen (zie Winnen, op pagina~\pageref{subsec:winnen} ).
+  
+    Deze rollen komen van het spel \emph{Weerwolven van Wakkerdam} en de twee uitbreidingssets \emph{Volle Maan} en \emph{Het Dorp}, elk van de maker \emph{999Games}. Ook zijn er rollen door spelers bedacht, of overgenomen van het spel \emph{Ultimate Werewolf Ultimate Edition} van \emph{B\'ezier Games}. 
+  
+    Bij de uitleg van de rollen komen allerlei verschillende regels voor; de rollen lopen erg uiteen en zorgen voor veel variatie in de spellen. Wel kan vast worden gesteld dat, tenzij anders vermeld, een speler altijd de keuze heeft om blanco te stemmen als hem wordt gevraagd om \'e\'en (of meerdere) spelers te kiezen. Geen van de spelers wordt hiervan bericht, alles is anoniem, tenzij dat expliciet staat vermeld. Staat erbij dat herhaling niet mag, dan mag de speler niet tweemaal achter elkaar dezelfde keuze maken (dus niet tweemaal achter elkaar dezelfde speler kiezen, maar ook niet tweemaal achter elkaar blanco stemmen!).
+  
+    \subsubsection{Burger}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Burger is een inwoner van Wakkerdam zonder enige speciale gave. Hij moet ervoor zien te zorgen dat het kwaad zijn dorp verlaat en dat hij de strijd overleeft!
+
+    \subsubsection{Cupido}
+      \emph{\scriptsize Team: Burgers}
+    
+      De God van de Liefde, Cupido, wordt de eerste nacht wakker om zijn pijlen af te schieten. Hierbij mag hij twee spelers kiezen (hij kan ook zelf \'e\'en van deze spelers zijn), die vanaf nu Geliefden zijn. De Geliefden worden op de hoogte gesteld van deze daad van de (anonieme) Cupido; dit koppel Geliefden vormen vanaf nu een team dat samen moet zien te overleven. Sterft \'e\'en van hen, dan zal de ander ook komen te overlijden aan liefdesverdriet. Hier kan zelfs een Lijfwacht (zie Opdrachtgever) een speler niet van redden.
+
+    \subsubsection{Dief}
+      \emph{\scriptsize Team: Burgers}
+    
+      Als een dief in de nacht sluipt hij door Wakkerdam en steelt het meest waardevolle van een andere inwoner: de Dief mag in de eerste nacht een andere speler kiezen, die hij van zijn rol zal bestelen. Deze gekozen speler zal direct een Burger worden (hij wordt hiervan op de hoogte gesteld), en de Dief krijgt de rol van de speler. Kiest de Dief een andere Dief, dan wordt hij een gewone Burger. Hetzelfde gebeurt als de Dief blanco stemt, of vergeet te stemmen.
+
+    \subsubsection{Dorpsgek}
+      \emph{\scriptsize Team: Burgers}
+    
+      Deze zot weet zijn gekheid goed te verbergen van de andere inwoners van Wakkerdam, en niemand weet dat hij de gek is. Komt hij echter op de Brandstapel, dan zal hij toch zijn hart moeten luchten, en zal iedereen inzien dat deze Dorpsgek geen vlieg kwaad doet: hij krijgt direct vrijspraak, en die ronde wordt er niemand gelynched. Zijn rol wordt bekend gemaakt aan al de spelers, en vanaf dat moment mag de Dorpsgek niet meer stemmen, noch mag er op hem gestemd worden voor de Brandstapel (immers is hij gek). Op andere manieren kan hij wel nog worden vermoord...
+
+    \subsubsection{Dorpsoudste}
+      \emph{\scriptsize Team: Burgers}
+    
+      Deze oude, wijze inwoner van Wakkerdam heeft al veel meegemaakt, en schrikt niet van de dreiging van de Weerwolven of andere monsters. Zijn huid is ondertussen ook dermate dik geworden dat hij een nachtelijke aanval van deze wezens kan overleven. Een tweede aanval wordt hem wel fataal. Komt de Dorpsoudste te overlijden, dan verliezen alle spelers van zijn team hun speciale gaves, en worden zij Burgers. Ook worden ontdekte Dorpsgekken direct gelynched, omdat men zonder de wijsheid van de Dorpsoudste dit niet meer dan redelijk achten.
+      
+    \subsubsection{Dwaas}
+      \emph{\scriptsize Team: Burgers}
+      
+      De Dwaas is ervan overtuigd dat hij fantastisch slim is, en daarbij ook paranormaal begaafd. Elke nacht zal hij, overtuigd van zijn gave, een speler kiezen van wie hij de ware aard wil weten. Hij concentreert zich dan hard, totdat hij eindelijk een visioen ziet, en de rol van deze speler te weten komt. Alleen... de Dwaas heeft het altijd fout.
+      
+      De Dwaas weet niet dat hij een Dwaas is, maar denkt dat hij een Ziener is. Hij krijgt dan ook dezelfde keuzes als een Ziener, maar het uiteindelijke resultaat dat hij krijgt te zien zal een foute rol zijn: de Dwaas ziet een willekeurige rol die in het spel zit, maar nooit de rol die de speler zelf heeft.
+
+    \subsubsection{Fluitspeler}
+      \emph{\scriptsize Team: Fluitspelers}
+    
+      Met zijn magische fluit komt hij Wakkerdam betoveren; elke nacht mag de Fluitspeler twee spelers kiezen die hij betovert. Deze twee Betoverden spelers zullen worden verteld dat zij Betoverd zijn, al blijft de verantwoordelijke anoniem. Ze mogen gewoon verder spelen alsof er niets aan de hand is.
+    
+      Wanneer de Fluitspeler echter alle levende spelers (exclusief alle Fluitspelers) heeft betoverd, dan wint hij het spel. Betoveringen zijn speler-specifiek, hangen dus niet af van de locatie van de Slet, Geliefden, Lijwachten of andere zaken. De Heks kan een betovering ook niet genezen, en de Genezer kan niemand ervan beschermen.
+    
+      Bij meerdere Fluitspelers in een spel vormen deze een gezamelijk team; zoals de Weerwolven moeten zij ook stemmen op wie ze betoveren. Hierbij mag elk van hen twee stemmen opgeven; de twee spelers met de meeste stemmen worden betoverd.
+    
+    \subsubsection{Genezer}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      De Genezer kan, met zijn oeroude magie, iedere nacht een dorpsbewoner beschermen van de kwade invloeden van de Weerwolven, de Vampiers, de Psychopaat en de Witte Weerwolf. Elke nacht kiest hij \'e\'en speler die beschermt zal worden, ongeacht hoeveel monsters hem aanvallen. 
+    
+      De Genezer mag ook zichzelf beschermen, maar hij mag niet tweemaal achter elkaar dezelfde keuze maken.
+    
+    \subsubsection{Goochelaar}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      De Goochelaar heeft een mooie truc: hij kiest twee lieftallige assistenten, en kan hen met een prachtige show van plaats laten verwisselen. Hij moet deze truc echter vaak oefenen, en mag dus elke nacht twee spelers kiezen, die hij op elkaars plaats zet. Wordt \'e\'en van deze twee spelers als slachtoffer van de Weerwolven of andere monsters, dan zullen zij deze speler niet in bed aantreffen, maar juist de andere speler---deze zal worden vermoord.
+    
+      De Goochelaar mag iedere nacht twee spelers kiezen, maar hij kan ook zichzelf kiezen als \'e\'en van de spelers om te verwisselen. Ook kan hij ervoor kiezen om een nacht niet te oefenen, en dus blanco te stemmen. Om zijn truc echter niet te verleren mag hij niet tweemaal achter elkaar dezelfde keuze maken, en dus mag hij niet tweemaal achter elkaar dezelfde combinatie van spelers kiezen.
+    
+    \subsubsection{Grafrover}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Grafrover pikt graag van de doden, en hij weet alles te stelen. Zelfs de rollen van overleden spelers: hij wordt vanaf de tweede nacht als eerste wakker, en mag een dode speler kiezen, wiens rol hij vervolgens rooft. Hij kan zijn gave slechts \'e\'en keer in het spel gebruiken; hierna verliest hij zijn rol, en kan hij dus niet opnieuw een rol roven.  
+    
+      Kiest de Grafrover een overleden Cupido of Opdrachtgever, dan krijgt hij geen kans om Geliefden of een Lijfwacht te kiezen; dit gebeurt enkel in de eerste nacht van het spel.
+    
+    \subsubsection{Heks}
+      \emph{\scriptsize Team: Burgers}
+    
+      In tegenstelling tot wat de meeste mensen van haar denken, is de Heks geen kwaadaardig figuur; ze wil graag haar medeburgers helpen om de Weerwolven hun dorp uit te jagen. Hierbij komt haar kennis van kruiden en magische drankjes goed van pas: ze heeft twee drankjes gebrouwd om te gebruiken. Het levenselixer kan een overleden speler weer tot leven wekken, en het gif kan een speler doden. Elk drankje kan slechts eenmaal per spel gebruikt worden, maar ze kunnen desnoods wel in dezelfde nacht gebruikt worden. Is de Heks zelf het slachtoffer van de Weerwolven of andere monsters, dan kan ze kiezen om nog net op tijd het levenselixer in te nemen (als ze dat nog heeft); hier is het nog niet te laat voor.
+    
+    \subsubsection{Jager}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Jager is bedreven met zijn jachtgeweer en houdt deze altijd aan zijn zijde. Hierom is hij klaar om, wanneer hij aangevallen wordt, zichzelf te verdedigen. Gaat de Jager dood om wat voor reden dan ook (met uitzondering van inactiviteit), dan mag hij een andere speler aanwijzen die hij vervolgens neerschiet.
+    
+    \subsubsection{Klaas Vaak}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      Klaas Vaak helpt mensen die last hebben van slapeloosheid door wat van zijn magische zand in hun ogen te strooien; iedere nacht mag hij \'e\'en speler kiezen die, ongeacht zijn rol, die nacht niet wakker zal worden. De speler krijgt hier bericht van, maar zal later, wanneer het tijd wordt voor zijn beurt, geen mail ontvangen. Dit geldt niet wanneer het de (overleden) Burgemeester betreft; deze wordt w\'el wakker om zijn testament te maken.
+      
+      Omdat iedereen in Wakkerdam goede slaap verdient, en niet slechts \'e\'en speler, mag Klaas Vaak niet tweemaal achter elkaar dezelfde keuze maken; hij moet dit afwisselen.
+    
+    \subsubsection{Onschuldige Meisje}
+      \emph{\scriptsize Team: Burgers}
+    
+      Het Onschuldige Meisje is een bang kind dat, uit angst voor het monster onder haar bed, 's nachts even een kijkje neemt of er iemand is die dit monster weg wil jagen. Dat ze hier toevallig de Weerwolven opmerkt, is niet haar schuld. Ze kan er wel haar voordeel mee doen, en hen afluisteren; elke nacht luistert het Onschuldige Meisje de Weerwolven (en Vampiers) af, en hoort op welke spelers ze het gemunt hebben. Ze krijgt de resultaten te zien van de stemming die hun slachtoffer bepaalt. Omdat ze echter een angstig meisje is, durft ze niet een kijkje te nemen om te zien wie de monsters echt zijn (ze zou maar ontdekt worden!). Daarom krijgt ze alle stemmen anoniem te zien.
+    
+    \subsubsection{Opdrachtgever}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Opdrachtgever is een uiterst rijke inwoner van Wakkerdam, die zich niet veilig voelt in het geheel. Daarom kiest hij in het begin van het spel een speler die hij grote hopen geld toeschuift zodat deze speler zijn Lijfwacht wordt, loyaal aan enkel hem. De Lijfwacht moet de Opdrachtgever beschermen van onheil, want als de Opdrachtgever sterft om wat voor reden dan ook (met uitzondering van inactiviteit of liefdesverdriet omdat zijn Geliefde stierf), dan zal de Lijfwacht zijn plaats innemen en zijn leven geven voor dat van de Opdrachtgever. Niemand is echter zo gek om hem een tweede maal te beschermen, dus nadat de Lijfwacht is gestorven zal de Opdrachtgever er alleen voor staan.
+    
+      De Lijfwacht moet de Opdrachtgever dus levend zien te houden; dit verandert iets aan zijn winnende conditie (zie Winnen, op pagina~\pageref{subsec:winnen} ).
+    
+    \subsubsection{Priester}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Priester is een devoot man die graag de dorpsbewoners wil beschermen van onheilige gevaren. Hierom sprenkelt hij elke nacht een beetje wijwater over een speler om te kijken of diens geweten goed is. Brandt het wijwater de huid van de speler, dan weet de Priester dat zijn geweten onzuiver is. Maar let wel op, want niet alle spelers met een onzuiver geweten zijn kwaadaardig (en niet alle kwaadaardige spelers hebben een onzuiver geweten: bijvoorbeeld een Burger verliefd met een Weerwolf...). 
+    
+      Het wijwater brandt de Weerwolven, de Welp, de Witte Weerwolven, de Vampiers, de Fluitspelers, de Psychopaten, maar ook de Heks, de Grafrover, de Slet en de Verleidster!
+    
+    \subsubsection{Psychopaat}
+      \emph{\scriptsize Team: Eigen}
+    
+      De Psychopaat is een onstabiele ziel, die bij het zien van zoveel bloedvergiet zelf ook besluit mee te doen: iedere nacht wordt hij wakker en mag hij \'e\'en slachtoffer kiezen, die hij vervolgens de keel doorsnijdt. Hij rust pas als iedereen in Wakkerdam dood is, en hij als enige over is.
+    
+    \subsubsection{Raaf}
+      \emph{\scriptsize Team: Burgers}
+    
+      De Raaf heeft altijd een uitgesproken mening over zijn medeburgers; wanneer hij iemand niet vertrouwt, schroomt hij niet om diegene te beschuldigen. Om zichzelf in te dekken doet hij dit echter liever anoniem; hij laat een anonieme brief achter waarop deze speler zwart wordt gemaakt.
+    
+      Elke nacht mag de Raaf een speler kiezen, die het Teken van de Raaf krijgt. Deze speler zal in de daaropvolgende Brandstapelstemming twee extra stemmen tegen zich krijgen, ook als de Raaf daarvoor al gestorven is.
+
+    \subsubsection{Schout}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      De Schout behoort de orde te bewaren, en ook in deze onrustige tijd doet hij zijn best hiertoe: in een poging het dagelijks gelynch van de dorpsbewoners te voorkomen sluit hij elke ochtend \'e\'en speler op in zijn cel. Deze speler is dan veilig van de boze menigte, en niemand kan bij hem komen; er kan niet op hem worden gestemd voor de Brandstapel, en hijzelf kan ook niet stemmen.
+    
+      Omdat de Schout iedereen moet beschermen is het oneerlijk om steeds dezelfde speler op te sluiten; hij mag niet tweemaal achter elkaar dezelfde keuze maken. Wel kan hij ervoor kiezen om zichzelf op te sluiten en dus van de Brandstapel te beschermen. Het opsluiten beschermt echter niet tegen een schot van de Jager, en ook de dood van een Geliefde zal de opgesloten speler (mits deze de tweede Geliefde was) doen sterven. Tenslotte, als de Oprdachtgever sterft, terwijl zijn Lijfwacht opgesloten is, zal deze Lijfwacht moedig vrijbreken om hem te redden (met zijn eigen leven).
+    
+      De speler die wordt opgesloten kan overigens wel meedoen met de Burgemeesterverkiezing (zowel stemmen als zich verkiesbaar stellen); dat hij opgesloten zit heeft hier geen effect op.
+    
+    \subsubsection{Slet}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      De Slet is een eenzaam meisje dat graag iedere nacht wat gezelschap heeft. Hierom kiest ze iedere nacht een speler uit om bij in bed te gaan liggen. Komen de Weerwolven (of andere monsters) haar halen, dan vinden ze een leeg bed, en maken ze geen slachtoffer. Komen ze echter naar het bed waar de Slet ligt met haar vriend (of vriendin), dan hebben ze twee slachtoffers!
+    
+      De Slet mag iedere nacht een speler kiezen om bij te slapen, maar ze kan er ook voor kiezen om blanco te stemmen, en dus in haar eigen bed te blijven. Maar omdat ze van variatie houdt, mag ze niet tweemaal achter elkaar dezelfde keuze maken.
+    
+    \subsubsection{Vampier}
+      \emph{\scriptsize Team: Vampiers}
+    
+      In Wakkerdam bevinden zich niet slechts Weerwolven, maar ook Vampiers! Deze bloeddorstige monsters zijn erop uit om alle dorpsbewoners af te maken, inclusief die Weerwolven waar zij zo'n hekel aan hebben. De Weerwolven zullen echter ook terugvechten, en beide teams kunnen slachtoffers van elkaar maken.
+    
+      De Vampiers worden na de Weerwolven wakker en kunnen, evenals de Weerwolven, \'e\'en speler doden. Dit gebeurt volgens dezelfde regels als de Weerwolven; in feite zijn de Vampiers een apart team dat precies hetzelfde is als de Weerwolven.
+    
+    \subsubsection{Verleidster}
+      \emph{\scriptsize Team: Burgers, geen herhaling}
+    
+      De Verleidster kan, net als de Slet, ervoor zorgen dat \'e\'en bed leeg komt te staan, terwijl een ander bed vol ligt met twee spelers. Zij gaat echter niet bij anderen op bezoek, maar lokt hen naar haar toe. De Verleidster mag iedere nacht een speler kiezen die bij haar komt te liggen. Ze mag ook blanco stemmen en alleen in bed blijven liggen, maar net zoals bij de Slet mag ze haar keuze niet herhalen.
+    
+      Weet de Verleidster een Weerwolf haar bed in te lokken, en wordt ze vervolgens aangevallen door de Weerwolven, dan zal ook deze uitgekozen Weerwolf in het duister van de nacht worden verslonden door zijn eigen roedel.
+    
+    \subsubsection{Waarschuwer}
+      \emph{\scriptsize Team: Burgers}
+    
+      Een gewaarschuwd man telt voor twee, zo gaat het spreekwoord, en de Waarschuwer vertrouwt hierop. Hij kent de kwaadaardige wezens die Wakkerdam onveilig maken, en wil graag de dorpsbewoners helpen hen te bestrijden. Elke nacht waarschuwt hij een speler, net voordat de zon opkomt, zodat deze man een weloverwogen keuze kan maken bij het uitbrengen van zijn stem voor de Brandstapel, de volgende dag. Hierdoor heeft zijn stem meer waarde; deze telt als een extra stem.
+    
+      De Waarschuwer mag meerdere keren achter elkaar dezelfde speler waarschuwen, als hij dit verstandig acht, maar kan zichzelf niet waarschuwen (immers weet hij al dat er gevaar dreigt...).
+    
+    \subsubsection{Weerwolf}
+      \emph{\scriptsize Team: Weerwolven}
+    
+      De Weerwolven zijn de grote dreiging in Wakkerdam; deze monsters plotten om alle inwoners te vermoorden, en hebben stevige trek in wat mensenvlees. Ze komen elke nacht samen om een dorpsbewoner op te eten, en uiteindelijk willen ze het hele dorp leeg krijgen. Hierom moeten ze ook overdag stilletjes  samenwerken en uiteindelijk een overmacht krijgen!
+    
+      Weerwolven kunnen elke nacht een speler opeten die ze zelf kiezen. Om dit te doen stemt elke Weerwolf afzonderlijk op een speler. De speler met de meeste stemmen wordt opgegeten. Bij gelijkspel wordt een willekeurige speler met het hoogste aantal stemmen opgegeten. Weerwolven mogen niet op andere Weerwolven stemmen, dus kunnen ze elkaar niet opeten (behalve als er trucs van de Goochelaar of Verleidster in het spel zijn...).
+
+    \subsubsection{Welp}
+      \emph{\scriptsize Team: Weerwolven}
+    
+      De Welp is een jonge Weerwolf, en hoort eigenlijk nog niet bij de roedel; hij wordt 's nachts niet wakker en weet niet wie de Weerwolven zijn (de Weerwolven weten ook niet wie hij is, en kunnen hem per ongeluk opeten). Pas als er een Weerwolf gestorven is op welke manier dan ook (inclusief inactiviteit), is er plek in de roedel voor de Welp: deze wordt een normale Weerwolf, en wordt vanaf dat moment ook 's nachts wakker met de rest van de roedel.
+    
+    \subsubsection{Witte Weerwolf}
+      \emph{\scriptsize Team: Eigen}
+    
+      Dit monster is waarlijk een kwaadaardig schepsel, dat niks geeft om een roedel. Hij wil heel Wakkerdam dood zien, inclusief zijn mede-Weerwolven. Hier is hij echter wel slinks in: hij doet zich voor als een gewone Weerwolf en wordt elke nacht samen met hen wakker. Hij heeft ook een stem bij het uitkiezen van het slachtoffer, zoals alle andere Weerwolven. Maar elke tweede nacht wordt de Witte Weerwolf nog een keer extra wakker, in zijn eentje, en krijgt nog eens de kans om een speler op te eten. Deze keer, echter, mag hij ook \'e\'en van de Weerwolven opeten, als hij dat wil.
+    
+      Zijn er meerdere Witte Weerwolven in het spel, dan opereren zij allen apart; elk van hen wil als enige overblijven. Elke tweede nacht worden alle Witte Weerwolven dan apart van elkaar wakker, en mogen apart van elkaar een slachtoffer maken. Dan zullen er veel slachtoffers vallen!
+    
+    \subsubsection{Ziener}
+      \emph{\scriptsize Team: Burgers}
+    
+      Deze inwoner van Wakkerdam bezit de gave om in andermans ziel te kijken, en te zien wat zijn ware aard is. Elke nacht wordt hij wakker en kiest een speler; de rol van die speler zal aan hem worden verteld. Wat de Ziener doet met deze kennis (het openbaar maken, of juist geheim houden), is volledig aan hem.
+
+    \subsubsection{Zondebok}
+      \emph{\scriptsize Team: Burgers}
+    
+      Bij kwade gebeurtenissen moet er een schuldige worden aangewezen. Is deze niet duidelijk, dan neemt men de Zondebok: als er een gelijkspel is tussen verschillende spelers bij de Brandstapelstemming, dan besluit men om de Zondebok op de Brandstapel te gooien (ook als hij geen enkele stem ontving, of opgesloten was door de Schout!). Al roosterend op het vuur weet deze arme jongen toch een zielig pleidooi te houden waardoor sommige spelers een immens schuldgevoel krijgen; de Zondebok mag kiezen welke spelers vanwege dit schuldgevoel de volgende Brandstapelstemming niet mogen stemmen.
+    
+      Zijn er meerdere Zondebokken in het spel, dan wordt in geval van een gelijkspel een willekeurige Zondebok gekozen; hopen dat je niet de pech hebt om de schuld van al het onheil in Wakkerdam te krijgen...
+    
+  \subsection{Stemmingen}
+  
+    In het spel komt meerdere malen een stemming voor; als er met Burgemeester gespeeld wordt, moet deze gekozen worden, en ook moet er elke dag een speler op de Brandstapel komen, wat ook per stemming gebeurt. Deze twee stemmingen worden hier uitgelicht.
+    
+    \subsubsection{Brandstapelstemming}
+  
+      Elke dag gooien de inwoners van Wakkerdam iemand op de Brandstapel in de hoop dat deze speler een Weerwolf (of andere vijand) is. Helaas mogen de Weerwolven ook meestemmen, omdat zij zich goed hebben vermomd als normale Burgers. In een Brandstapelstemming hebben dus alle levende spelers \'e\'en stem. Hier zijn echter uitzonderingen op:
+      
+      \begin{itemize}
+      	\item De stem van de Burgemeester telt dubbel.
+      	\item De stem van een speler die door de Waarschuwer is gewaarschuwd telt ook dubbel.
+      	\item Het Teken van de Raaf telt als twee stemmen voor de speler die dit Teken heeft gekregen.
+      	\item Een ontdekte Dorpsgek mag niet stemmen, en op hem kan ook niet gestemd worden.
+      	\item Een speler die door de Schout is opgesloten mag ook niet stemmen, en op hem kan ook niet gestemd worden.
+      	\item Een speler met schuldgevoel omdat bij de vorige Brandstapel de Zondebok zonder reden op de Brandstapel eindigde, heeft ook geen stem, maar er mag w\'el op hem worden gestemd.
+      \end{itemize}
+      
+      Als alle stemmen geteld zijn, wordt de speler die de meeste stemmen heeft ontvangen op de Brandstapel gegooid (en dus gedood). Komt het echter voor dat er meerdere spelers zijn met het hoogste aantal stemmen, dan wordt de Zondebok gedood. Is er geen (levende) Zondebok, dan wordt er gekeken naar de stem van de Burgemeester: de speler waar hij op stemt wordt gelynched, ongeacht hoeveel stemmen deze speler verder ontving. Heeft de Burgemeester blanco gestemd, dan valt er geen slachtoffer.
+      
+      Zo ook als iedereen blanco heeft gestemd: eerst wordt gekeken of er een Zondebok op de Brandstapel kan, anders valt er geen slachtoffer.
+
+    \subsubsection{Burgemeesterverkiezing}
+    
+      Niet altijd wordt een spel gespeeld met Burgemeester. Maar als dit wel het geval is, dan wordt in het begin van het spel (zodra de eerste nacht is afgelopen) een Burgemeester gekozen. Hierbij mag iedereen stemmen, en iedereen mag Burgemeester worden, ongeacht de rol van de speler. Ook ontdekte Dorpsgekken mogen Burgemeester worden, al gaat hun dubbele stem verloren omdat ze niet mogen stemmen.
+      
+      Uiteindelijk worden alle stemmen geteld, en de speler met de meeste stemmen wordt Burgemeester; voortaan zal zijn stem dubbel tellen bij de Brandstapelstemming. Zijn er meerdere spelers met het hoogste aantal stemmen, dan wordt er geen herverkiezing gehouden om de Burgemeester te bepalen, maar wordt \'e\'en van deze spelers willekeurig gekozen.
+      
+      Komt het voor dat iedereen blanco (of niet) heeft gestemd, dan is het duidelijk dat Wakkerdam geen Burgemeester wil; geen Burgemeester wordt aangesteld, en vanaf dat moment komt er nooit meer een nieuwe Burgemeester. 
+      \\[\baselineskip]
+      Komt de Burgemeester te overlijden, overdag of 's nachts, dan wordt hem gevraagd om een Testament achter te laten: hierin staat zijn opvolger. Dit kan een specifieke speler zijn, die de volgende ochtend de nieuwe Burgemeester wordt, maar de overleden Burgemeester kan ook blanco stemmen; als dit gebeurt, dan komt de volgende ochtend een nieuwe Burgemeesterverkiezing, en wordt een nieuwe Burgemeester gekozen door de levende spelers.
+
+  \subsection{Fases}
+  
+    In het spel zijn drie grote fases te onderscheiden: initialisatie, dag en nacht. Binnen deze drie zijn echter ook nog fases aan te wijzen, die allemaal in volgorde doorlopen moeten worden. Hier zullen ze allemaal duidelijk staan, omdat deze fases toch enige hints kunnen geven wat betreft de rollen waarmee gespeeld wordt. Elke fase duurt even lang; hoeveel dagen een fase duurt hangt af van de snelheid van een spel, in het begin aan alle spelers verteld. Als een speler dus goed oplet, dan kan die beredeneren welke rollen er wellicht wel of niet inzitten.
+    
+    \begin{center}
+      \begin{tabular}{r|l}
+	\multirow{4}{*}{Initialisatie} & Rollen verdelen \\ \cline{2-2}
+	 & Dief \\ \cline{2-2}
+	 & Cupido (Geliefden) \\ \cline{2-2}
+	 & Opdrachtgever (Lijfwacht) \\
+	\hline
+	\hline
+	\multirow{6}{*}{Nacht} & Grafrover* \\ \cline{2-2}
+	 & Klaas Vaak \\ \cline{2-2}
+	 & Genezer, Ziener (en Dwaas), \\
+	 & Priester, Slet, Verleidster, \\
+	 & Goochelaar, Weerwolven, \\
+	 & Vampiers, Onschuldige Meisje, \\
+	 & Psychopaat, Witte Weerwolf** \\ \cline{2-2}
+	 & Heks, Fluitspelers (Betoverden)\\ \cline{2-2}
+	 & Waarschuwer, Raaf, Schout \\ \cline{2-2}
+	 & Jager***, Burgemeester*** \\
+	\hline
+	\multirow{4}{*}{Dag} & Wakker worden \\ \cline{2-2}
+	 & Burgemeesterverkiezing**** \\ \cline{2-2}
+	 & Brandstapelstemming \\ \cline{2-2}
+	 & Jager***, Zondebok***** \\ \cline{2-2}
+	 & Gaan slapen \\
+      \end{tabular}
+      
+      {\scriptsize \noindent $^{\ast}$niet in de eerste nacht, 
+      $^{\ast\ast}$elke tweede nacht, 
+      $^{\ast\ast\ast}$wanneer deze overleden is, \\
+      $^{\ast\ast\ast\ast}$wanneer er geen Burgemeester is,
+      $^{\ast\ast\ast\ast\ast}$wanneer deze schuldgevoel mag opwekken}
+      
+    \end{center}
+    
+  \subsection{Winnen} \label{subsec:winnen}
+  
+    Zoals in ieder spel, streven spelers ernaar om te winnen. Hoe een speler wint, hangt echter af van de rol van de speler, en of hij een Geliefde of Lijfwacht is. In de sectie Rollen, op pagina~\pageref{subsec:rollen}, staat bij welk team een rol hoort. Een speler wint als aan de winnende conditie van zijn team wordt voldaan:
+    
+    \begin{center}
+      \begin{tabular}{r|l}
+	\multirow{4}{*}{Burgers}
+	 & De Burgers hebben gewonnen als er geen \\
+	 & kwade rollen (Weerwolf, Welp, Witte Weerwolf, \\
+	 & Vampier, Psychopaat en Fluitspeler) meer \\
+	 & over zijn. \\
+	\hline
+	\multirow{3}{*}{Weerwolven}
+	 & Als de enige levende spelers danwel Weerwolven, \\
+	 & danwel Welpen zijn, dan hebben de Weerwolven \\
+	 & gewonnen. \\
+	\hline
+	\multirow{3}{*}{Vampiers}
+	 & Als er enkel Vampiers over zijn tussen de \\
+	 & levende spelers, dan hebben de Vampiers \\
+	 & gewonnen. \\
+	\hline
+	\multirow{3}{*}{Fluitspelers}
+	 & Als elke levende speler, met uitzondering van \\
+	 & de Fluitspelers betoverd zijn, hebben de \\
+	 & Fluitspelers gewonnen. \\
+	\hline
+	\multirow{2}{*}{Eigen} 
+	 & Als enkel deze speler is overgebleven, dan \\
+	 & heeft deze speler gewonnen. \\
+      \end{tabular}
+    \end{center}
+    
+    Als twee Geliefden van verschillende teams zijn, dan zouden ze eigenlijk niet kunnen winnen; de Weerwolven winnen pas als alle Burgers dood zijn, en andersom. Hierom verandert hun winnende conditie: de Geliefden winnen wanneer er voldaan wordt aan de winnende condities van hun beide teams, \emph{waarbij de Geliefden niet worden meegeteld in deze condities.}
+    
+    Bijvoorbeeld:
+
+    \begin{center}
+      \begin{tabular}{r|l}
+	\multirow{4}{*}{Burgers/Weerwolven}
+	 & Als alle andere teams dood zijn, en van de \\
+	 & Burgers is slechts de eerste Geliefde over, \\
+	 & en van de Weerwolven slechts de tweede Geliefde, \\
+	 & Dan hebben deze Geliefden gewonnen.\\
+	\hline
+	\multirow{4}{*}{Burgers/Fluitspelers}
+	 & Als alle andere teams dood zijn, en van de \\
+	 & Fluitspelers is slechts de Geliefde over, \\
+	 & en alle levende Burgers zijn betoverd, dan \\
+	 & hebben deze Geliefden gewonnen. \\
+      \end{tabular}
+    \end{center}
+    
+    Wanneer de Opdrachtgever en Lijfwacht van verschillende teams zijn, dan zou de Lijfwacht ook onmogelijk kunnen winnen; als Weerwolf moet hij alle Burgers inclusief de Opdrachtgever doden, maar als hij de Opdrachtgever dood, sterft hijzelf. Daarom is er nog een aanpassing in de winnende conditie van de Lijfwacht: de Lijfwacht wint wanneer er voldaan wordt aan de winnende conditie van zijn eigen team, en het team van de Opdrachtgever, waarbij de Lijfwacht en de Opdrachtgever niet worden meegeteld. Dit is dus zoals de Geliefden.
+    
+    De Opdrachtgever krijgt hierbij twee verschillende manieren van winnen; hij kan met zijn Lijfwacht winnen, maar hij kan ook de Lijfwacht laten sterven en met zijn eigen team winnen. Het is aan hem welke keuze hij maakt, welk doel hij achterna jaagt.
+    
+  \subsection{Dood}
+  
+    Dit spel houdt zich constant bezig met het doden van verschillende spelers; de Weerwolven doen dit 's nachts (evenals andere rollen), en ook overdag gaat er iemand op de Brandstapel, wat deze speler dood maakt. Wanneer een speler dood is, komt hij niet meer aan de beurt (met uitzondering van de Jager, Burgemeester en eventueel Zondebok, die elk nog \'e\'en keer een actie mogen uitvoergen), en kan hij niet meer stemmen. Het enige dat de speler nog kan doen is hopen dat zijn team zal winnen.
+    
+    Van dode spelers wordt verwacht dat ze niets meer doen, en geen berichten meer sturen; ze zijn dood en horen uit het spel te zijn. Geheimen die een dode speler weet moet hij voor zich houden en niet aan levende spelers vertellen. 
+    
+    Wel ontvangen dode spelers nog berichten van het spel: omdat vele doden graag nog willen weten hoe het spel afloopt, krijgen ze nog steeds mails. Maar niet alle mails; enkel de mails die naar alle spelers gaan (dag-mails). Een overleden Weerwolf hoort niets meer van de levende Weerwolven.
+    
+    Wil een dode speler geen emails meer ontvangen, dan moet hij dit melden aan het systeembeheer (zie Help, op pagina~\pageref{subsec:help} ): deze zullen hem uit de mail-lijst halen.
+    
+  \subsection{Let op!}
+  
+    Er zijn een aantal uitzonderingsgevallen die wellicht voor kunnen komen, waar een speler zich niet door zou moeten laten verrassen:
+  
+    \begin{itemize}
+  	\item Om monogamie te bevorderen is het niet toegestaan dat \'e\'en speler meerdere Geliefden heeft; kiezen twee (of meer) Cupido's dezelfde speler, dan wordt deze keuze geweigerd. Enkel de snelste Cupido ziet zijn wens vervuld, en de speler wordt verliefd op de Geliefde die hij aanwees. Andere Cupido's moeten hun keuze herzien.
+  	\item Hoewel een speler altijd sterft als zijn Geliefde komt te overlijden is er een uitzondering gemaakt voor inactiviteit: sterft zijn Geliefde om deze reden, dan weet de speler zich te redden van het liefdesverdriet en is hij op slag geen Geliefde meer.
+  	\item De Dorpsoudste kan eenmaal een aanval van monsters overleven, maar hij zal direct sterven door andere dodelijke middelen: het gif van de Heks, of een schot van de Jager, evenals het sterven van een Geliefde, of simpelweg gelynched worden. \emph{Enkel} van een aanval van de Weerwolven, Vampiers of Psychopaat kan hij overleven.
+  	\item De Dorpsoudste heeft misschien wel zoveel meegemaakt, en zo'n dikke huid ontwikkeld, hij heeft nog nooit zoiets gehoord als de hypnotizerende muziek van de Fluitspeler. Deze kan hem w\'el in \'e\'en keer betoveren.
+  	\item Wanneer een Dorpsoudste sterft vanwege inactiviteit, dan verliest geen enkele speler zijn rol.
+  	\item Als de Grafrover de rol van de Heks overneemt, krijgt hij beide drankjes (het levenselixer en het gif) om te gebruiken, ongeacht hoeveel deze Heks hiervoor had gebruikt.
+  	\item Als de Grafrover de rol van de Fluitspeler overneemt, dan blijven de Betoverden allemaal betoverd (immers werkt de magische fluit nog steeds). Hij weet echter niet wie er betoverd zijn.
+  	\item De Raaf kan zijn Teken geven aan een speler die vervolgens door de Schout wordt opgesloten; als dit gebeurt, dan worden de twee extra stemmen van het Teken van de Raaf teniet gedaan (immers kan de speler niet gelynched worden, omdat hij opgesloten is).
+  	\item Bij de aanvallen van de Weerwolven, Vampiers, Psychopaten en Witte Weerwolven kunnen onverwachte dingen gebeuren; door de Slet, Verleidster en Goochelaar kunnen spelers verplaatst zijn, of verwisseld. Dit resulteert in onverwachte slachtoffers, soms meer, soms minder. De keuzes van andere rollen zijn echter speler-specifiek; het maakt niet uit waar deze speler zich bevindt, of met wie, want de keuze heeft altijd effect op diegene.
+  	\item Wordt een speler meerdere malen aangevallen in \'e\'en nacht (bijvoorbeeld door zowel de Weerwolven als Vampiers), dan zal hij maar \'e\'en keer overlijden (immers is hij al dood voor de tweede aanval). De Heks kan hem nog redden met \'e\'en enkel levenselixer.
+  	\item Als een Slet bij een speler slaapt, en vervolgens door de Verleidster wordt verleidt, kunnen de Weerwolven haar niet te pakken krijgen; zij is zo druk met het heen en weer rennen tussen de bedden van deze twee spelers, dat de Weerwolven haar in geen enkel bed kunnen vinden.
+  	\item Hoewel de Welp niet wakker wordt met de andere Weerwolven, hoort hij wel in hun team, en wint dus ook als de Weerwolven winnen, zelfs als hij nooit een echte Weerwolf is geworden.
+  	\item Als er een gelijkspel is bij de Brandstapelstemming, en er zijn meerdere Zondebokken, dan wordt een willekeurige Zondebok op de Brandstapel gegooid, \emph{ongeacht het aantal stemmen dat deze kreeg.}
+    \end{itemize}
+
+\section{Gebruik van het Systeem}
+
+  \subsection{Inschrijven}
+  
+    Het inschrijven is een van de belangrijkste dingen van een spel; zonder dit kan een speler niet meedoen, maar het is ook belangrijk omdat dit precies moet gebeuren. Voor andere mails naar het systeem maakt de structuur van een bericht niet uit, maar voor de inschrijving wel. Hierom is het uiterst belangrijjk om precies te werk te gaan: om je in te schrijven in een bepaald spel, moet een email gestuurd worden naar het thuisadres van het systeem (\href{mailto:<WWautoVerteller@gmail.com>}{WWautoVerteller@gmail.com}), met als onderwerp de naam van het spel (bijvoorbeeld `WW5' of een andere naam die gegeven is). In het bericht moet de naam van de speler staan, vervolgens een komma, en dan of de speler een man of een vrouw is (deze informatie is nodig voor de verhalen van het systeem, zie Verhalen op pagina~\pageref{subsec:verhalen} ).
+    
+    Een voorbeeld:
+    
+    \begin{center}
+      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
+	\hline
+	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+	Van: & $<$mijn\_account@gmail.com$>$ \\
+	Onderwerp: & WWspelnaam \\[\baselineskip]	
+	Bericht: & NAAM, man \\  
+	\hline
+      \end{tabularx}
+    \end{center}
+    
+    Als deze email verstuurd wordt, zal de speler worden ingeschreven in het spel `WWspelnaam' met naam `NAAM', en emailadres `$<$main\_account@gmail.com$>$'. Zijn geslacht zal mannelijk zijn.
+    \\[\baselineskip]
+    Na succesvolle inschrijving krijgt de speler een email van het systeem met daarin zijn gegevens; mochten deze niet kloppen, dan moet de speler zich opnieuw inschrijven. Dit gebeurt door simpelweg een nieuwe email met de goede gegevens te sturen naar het systeem: zijn oude gegevens worden dan overschreven.
+    
+    Gaat een inschrijving fout, dan krijgt de speler een foutmelding. Dit kan komen doordat er niet goed aan de structuur gehouden was, er geen duidelijk geslacht (`man', `vrouw') aangegeven stond, of omdat er iets mis was met de naam (deze mag enkel alfabetische tekens bevatten, en er mogen geen twee spelers met dezelfde naam in hetzelfde spel zitten, om problemen met stemmen te voorkomen).
+
+  \subsection{Stemmen}
+  
+    Om te stemmen op wat voor manier dan ook (Burgemeesterverkiezing, Brandstapelstemming, maar ook voor een actie; iedere keer wanneer een speler moet worden gekozen), moet een email worden verstuurd naar het thuisadres, \href{mailto:<WWautoVerteller@gmail.com>}{WWautoVerteller@gmail.com}. In het onderwerp van deze mail moet de naam van het spel staan (bijvoorbeeld `WW5'), en in het bericht moet de stem staan. 
+    
+    Als er op \'e\'en speler wordt gestemd moet er in het bericht slechts \'e\'en naam van een speler staan, \emph{goedgespeld.} Waar in het bericht de naam staat is irrelevant, maar het mag maar \'e\'en naam zijn (sluit de mail dus niet af met je eigen naam!). Staan er te veel namen in het bericht, of er staan te weinig (er kan geen naam gevonden worden), dan wordt een foutmelding teruggestuurd. Ook als de gekozen speler in overtreding is met de criteria (als een Genezer bijvoorbeeld voor de tweede keer op rij op dezelfde speler stemt), dan wordt ook een foutmelding gegeven, en moet de speler opnieuw proberen te stemmen.
+    
+    Hetzelfde geldt wanneer er op twee spelers moet worden gestemd: het aantal namen in het bericht moet precies gelijk zijn aan het aantal spelers waarop gestemd moet worden. Mag er echter op zowel \'e\'en of twee spelers worden gestemd (de Fluitspelers mogen dit), dan wordt er geen foutmelding gegeven als er maar \'e\'en naam gevonden is.
+    
+    Bij elke stemming mag een speler er ook voor kiezen om blanco te stemmen (tenzij dit herhaling is, en herhaling niet mag, zoals bij de Genezer of Slet). Om dit te doen moet er geen enkele naam in het bericht staan, maar wel het woord `blanco'. Staat er zowel `blanco' als een naam, dan wordt een foutmelding teruggestuurd.
+    \\[\baselineskip]
+    Er zit altijd een deadline bij het stemmen: de tijd die een speler krijgt om te stemmen is gelijk aan de snelheid van het spel (in het begin van het spel naar iedereen gestuurd) in dagen. Normaal is deze snelheid gelijk aan 2, dus heeft een speler twee dagen om zijn stem te plaatsen. 
+    
+    Plaatst hij een stem, dan kan hij deze totaan de deadline nog herzien. Er is geen limiet aan hoe vaak dit mag gebeuren. Aangeraden wordt dus dat een speler, als hij nog twijfelt wat te doen, eerst blanco stemt, en vervolgens zijn echte stem plaatst als hij zijn keuze heeft gemaakt: dit voorkomt dat hij vergeet te stemmen en als inactief wordt beschouwd.
+    
+    Is de deadline echter voorbij, dan staat de stem vast, ook als deze blanco is, of als de speler niet gestemd heeft. De speler kan de stem dan niet veranderen.
+    \\[\baselineskip]
+    Heeft een speler niet gestemd, dan wordt dit geteld als eenmaal inactiviteit (zie Inactiviteit, op pagina~\pageref{subsec:inactiviteit}). Zijn stem telt dan als blanco.
+  
+  \subsection{Inactiviteit} \label{subsec:inactiviteit}
+  
+    Inactiviteit wordt niet op prijs gesteld, en voordat een speler met een spel begint zou hij eigenlijk moeten overwegen of hij wel actief zal kunnen spelen gedurende het spel. Om de demotiverende werking van inactiviteit van andere spelers zo veel mogelijk in te perken, worden inactieve spelers zo snel mogelijk verwijderd van het spel: heeft een speler te vaak een stemronde gemist, dan wordt hij gedood, en zullen de andere spelers geen last meer van hem hebben.
+    
+    De inactiviteit van spelers wordt gemeten door bij te houden hoevaak ze niet hebben gestemd voor een actie, Burgemeesterverkiezing of Brandstapelstemming. Elk spel heeft een zogeheten `strengheid' (deze is standaard 2) die in het begin van het spel naar alle spelers is gemaild, en dit bepaald het maximale aantal van stemrondes die een speler achter elkaar mag missen: vergeet hij tweemaal achter elkaar te stemmen (de strengheid is dus 2 in dit voorbeeld), dan wordt hij als inactief beschouwd, en zal hij er spoedig uitvliegen. Mist hij \'e\'en stem, maar weet hij de volgende keer wel te stemmen, dan is zijn inactiviteit weer 0; hij heeft 0 stemmingen gemist.
+
+  \subsection{Help} \label{subsec:help}
+  
+    Bij vragen, onduidelijkheden of foutmeldingen van het systeem kan een speler altijd een bericht sturen naar het systeembeheer: door een mail naar het thuis-adres van het systeem te sturen, met als onderwerp `Help'. Deze mail zal door het systeem worden doorgestuurd naar alle systeembeheerders, die vervolgens het probleem van de speler kunnen aanpakken, of diens vraag kunnen beantwoorden. 
+  
+    Omdat duidelijkheid en zekerheid uiterst fijn zijn in een spel gevuld met wantrouwen moet een speler niet schromen om een vraag in te sturen, wanneer hij zelf het antwoord niet kan vinden. Is het echter niet nodig om bepaalde informatie (zoals de rol van deze speler) te verstrekken aan de systeembeheerders, dan is het aangeraden om dit niet te doen, aangezien de systeembeheerders misschien ook meespelen.
+
+\section{Systeembeheer en Onderhoud}
+
+  Het systeem is zo gebouwd dat het automatisch werkt, dat is: zonder tussenkomst van enig mens. Toch blijkt dat zulk soort systemen onverwachte fouten vertonen waar toch iets aan gedaan moet worden. Om deze reden is er een systeembeheer, dat de bevoegdheden heeft om dingen in het systeem te veranderen. Dit systeembeheer lost problemen van spelers op, en mogelijk ook problemen van het programma zelf.
+  
+  \subsection{Systeembeheerder worden}
+  
+  Systeembeheer is dus essenti\"eel, en het kan voorkomen dat \'e\'en beheerder niet genoeg is; met meerdere beheerders kan het systeem ook doorlopen wanneer \'e\'en beheerder weg is (op vakantie, of anderzijds afwezig). Dit is natuurlijk gewenst, want spellen pauzeren omdat de beheerder weg is, is uiterst onhandig.  
+  
+  Daarom zouden we graag meer systeembeheerders verwelkomen. Voor deze functie is veel kennis en ervaring met het spel (zowel over de mail als het origineel) nodig. Verder kan enige kennis van de talen PHP, SQL en HTML van pas komen, maar is zeker niet nodig of noodzakelijk. Een systeembeheerder moet wel snel kunnen reageren op een mail, dat is: minimaal binnen twee dagen.
+  
+  Als je ge\"interesseerd bent in het worden van systeembeheerder, neem dan contact op met het huidige systeembeheer (zie `Help' op pagina~\pageref{subsec:help} ). Deze zal je toevoegen en de Handleiding Systeembeheer toesturen, zodat je vanaf dat moment ook kan helpen deze Automatische Verteller draaiende te houden.
+
+  \subsection{Verhalen} \label{subsec:verhalen}
+  
+  Een andere manier van helpen met het verbeteren van het systeem, is door verhalen te schrijven. De verhalen die de Automatische Verteller naar de spelers stuurt, zijn voorbereide verhalen met specifieke thema's die hij uit een database haalt. Aan deze database kunnen meer verhalen worden toegevoegd, met nieuwe thema's, zodat er steeds meer verhalen komen, en de spellen daarmee steeds uitgebreider worden.
+  
+  Ben je ge\"interesserd in het schrijven van verhalen voor de Automatische Verteller, neem dan een kijkje bij deze \href{http://placeholder-voor-jennekes-template}{template} (met dank aan Jenneke Buwalda), waarop staat wat je moet schrijven en op wat voor manier het programma dit begrijpt. Ook hierbij komt enige kennis van HTML van pas, maar is niet nodig.
+  
+  Heb je een verhalen geschreven voor de Automatische Verteller, neem dan contact op met het systeembeheer (zie `Help' op pagina~\pageref{subsec:help} ) zodat deze verhalen zo snel mogelijk aan de database kunnen worden toegevoegd.
+  
+\section{Uitbreidingen}
+
+  Dit systeem zoals het hier gedocumenteerd is, is de eerste versie van de Automatische Verteller. Of het aanslaat is vooralsnog onbekend, omdat het nog niet openbaar is gemaakt, en hier worden geen voorspellingen over gemaakt. Wel kan er worden voorspeld dat, \emph{als} de Automatische Verteller aanslaat, er mogelijkheid is voor uitbreiding. 
+  
+  Het spel bied van zichzelf veel ruimte voor creativiteit, in het bedenken van rollen of andere speciale regels. Wellicht zullen er rollen bijkomen zoals de Toerist, de Pokeraar en de Kluizenaar. Dit is niet ondenkbaar.
+  
+  Ook kan er gekeken worden naar de uitbreidingen van het originele spel, \emph{Weerwolven van Wakkerdam} van \emph{999Games}. Dit spel werd uitgebreid met \emph{Volle Maan}, waar nieuwe rollen bijkwamen, maar ook gebeurteniskaarten, en meerdere nieuwe spelvarianten. Vervolgens bracht de uitbreiding \emph{Het Dorp} ook nog beroepen naar de tafel. Zulk soort dingen zouden in de toekomst ook ge\"implementeerd kunnen worden, als daar vraag naar ontstaat.
+
+\end{document}

@@ -2,9 +2,10 @@
      TODO:
 ===============
 
-  * Opmerking:  als een Slet Verleid wordt, kan deze niet vermoord worden.
   * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
                 aangevallen? (documenteer dit!)
+  * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
+                Brandstapel eindigt? (fix dit!)
 
   * Testen:  kan een spel winnen?
   * Testen:  mails
@@ -23,11 +24,15 @@
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
 
+  * Parsen:  inschrijvingen, de namen van spelers (check op geen dubbele naam,
+             en alleen letters)
+
   * Nodig:   handleiding maken
   * Nodig:   "or die" veranderen in "or stuurError" (in dbFuncties)
   * Nodig:   alle echo's verwijderen... (is dit nodig?)
   * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
              (zelfde voor SID).
+  * Nodig:   alle TODO's afhandelen
 
   * Config:  upload verhaaltjes (.txt file)
 
@@ -658,7 +663,8 @@ Fluitspeler:        0 = Wakker worden
                     4 = Betoverden mailen
                     9 = Blanco gestemd (DOOD = 2)
 Waarschuwer:        0 = Wakker worden
-                    1 = Speler gewaarschuwd
+                    1 = Speler gewaarschuwd (Waarschuwer)
+					2 = Wordt gewaarschuwd (speler)
                     9 = Blanco gestemd
 Schout:             0 = Wakker worden
                     1 = Zelf opgesloten

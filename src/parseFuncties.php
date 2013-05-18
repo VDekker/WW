@@ -120,24 +120,25 @@ function geldigeStemHeks($bericht,$sid,$nieuw) {
 //checkt of een bericht een geldige Brandstapelstem bevat; 
 //let hierop ook op de keuze van de Schout (wie is er opgesloten), 
 //of de speler wel mag stemmen (Zondebok) en 
-//of hij niet een ontdekte Dorpsgek is.
+//of hij niet een ontdekte Dorpsgek is:
+//deze drie stemmen altijd blanco.
 function geldigeStemBrand($naam,$bericht,$sid) {
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND NAAM='$naam'");
 	$speler = sqlFet($resultaat);
 	if($speler['GEK']) {
 		echo "Dorpsgek $naam mag niet stemmen.\n";
-		return false;
+		return "blanco";
 	}
 	if($speler['SCHULD']) {
 		echo "$naam voelt zich schuldig en mag niet stemmen.\n";
-		return false;
+		return "blanco";
 	}
 	$stem = geldigeStem($bericht,$sid,1);
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ROL='Schout'");
 	while($schout = sqlFet($resultaat)) {
 		if($schout['EXTRA_STEM'] == $naam) {
 			echo "$naam is opgesloten en mag niet stemmen.\n";
-			return false;
+			return "blanco";
 		}
 		if($stem != "blanco" && $stem == $schout['EXTRA_STEM']) {
 			echo "$naam stemt op $stem, die is opgesloten.\n";

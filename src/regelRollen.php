@@ -82,7 +82,11 @@ function regelOpdracht($sid) {
 	return;
 }//regelOpdracht
 
-//regelt de Welp(en)
+//regelt de Welp(en) 
+//TODO als 1 WW sterft, wordt 1 welp een WW. 
+//     Maar de volgende dag wordt de volgende welp ook een WW 
+//     vanwege dezelfde dode WW.
+//     Maak een vlag hiertegen...
 function regelWelp($sid) {
 	$welpen = array();
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ROL='Welp'");
@@ -226,12 +230,12 @@ function regelZiener($sid) {
 //regelt de stem van de Dwaas (of Dwazen): 
 //mailt een rol die ongelijk is aan de gevraagde rol
 function regelDwaas($sid) {
-	$enkelDwaas = true;
+	$andereRollen = 0; //andere rollen dan de Dwaas: liefst 2
 	$rollen = array();
 	$resultaat = sqlSel("Spelers","SPEL='$sid'"); //pak alle rollen in het spel
 	while($speler = sqlFet($resultaat)) {
-		if($speler['ROL'] != "Dwaas") {
-			$enkelDwaas = false;
+		if($speler['ROL'] != "Dwaas" && !in_array($speler['ROL'],$rol) {
+			$andereRollen++;
 		}
 		array_push($rollen,$speler['ROL']);
 	}
@@ -256,7 +260,7 @@ function regelDwaas($sid) {
 		$speler2 = sqlFet($resultaat2);
 		$rol = $speler2['ROL'];
 		$gezien = $rol;
-		if($enkelDwaas) {
+		if($andereRollen == 0 || ($andereRollen == 1 && $rol != "Dwaas")) {
 			$gezien = "Dwaas";
 		}
 		else {
