@@ -12,7 +12,6 @@
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
              Verleidster, Goochelaar en Klaas Vaak
   * Testen:  nieuwe regelDood2, samen met fase-loops (naar fase 10 en fase 17)
-  * Testen:  config start, nodigt dit spelers uit?
 
   * Mailen:  verhalen implementeren voor meerdere spelers/brandstapel
   * Mailen:  stuurFoutStem maken voor specifieke rollen

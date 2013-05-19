@@ -8,8 +8,9 @@ function footnote() {
 	$footnote .= "<hr>";
 	$footnote .= "<font size='1'>";
 	$footnote .= "Automatische Verteller, gemaakt door Victor Dekker. ";
-	$footnote .= "Gebaseerd op het spel <i>'Weerwolven van Wakkerdam'</i> ";
-	$footnote .= "van 999Games, en de uitbreidingen <i>'Volle Maan'</i> en ";
+	$footnote .= "Gebaseerd op het spel <i>'De Weerwolven van Wakkerdam'</i> ";
+	$footnote .= "van 999Games, en de uitbreidingen ";
+	$footnote .= "<i>'Volle Maan in Wakkerdam'</i> en ";
 	$footnote .= "<i>'Het Dorp'</i>.<br />";
 	$footnote .= "Voor hulp bij het gebruik van de Automatische Verteller, ";
 	$footnote .= "zie <a href=$handleiding>handleiding</a>, ";

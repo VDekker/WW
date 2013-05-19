@@ -36,42 +36,33 @@ function config($adres,$onderwerp,$bericht) {
 }//config
 
 function adminQuery($text,$adres) {
-	if(preg_match("/;/",$text)) {
-		$sql = explode(";",$text);
-		foreach($sql as $query) {
-			if(preg_match("/\bselect\b/i",$query)) {
+	$sql = explode("\r\n",$text);
+	foreach($sql as $query) {
+		if(preg_match("/\bselect\b/i",$query) ||
+			preg_match("/\bshow\b/i",$query) ||
+			preg_match("/\bdescribe\b/i",$query) ||
+			preg_match("/\bexplain\b/i",$query)) {
 				$resultaat = sqlQuery($query);
 				if(sqlNum($resultaat) > 0) {
 					stuurResultaatHTML($adres,$resultaat);
 					echo "Resultaat van query gestuurd.\n";
 				}
 				else {
+					//TODO mail de admin geen resultaten
 					echo "Query gaf geen resultaten.\n";
 				}
 			}
-			else {
-				sqlQuery($query);
-				echo "Query uitgevoerd.\n";
-			}
-		}//foreach
-	}//if
-	else {
-		$query = "$text";
-		if(preg_match("/\bselect\b/i",$query)) {
-			$resultaat = sqlQuery($query);
-			if(sqlNum($resultaat) > 0) {
-				stuurResultaatHTML($adres,$resultaat);
-				echo "Resultaat van query gestuurd.\n";
-			}
-			else {
-				echo "Query gaf geen resultaten.\n";
-			}
-		}
 		else {
+			if(preg_match("/\bdrop\b/i",$query)) {
+				//TODO mail admin dat dit niet mag
+				echo "Tabellen verwijderen mag niet.\n";
+				return;
+			}
 			sqlQuery($query);
+			//TODO mail admin dat het is gedaan
 			echo "Query uitgevoerd.\n";
 		}
-	}//else
+	}//foreach
 	return;
 }//adminQuery
 
@@ -185,12 +176,10 @@ function adminStart($text,$adres) {
 	$bericht .= "Strengheid = $streng<br />";
 	$bericht .= "Thema = $thema<br />";
 	stuurMail($adres,$onderwerp,$bericht);
-	
-	var_dump($details);
+
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,0);
 	}
-	var_dump($details);
 	$deadline = geefDeadline($sid);
 	$onderwerp = "Uitnodiging: $sid";
 	$bericht = "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
@@ -206,11 +195,14 @@ function adminStart($text,$adres) {
 	$bericht .= "Duur van een stemronde: $snel ";
 	$bericht .= ($snel == 1) ? "dag" : "dagen";
 	$bericht .= "<br />";
-	$bericht .= "Toegestane inactiviteit: minder dan $streng<br />";
+	$bericht .= "Toegestane inactiviteit: ";
+	$bericht .= "minder dan $streng stemmingen <br />";
 	$bericht .= "Thema van het spel: $thema";
 	foreach($details as $email) {
-		stuurMail($email,$onderwerp,$bericht);
-		echo "Uitgenodigd: $email.\n";
+		if(!empty($email)) {
+			stuurMail($email,$onderwerp,$bericht);
+			echo "Uitgenodigd: $email.\n";
+		}
 	}
 
 	return;
