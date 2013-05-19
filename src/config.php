@@ -188,7 +188,7 @@ function adminStart($text,$adres) {
 	
 	var_dump($details);
 	for($i = 0; $i < 5; $i++) {
-		$details = delArrayElement($details,$i);
+		$details = delArrayElement($details,0);
 	}
 	var_dump($details);
 	$deadline = geefDeadline($sid);
