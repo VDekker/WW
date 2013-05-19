@@ -331,7 +331,7 @@ function parseStem($naam,$adres,$sid,$bericht,$onderwerp,
 					}//else if
 				else if($rol == "Waarschuwer") { //mag niet op zichzelf stemmen
 					$stem = geldigeStemWaarschuw($bericht,$sid,1);
-					if($stem != false && $stem != $naam]) {
+					if($stem != false && $stem != $naam) {
 						zetStem($naam,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
 						echo "$rol $naam kiest $stem.\n";
