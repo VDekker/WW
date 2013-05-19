@@ -234,7 +234,7 @@ function regelDwaas($sid) {
 	$rollen = array();
 	$resultaat = sqlSel("Spelers","SPEL='$sid'"); //pak alle rollen in het spel
 	while($speler = sqlFet($resultaat)) {
-		if($speler['ROL'] != "Dwaas" && !in_array($speler['ROL'],$rol) {
+		if($speler['ROL'] != "Dwaas" && !in_array($speler['ROL'],$rol)) {
 			$andereRollen++;
 		}
 		array_push($rollen,$speler['ROL']);
