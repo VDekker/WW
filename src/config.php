@@ -185,7 +185,8 @@ function adminStart($text,$adres) {
 	$bericht .= "Strengheid = $streng<br />";
 	$bericht .= "Thema = $thema<br />";
 	stuurMail($adres,$onderwerp,$bericht);
-
+	
+	var_dump($details);
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,$i);
 	}
