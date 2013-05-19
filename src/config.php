@@ -205,6 +205,7 @@ function adminStart($text,$adres) {
 	$bericht .= "Thema van het spel: $thema";
 	foreach($details as $email) {
 		stuurMail($email,$onderwerp,$bericht);
+		echo "Uitgenodigd: $email.";
 	}
 
 	return;
