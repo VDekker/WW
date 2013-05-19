@@ -141,6 +141,8 @@ function adminDelete($text,$adres) {
 }//adminDelete
 
 function adminStart($text,$adres) {
+	global $thuis;
+
 	$details = explode("\r\n",$text);
 	$sid = $details[0];
 	$max = intval($details[1]);
@@ -183,6 +185,28 @@ function adminStart($text,$adres) {
 	$bericht .= "Strengheid = $streng<br />";
 	$bericht .= "Thema = $thema<br />";
 	stuurMail($adres,$onderwerp,$bericht);
+
+	for($i = 0; $i < 5; $i++) {
+		$details = delArrayElement($details,$i);
+	}
+	$deadline = geefDeadline($sid);
+	$onderwerp = "Uitnodiging: $sid";
+	$bericht = "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
+	$bericht .= "het zal beginnen op $deadline. ";
+	$bericht .= "Als je wilt meedoen met het spel, schrijf je dan in ";
+	$bericht .= "door een email naar $thuis te sturen, met daarin je naam, ";
+	$bericht .= "en je geslacht, gescheiden door een komma.<br />";
+	$bericht .= "<br />";
+	$bericht .= "<u>Speldetails:</u><br />";
+	$bericht .= "Spelnaam: $sid";
+	$bericht .= "Maximaal aantal spelers: $max";
+	$bericht .= "Duur van een stemronde: $snel dag(en)";
+	$bericht .= "Toegestane inactiviteit: minder dan $streng";
+	$bericht .= "Thema van het spel: $thema";
+	foreach($details as $email) {
+		stuurMail($email,$onderwerp,$bericht);
+	}
+
 	return;
 }//adminStart
 

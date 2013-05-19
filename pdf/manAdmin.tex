@@ -3,8 +3,12 @@
 \frenchspacing
 
 \usepackage[english,dutch]{babel}
-  
+\usepackage{multirow}
 \usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{hyperref} %moet als laatste package staan!
+
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{lem}{}
 \titleformat{\subsection}[hang]{\large\bfseries}{}{1em}{}
 \titleformat{\subsubsection}[hang]{\small\bfseries}{}{1em}{}
@@ -26,14 +30,70 @@
 
 \maketitle
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Welp2.png}
+\end{figure}
+
+\newpage
 \tableofcontents
 \newpage
 
 \section{Inleiding}
 
+  
+  
+\section{Taken van het systeembeheer}
+
 \section{Functies}
 
+  Om het systeembeheer makkelijk te maken zijn er een aantal functies voorbereid waarmee de database van spelers en spellen kan worden geraadpleegd: deze kunnen worden uitgevoerd door emails naar het systeem. Deze functies zullen hier worden besproken, maar eerst even uitleg hoe ze te gebruiken:
+  
+  Door de implementatie van het programma (en de handige PHP-functie {\tt preg\_match}, is het heel makkelijk om stemmen van spelers te pakken, en daar namen uit te halen. Er is geen specifieke syntax of structuur nodig in deze berichten. Helaas, vanwege de specifiekere natuur van de functies, kan dit niet zo eenvoudig worden gebruikt. Daarom is het van groot belang dat voor iedere functie de vereiste en syntax \emph{precies} gebruikt wordt. Als er onduidelijkheid is wat betreft het gebruik van een functie, gebruik deze dan \emph{niet.} Gaan er namelijk dingen fout, dan gaat het goed fout, omdat deze functies dingen kunnen veranderen in de database, waar heel het programma op rust. Vraag andere systeembeheerders om meer informatie over de functie (zie Help in de \href{http://www.liacs.nl/~vdekker/WW/pdf/man.pdf}{gewone handleiding} ).
+  \\[\baselineskip]
+  Om een functie uit te voeren moet een mail worden verstuurd naar het thuisadres, \href{mailto:<WWautoVerteller@gmail.com>}{WWautoVerteller@gmail.com}. In het onderwerp moet het woord `config' vermeld staan, en in het bericht moet op de eerste regel enkel het systeembeheer-wachtwoord staan.
+
   \subsection{Nieuw spel aanmaken}
+  
+    Om een nieuw spel te beginnen, moet een systeembeheerder `start' aan het onderwerp toevoegen; in het bericht moet na het wachtwoord de volgende dingen staan, elk op een eigen regel: de naam van het spel, het maximum aantal spelers, de snelheid van het spel, de strengheid van het spel, en het thema. 
+    
+    Een voorbeeld:
+    
+    \begin{center}
+      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
+	\hline
+	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+	Van: & $<$systeembeheerder@gmail.com$>$ \\
+	Onderwerp: & config start \\[\baselineskip]	
+	Bericht: & wachtwoord \\
+	 & Spelnaam \\
+	 & 15 \\
+	 & 3 \\
+	 & 1 \\
+	 & Wakkerdam \\
+	\hline
+      \end{tabularx}
+    \end{center}
+    
+    Als een van deze parameters ontbreekt, dan wordt hij met de standaard opgevuld, behalve bij de naam; als de naam ontbreekt, dan kan er geen spel worden gestart, en wordt een foutmelding naar de systeembeheerder gestuurd. In het volgende voorbeeld staan ook de standaardwaardes aangegeven tussen blokhaakjes:
+    
+    \begin{center}
+      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
+	\hline
+	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+	Van: & $<$systeembeheerder@gmail.com$>$ \\
+	Onderwerp: & config start \\[\baselineskip]	
+	Bericht: & wachtwoord \\
+	 & Spelnaam \\
+	 & [18] \\
+	 & [2] \\
+	 & [2] \\
+	 & [default] \\
+	\hline
+      \end{tabularx}
+    \end{center}
+    
+    Als een spel succesvol is aangemaakt, dan wordt de systeembeheerder hiervan op de hoogte gesteld. Als er ook mensen moeten worden uitgenodigd voor het spel, moeten deze onder het thema worden toegevoegd, waarbij elk emailadres een aparte regel krijgt:
   
   \subsection{Spel stoppen}
   
