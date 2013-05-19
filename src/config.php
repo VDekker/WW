@@ -189,23 +189,27 @@ function adminStart($text,$adres) {
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,$i);
 	}
+	var_dump($details);
 	$deadline = geefDeadline($sid);
 	$onderwerp = "Uitnodiging: $sid";
 	$bericht = "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
 	$bericht .= "het zal beginnen op $deadline. ";
 	$bericht .= "Als je wilt meedoen met het spel, schrijf je dan in ";
-	$bericht .= "door een email naar $thuis te sturen, met daarin je naam, ";
-	$bericht .= "en je geslacht, gescheiden door een komma.<br />";
+	$bericht .= "door een email naar $thuis te sturen, ";
+	$bericht .= "met daarin je naam en je geslacht, ";
+	$bericht .= "gescheiden door een komma.<br />";
 	$bericht .= "<br />";
 	$bericht .= "<u>Speldetails:</u><br />";
-	$bericht .= "Spelnaam: $sid";
-	$bericht .= "Maximaal aantal spelers: $max";
-	$bericht .= "Duur van een stemronde: $snel dag(en)";
-	$bericht .= "Toegestane inactiviteit: minder dan $streng";
+	$bericht .= "Spelnaam: $sid<br />";
+	$bericht .= "Maximaal aantal spelers: $max<br />";
+	$bericht .= "Duur van een stemronde: $snel ";
+	$bericht .= ($snel == 1) ? "dag" : "dagen";
+	$bericht .= "<br />";
+	$bericht .= "Toegestane inactiviteit: minder dan $streng<br />";
 	$bericht .= "Thema van het spel: $thema";
 	foreach($details as $email) {
 		stuurMail($email,$onderwerp,$bericht);
-		echo "Uitgenodigd: $email.";
+		echo "Uitgenodigd: $email.\n";
 	}
 
 	return;
