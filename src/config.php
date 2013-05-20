@@ -302,7 +302,10 @@ function adminStory($bericht,$adres) {
 	$thema = sqlEscape($header[1]);
 	delArrayElement($stukken,0);
 	echo "Auteur: $auteur, en thema: $thema.\n";
-	foreach($stukken as $stuk) {
+	foreach($stukken as $key => $stuk) {
+		if($key == 0) {
+			continue;
+		}
 		$onderdelen = explode("\r\n\r\n",$stuk);
 		var_dump($onderdelen);
 		$rol = sqlEscape($onderdelen[0]);
