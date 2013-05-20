@@ -315,14 +315,15 @@ function adminStory($bericht,$adres) {
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
+		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		if(empty($rol) || !is_int($fase) || empty($verhaal)) {
 			echo "Fout: rol, fase of verhaal ontbreekt.\n";
 			continue;
 		}
-		if(is_int($levend)) {
+		if(!is_int($levend)) {
 			$levend = "NULL";
 		}
-		if(is_int($dood)) {
+		if(!is_int($dood)) {
 			$dood = "NULL";
 		}
 		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
