@@ -30,7 +30,6 @@
              (zelfde voor SID).
   * Nodig:   alle TODO's afhandelen
 
-  * Config:  upload verhaaltjes
   * Config:  spel pauzeren (zodat het later verder kan gaan: gebruik vlag!)
 
   * Extra:   anonieme help maken? (is dat de moeite waard?)

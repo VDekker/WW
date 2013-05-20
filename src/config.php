@@ -293,11 +293,8 @@ function adminGames($adres) {
 }//adminGames
 
 function adminStory($bericht,$adres) {
-	var_dump($bericht);
 	$stukken = explode("\r\n\r\n\r\n",$bericht);
-	var_dump($stukken);
 	$header = explode("\r\n\r\n",$stukken[0]);
-	var_dump($header);
 	$auteur = sqlEscape($header[0]);
 	$thema = sqlEscape($header[1]);
 	delArrayElement($stukken,0);
@@ -307,7 +304,6 @@ function adminStory($bericht,$adres) {
 			continue;
 		}
 		$onderdelen = explode("\r\n\r\n",$stuk);
-		var_dump($onderdelen);
 		$rol = sqlEscape($onderdelen[0]);
 		$fase = (int)$onderdelen[1];
 		$levend = (int)$onderdelen[2];
@@ -315,7 +311,6 @@ function adminStory($bericht,$adres) {
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
-		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		if(empty($rol) || ($fase == 0 && $onderdelen[1] != "0") || empty($verhaal)) {
 			echo "Fout: rol, fase of verhaal ontbreekt.\n";
 			continue;
@@ -326,7 +321,6 @@ function adminStory($bericht,$adres) {
 		if(($dood == 0 && $onderdelen[3] != "0")) {
 			$dood = "NULL";
 		}
-		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
 		$sql .= "'$rol',$fase,'$verhaal',$geslacht)";
