@@ -309,21 +309,21 @@ function adminStory($bericht,$adres) {
 		$onderdelen = explode("\r\n\r\n",$stuk);
 		var_dump($onderdelen);
 		$rol = sqlEscape($onderdelen[0]);
-		$fase = intval($onderdelen[1]);
-		$levend = intval($onderdelen[2]);
-		$dood = intval($onderdelen[3]);
+		$fase = $onderdelen[1];
+		$levend = $onderdelen[2];
+		$dood = $onderdelen[3];
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
 		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		echo "Verhaal: $verhaal.\n";
-		if(empty($rol) || empty($fase) || empty($verhaal)) {
+		if(empty($rol) || !is_int($fase) || empty($verhaal)) {
 			continue;
 		}
-		if(empty($levend)) {
+		if(is_int($levend)) {
 			$levend = "NULL";
 		}
-		if(empty($dood)) {
+		if(is_int($dood)) {
 			$dood = "NULL";
 		}
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
