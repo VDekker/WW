@@ -317,7 +317,7 @@ function adminStory($bericht,$adres) {
 			$dood = "NULL";
 		}
 		if(empty($geslacht)) {
-			$geslacht = "NULL"
+			$geslacht = "NULL";
 		}
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
