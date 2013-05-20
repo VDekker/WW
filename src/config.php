@@ -315,9 +315,8 @@ function adminStory($bericht,$adres) {
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
-		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
-		echo "Verhaal: $verhaal.\n";
 		if(empty($rol) || !is_int($fase) || empty($verhaal)) {
+			echo "Fout: rol, fase of verhaal ontbreekt.\n";
 			continue;
 		}
 		if(is_int($levend)) {
@@ -326,6 +325,7 @@ function adminStory($bericht,$adres) {
 		if(is_int($dood)) {
 			$dood = "NULL";
 		}
+		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
 		$sql .= "'$rol',$fase,'$verhaal',$geslacht)";
