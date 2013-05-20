@@ -316,6 +316,7 @@ function adminStory($bericht,$adres) {
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
 		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
+		echo "Verhaal: $verhaal.\n";
 		if(empty($rol) || empty($fase) || empty($verhaal)) {
 			continue;
 		}
@@ -324,9 +325,6 @@ function adminStory($bericht,$adres) {
 		}
 		if(empty($dood)) {
 			$dood = "NULL";
-		}
-		if(empty($geslacht)) {
-			$geslacht = "NULL";
 		}
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
