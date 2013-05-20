@@ -24,21 +24,15 @@
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
 
-  * Parsen:  inschrijvingen, de namen van spelers (check op geen dubbele naam,
-             en alleen letters)
-
-  * Nodig:   handleiding maken
   * Nodig:   "or die" veranderen in "or stuurError" (in dbFuncties)
   * Nodig:   alle echo's verwijderen... (is dit nodig?)
   * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
              (zelfde voor SID).
   * Nodig:   alle TODO's afhandelen
 
-  * Config:  upload verhaaltjes (.txt file)
+  * Config:  upload verhaaltjes
+  * Config:  spel pauzeren (zodat het later verder kan gaan: gebruik vlag!)
 
-  * Extra:   index.html maken in WW-map op liacs, om andere files te verbergen
-  * Extra:   mensen uitnodigen voor een nieuw spel/enkel specifieke mensen 
-             toelaten
   * Extra:   anonieme help maken? (is dat de moeite waard?)
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)

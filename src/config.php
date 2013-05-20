@@ -32,6 +32,9 @@ function config($adres,$onderwerp,$bericht) {
 	if(preg_match("/games/i",$onderwerp)) {
 		adminGames($adres);
 	}
+	if(preg_match("/story/i",$onderwerp)) {
+		adminStory($bericht,$adres);
+	}
 	return;
 }//config
 
@@ -288,6 +291,43 @@ function adminGames($adres) {
 	stuurResultaatHTML($adres,$resultaat);
 	return;
 }//adminGames
+
+function adminStory($bericht,$adres) {
+	$stukken = explode("\r\n\r\n\r\n",$bericht);
+	$header = explode("\r\n\r\n",$stukken[0]);
+	$auteur = sqlEscape($header[0]);
+	$thema = sqlEscape($header[1]);
+	delArrayElement($stukken,0);
+	echo "Auteur: $auteur, en thema: $thema.\n";
+	foreach($stukken as $stuk) {
+		$onderdelen = explode("\r\n\r\n",$stuk);
+		$rol = sqlEscape($onderdelen[0]);
+		$fase = intval($onderdelen[1]);
+		$levend = intval($onderdelen[2]);
+		$dood = intval($onderdelen[3]);
+		$verhaal = sqlEscape($onderdelen[4]);
+		$geslacht = sqlEscape($onderdelen[5]);
+		if(empty($rol) || empty($fase) || empty($verhaal)) {
+			continue;
+		}
+		if(empty($levend)) {
+			$levend = "NULL";
+		}
+		if(empty($dood)) {
+			$dood = "NULL";
+		}
+		if(empty($geslacht)) {
+			$geslacht = "NULL"
+		}
+		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
+		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
+		$sql .= "'$rol',$fase,'$verhaal','$geslacht')";
+		sqlQuery($sql);
+		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
+	}//foreach
+	//TODO stuur alle gevonden verhaaltjes (rol en fase), en auteur en thema
+	return;
+}//adminStory
 
 //hulp aangevraagd: $onderwerp is het originele onderwerp, 
 //en $bericht het originele bericht

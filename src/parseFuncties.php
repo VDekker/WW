@@ -9,6 +9,12 @@ function inschrijving($adres,$bericht,$sid) {
 		echo "Geen naam gevonden.\n";
 		return false;
 	}
+	if(!preg_match('/[^A-Za-z]/',$naam) { //andere tekens dan gewone letters
+		echo "Naam bevatte andere tekens dan letters.\n";
+		return false;
+	}
+	$naam = strtolower($naam);
+	$naam = ucfirst($naam);
 	echo "Naam: $naam\n";
 	$text = delArrayElement($text,0);
 	$bericht = implode(",",$text);
