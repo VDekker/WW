@@ -297,7 +297,7 @@ function adminStory($bericht,$adres) {
 	$stukken = explode("\r\n\r\n\r\n",$bericht);
 	var_dump($stukken);
 	$header = explode("\r\n\r\n",$stukken[0]);
-	$ver_dump($header);
+	var_dump($header);
 	$auteur = sqlEscape($header[0]);
 	$thema = sqlEscape($header[1]);
 	delArrayElement($stukken,0);
