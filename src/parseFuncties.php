@@ -9,7 +9,7 @@ function inschrijving($adres,$bericht,$sid) {
 		echo "Geen naam gevonden.\n";
 		return false;
 	}
-	if(!preg_match('/[^A-Za-z]/',$naam) { //andere tekens dan gewone letters
+	if(!preg_match('/[^A-Za-z]/',$naam)) { //andere tekens dan gewone letters
 		echo "Naam bevatte andere tekens dan letters.\n";
 		return false;
 	}
