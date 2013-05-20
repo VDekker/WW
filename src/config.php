@@ -309,9 +309,9 @@ function adminStory($bericht,$adres) {
 		$onderdelen = explode("\r\n\r\n",$stuk);
 		var_dump($onderdelen);
 		$rol = sqlEscape($onderdelen[0]);
-		$fase = $onderdelen[1];
-		$levend = $onderdelen[2];
-		$dood = $onderdelen[3];
+		$fase = (int)$onderdelen[1];
+		$levend = (int)$onderdelen[2];
+		$dood = (int)$onderdelen[3];
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
