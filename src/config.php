@@ -314,7 +314,7 @@ function adminStory($bericht,$adres) {
 		$dood = intval($onderdelen[3]);
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
-			"NULL" : "'" . sqlEscape($onderdelen[5] . "'";
+			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
 		if(empty($rol) || empty($fase) || empty($verhaal)) {
 			continue;
 		}
