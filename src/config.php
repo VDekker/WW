@@ -327,11 +327,11 @@ function adminStory($bericht,$adres) {
 		if(empty($geslacht)) {
 			$geslacht = "NULL";
 		}
+		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
 		$sql .= "'$rol',$fase,'$verhaal',$geslacht)";
 		sqlQuery($sql);
-		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 	}//foreach
 	//TODO stuur alle gevonden verhaaltjes (rol en fase), en auteur en thema
 	return;
