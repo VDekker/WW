@@ -293,14 +293,18 @@ function adminGames($adres) {
 }//adminGames
 
 function adminStory($bericht,$adres) {
+	var_dump($bericht);
 	$stukken = explode("\r\n\r\n\r\n",$bericht);
+	var_dump($stukken);
 	$header = explode("\r\n\r\n",$stukken[0]);
+	$ver_dump($header);
 	$auteur = sqlEscape($header[0]);
 	$thema = sqlEscape($header[1]);
 	delArrayElement($stukken,0);
 	echo "Auteur: $auteur, en thema: $thema.\n";
 	foreach($stukken as $stuk) {
 		$onderdelen = explode("\r\n\r\n",$stuk);
+		var_dump($onderdelen);
 		$rol = sqlEscape($onderdelen[0]);
 		$fase = intval($onderdelen[1]);
 		$levend = intval($onderdelen[2]);
