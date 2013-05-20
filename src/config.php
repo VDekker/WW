@@ -313,7 +313,8 @@ function adminStory($bericht,$adres) {
 		$levend = intval($onderdelen[2]);
 		$dood = intval($onderdelen[3]);
 		$verhaal = sqlEscape($onderdelen[4]);
-		$geslacht = sqlEscape($onderdelen[5]);
+		$geslacht = ($onderdelen[5] == "NULL") ? 
+			"NULL" : "'" . sqlEscape($onderdelen[5] . "'";
 		if(empty($rol) || empty($fase) || empty($verhaal)) {
 			continue;
 		}
@@ -328,7 +329,7 @@ function adminStory($bericht,$adres) {
 		}
 		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
-		$sql .= "'$rol',$fase,'$verhaal','$geslacht')";
+		$sql .= "'$rol',$fase,'$verhaal',$geslacht)";
 		sqlQuery($sql);
 		echo "Rol: $rol, fase: $fase, levend: $levend en dood: $dood.\n";
 	}//foreach
