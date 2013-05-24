@@ -50,15 +50,23 @@ function gmailParse() {
 				if($gevonden) { // als een speltitel in het onderwerp staat
 					$resultaat = sqlSel("Spellen","SID='$sid'");
 					$spel = sqlFet($resultaat);
-					$init = $spel['INIT'];
-					$fase = $spel['FASE'];
-					$tweede = $spel['TWEEDE_NACHT'];
-					$max = $spel['MAX_SPELERS'];
-					$naam = spelerNaam($afzender,$sid);
-					if(!empty($naam) || ($init && $fase == 1)) {
-						parseStem($naam,$afzender,$sid,
-							$bericht,$onderwerp,$init,$fase,$tweede,$max);
+					if($spel['GEWONNEN'] == 1) {
+						stuurFoutStop($adres,$sid);
 					}
+					else if ($spel['PAUZE'] == 1) {
+						stuurFoutPauze($adres,$sid);
+					}
+					else {
+						$init = $spel['INIT'];
+						$fase = $spel['FASE'];
+						$tweede = $spel['TWEEDE_NACHT'];
+						$max = $spel['MAX_SPELERS'];
+						$id = spelerID($afzender,$sid);
+						if(!empty($naam) || ($init && $fase == 1)) {
+							parseStem($id,$afzender,$sid,
+								$bericht,$onderwerp,$init,$fase,$tweede,$max);
+						}
+					}//else
 				}//if
 				else {
 					echo "Verkeerd onderwerp (geen SID herkend), ";
@@ -120,5 +128,29 @@ function verwijderMails() {
 	sqlQuery($sql);
 	return;
 }//verwijderMails
+
+//maakt verbinding met gmail
+function gmailConnect () {
+	global $thuis;
+	$wachtwoord = 'W@kkerd@m';
+
+	$map = "INBOX";
+	$imapadres = "{imap.gmail.com:993/imap/ssl}";
+	$hostnaam = $imapadres . $map;
+	$connection = imap_open($hostnaam,$thuis,$wachtwoord) or 
+		stuurError("Kan niet verbinden met Gmail:\n\n " . 
+		imap_last_error());
+	return($connection);
+}//gmailConnect
+
+//sluit verbinding met gmail
+function gmailSluit() {
+	global $gmconnect;
+
+	imap_close($gmconnect) or 
+		stuurError("Kan verbinding met Gmail niet sluiten:\n\n" . 
+		imap_last_error());
+	return;
+}//gmailSluit
 
 ?>

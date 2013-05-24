@@ -2,35 +2,38 @@
      TODO:
 ===============
 
+  * Opschonen:  isLevend, isNieuwDood, heeftRol, verwijderStem, stemGemist, wordtWakker, beschermd, zetDood, herleef, vermoord, isGewaarschuwd, isOpgesloten, isBeschuldigd, stemWaarde, gewonnenSpeler, zetStemNULL, geldigeStemBrand krijgen een speler ID ipv. naam
+  * Opschonen:  blanco => -1
+  * Opschonen:  nog te doen: vanaf regelRollen en voorts
+
   * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
                 aangevallen? (documenteer dit!)
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
                 Brandstapel eindigt? (fix dit!)
+  * Opmerking:  wat gebeurt er met vorige_stem als de stem NULL was? (fix dit)
+  * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
+                opeten
 
   * Testen:  kan een spel winnen?
   * Testen:  mails
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
              Verleidster, Goochelaar en Klaas Vaak
   * Testen:  nieuwe regelDood2, samen met fase-loops (naar fase 10 en fase 17)
+  * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks, 
+             kloppen deze?
+  * Testen:  spel pauzeren/hervatten
 
   * Mailen:  verhalen implementeren voor meerdere spelers/brandstapel
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen en begin
-  * Mailen:  lijst van keuzes aan speler mailen (nodig voor Heks, handig voor 
-             anderen)
-  * Mailen:  infodump bij Onschuldige Meisje en Zondebok
 
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
 
-  * Nodig:   "or die" veranderen in "or stuurError" (in dbFuncties)
-  * Nodig:   alle echo's verwijderen... (is dit nodig?)
   * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
              (zelfde voor SID).
   * Nodig:   alle TODO's afhandelen
-
-  * Config:  spel pauzeren (zodat het later verder kan gaan: gebruik vlag!)
 
   * Extra:   anonieme help maken? (is dat de moeite waard?)
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
@@ -41,9 +44,13 @@
   * Extra:   speler-tabel: vat alle vlag-kolommen samen in één kolom (met 
              bitflags)
   * Extra:   scores implementeren
-  * Extra:   mooie documentatie
+  * Extra:   manAdmin.pdf afmaken
   * Extra:   zijn execute-rechten nodig voor php-bestanden?
   * Extra:   alle mails in Verzonden zetten
+  * Extra:   alle echo's verwijderen... (is dit nodig?)
+  * Extra:   lijst van keuzes aan speler mailen (handig)
+  * Extra:   stemWaarde verbeteren: check op burgemeester kan beter
+             (hetzelfde voor isDodeBurg)
 
 
 ==========================================
@@ -658,7 +665,7 @@ Fluitspeler:        0 = Wakker worden
                     9 = Blanco gestemd (DOOD = 2)
 Waarschuwer:        0 = Wakker worden
                     1 = Speler gewaarschuwd (Waarschuwer)
-					2 = Wordt gewaarschuwd (speler)
+					          2 = Wordt gewaarschuwd (speler)
                     9 = Blanco gestemd
 Schout:             0 = Wakker worden
                     1 = Zelf opgesloten

@@ -1,8 +1,18 @@
 <?php
 
-//handelt een inschrijving af
+//handelt een inschrijving af:
+//als het adres al bij dit spel bekend is, is het een herinschrijving
+//anders: schrijf opnieuw in
 function inschrijving($adres,$bericht,$sid) {
-	echo "Nieuwe speler gevonden.\n";
+	$vlag = false;
+	$resultaat = sqlSel("Spelers","SPEL='$sid' AND EMAIL='$adres'");
+	if(sqlNum($resultaat) != 0) {
+		echo "Herinschrijving.\n";
+		$vlag = true;
+	}
+	else {
+		echo "Nieuwe speler gevonden.\n";
+	}
 	$text = explode(",",$bericht);
 	$naam = sqlEscape($text[0]);
 	if(empty($naam)) {
@@ -30,31 +40,38 @@ function inschrijving($adres,$bericht,$sid) {
 		echo "Geen geslacht gevonden.\n";
 		return false;
 	}
-	$sql = "INSERT INTO Spelers(NAAM,GESLACHT,EMAIL,SPEL) 
-		VALUES ('$naam',$geslacht,'$adres','$sid')";
-	sqlQuery($sql);
-	$resultaat = sqlSel("Spellen","SID='$sid'");
-	$spel = sqlFet($resultaat);
-	$levend = $spel['LEVEND'] + 1; //één extra speler
-	if($levend == $spel['MAX_SPELERS']) {
-		zetFase(2,$sid);
+	if($vlag) {
+		sqlUp("Spelers","NAAM='$naam',GESLACHT=$geslacht",
+			"SPEL='$sid' AND EMAIL='$adres'");
 	}
-	sqlUp("Spellen","LEVEND=$levend","SID='$sid'");
+	else {
+		$sql = "INSERT INTO Spelers(NAAM,GESLACHT,EMAIL,SPEL) 
+			VALUES ('$naam',$geslacht,'$adres','$sid')";
+		sqlQuery($sql);
+		$resultaat = sqlSel("Spellen","SID='$sid'");
+		$spel = sqlFet($resultaat);
+		$levend = $spel['LEVEND'] + 1; //één extra speler
+		if($levend == $spel['MAX_SPELERS']) {
+			zetFase(2,$sid);
+		}
+		sqlUp("Spellen","LEVEND=$levend","SID='$sid'");
+	}//else
+
 	return true;
 }//inschrijving
 
 // geeft naam van speler gebaseerd op email adres en spel,
 // of "" als het adres niet bij het spel hoort.
-function spelerNaam($adres,$sid) {
+function spelerID($adres,$sid) {
 	$resultaat = sqlSel("Spelers",
 		"SPEL='$sid' AND EMAIL='$adres' AND LEVEND=1");
 	$speler = sqlFet($resultaat);
-	return $speler['NAAM'];
-}//spelerNaam()
+	return $speler['ID'];
+}//spelerID
 
 //zet een stem van speler op NULL
-function zetStemNULL($naam,$sid,$plek) {
-	sqlUp("Spelers","$plek=NULL","SPEL='$sid' AND NAAM='$naam'");
+function zetStemNULL($id,$sid,$plek) {
+	sqlUp("Spelers","$plek=NULL","SPEL='$sid' AND NAAM='$id'");
 	return;
 }//zetStemNULL
 
@@ -64,9 +81,9 @@ function zetStemNULL($naam,$sid,$plek) {
 //deze returned hij. Als er meerdere voorkomen, geeft dan FALSE.
 function geldigeStem($bericht,$sid,$levend) {
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=$levend");
-	$naam = false;
+	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
-		$naam = "blanco";
+		$id = -1;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
@@ -74,53 +91,53 @@ function geldigeStem($bericht,$sid,$levend) {
 			if($naam != false) { // meerdere namen in bericht
 				return false;
 			}
-			$naam = $speler['NAAM'];
+			$id = $speler['ID'];
 		}//if
 	}//while
-	return $naam;
+	return $id;
 }//geldigeStem
 
 //checkt of de stem van de Verleidster geldig is.
 //Hierbij worden stemmen geweigerd als een andere Verleidster
 //al op die speler heeft gestemd.
 function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
-	$naam = geldigeStem($bericht,$sid,1);
-	if(!$naam) {
+	$id = geldigeStem($bericht,$sid,1);
+	if(!$id) {
 		echo "Geen speler gevonden...\n";
 		return;
 	}
-	if($naam == "blanco") {
-		return $naam;
+	if($id == -1) {
+		return $id;
 	}
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] == $rol) {
-			if($naam == $speler['STEM']) {
-				echo "$naam is al eerder gekozen.\n";
+			if($id == $speler['STEM']) {
+				echo "$id is al eerder gekozen.\n";
 				return false;
 			}
 		}//if
 	}//while
-	return $naam;
+	return $id;
 }//geldigeStemVerleidOpdracht
 
 function geldigeStemHeks($bericht,$sid,$nieuw) {
 	$resultaat = sqlSel("Spelers",
 		"SPEL='$sid' AND LEVEND=1 AND NIEUW_DOOD=$nieuw");
-	$naam = false;
+	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) {
-		$naam = "blanco";
+		$id = -1;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { //meerdere namen in bericht
+			if($id != false) { //meerdere namen in bericht
 				return false;
 			}
-			$naam = $speler['NAAM'];
+			$id = $speler['ID'];
 		}//if
 	}//while
-	return $naam;
+	return $id;
 }//geldigeStemHeks
 
 //checkt of een bericht een geldige Brandstapelstem bevat; 
@@ -128,26 +145,26 @@ function geldigeStemHeks($bericht,$sid,$nieuw) {
 //of de speler wel mag stemmen (Zondebok) en 
 //of hij niet een ontdekte Dorpsgek is:
 //deze drie stemmen altijd blanco.
-function geldigeStemBrand($naam,$bericht,$sid) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND NAAM='$naam'");
+function geldigeStemBrand($id,$bericht,$sid) {
+	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ID=$id");
 	$speler = sqlFet($resultaat);
 	if($speler['GEK']) {
-		echo "Dorpsgek $naam mag niet stemmen.\n";
-		return "blanco";
+		echo "Dorpsgek $id mag niet stemmen.\n";
+		return -1;
 	}
 	if($speler['SCHULD']) {
-		echo "$naam voelt zich schuldig en mag niet stemmen.\n";
-		return "blanco";
+		echo "$id voelt zich schuldig en mag niet stemmen.\n";
+		return -1;
 	}
 	$stem = geldigeStem($bericht,$sid,1);
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ROL='Schout'");
 	while($schout = sqlFet($resultaat)) {
-		if($schout['EXTRA_STEM'] == $naam) {
-			echo "$naam is opgesloten en mag niet stemmen.\n";
-			return "blanco";
+		if($schout['EXTRA_STEM'] == $id) {
+			echo "$id is opgesloten en mag niet stemmen.\n";
+			return -1;
 		}
-		if($stem != "blanco" && $stem == $schout['EXTRA_STEM']) {
-			echo "$naam stemt op $stem, die is opgesloten.\n";
+		if($stem != -1 && $stem == $schout['EXTRA_STEM']) {
+			echo "$id stemt op $stem, die is opgesloten.\n";
 			return false;
 		}
 	}//while
@@ -156,9 +173,9 @@ function geldigeStemBrand($naam,$bericht,$sid) {
 
 //checkt voor WW (en Witte WW!) of de stem geldig is
 function geldigeStemWWVP($bericht,$sid,$rol) {
-	$naam = geldigeStem($bericht,$sid,1);
-	if(!$naam || $naam == "blanco") {
-		return $naam;
+	$id = geldigeStem($bericht,$sid,1);
+	if(!$id || $id == -1) {
+		return $id;
 	}
 	if($rol == "Weerwolf") {
 		$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1 AND 
@@ -169,38 +186,38 @@ function geldigeStemWWVP($bericht,$sid,$rol) {
 			ROL='Vampier'");
 	}
 	while($speler = sqlFet($resultaat)) {
-		if($speler['NAAM'] == $naam && wordtWakker($naam,$sid)) {
+		if($speler['ID'] == $id && wordtWakker($id,$sid)) {
 			return false;
 		}
 	}//while
-	return $naam;
+	return $id;
 }//geldigeStemWWVP
 
 //checkt voor FS of de stem geldig is: spelers die leven, 
 //geen Fluitspeler zijn, en niet betoverd zijn. 
 //Gebruikt call by reference om direct 2 stemmen te vullen
-function geldigeStemFS($bericht,$sid,&$naam,&$naam2) {
+function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 	$resultaat = sqlSel("Spelers",
 		"SPEL='$sid' AND LEVEND=1 AND ROL<>'Fluitspeler'");
-	$naam = false;
-	$naam2 = false;
+	$id1 = false;
+	$id2 = false;
 	$teller = 0;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
-		$naam = "blanco";
+		$id1 = -1;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { //meerdere namen in bericht
-				if($naam2 != false) { //te veel namen!
-					$naam = false;
-					$naam2 = false;
+			if($id1 != false) { //meerdere namen in bericht
+				if($id2 != false) { //te veel namen!
+					$id1 = false;
+					$id2 = false;
 					return;
 				}
-				$naam2 = $speler['NAAM'];
+				$id2 = $speler['ID'];
 			}//if
 			else {
-				$naam = $speler['NAAM'];
+				$id1 = $speler['ID'];
 			}
 		}//if
 	}//while
@@ -209,46 +226,47 @@ function geldigeStemFS($bericht,$sid,&$naam,&$naam2) {
 
 //checkt voor Goochelaar of de stem geldig is: spelers die leven. 
 //Gebruikt call by reference om direct 2 stemmen te vullen
-function geldigeStemGoochel($bericht,$afzender,$sid,&$naam,&$naam2) {
+function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
-	$naam = false;
-	$naam2 = false;
+	$id1 = false;
+	$id2 = false;
 	$teller = 0;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
-		$naam = "blanco";
+		$id1 = -1;
 		return;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { //meerdere namen in bericht
-				if($naam2 != false) { //te veel namen!
-					$naam = false;
-					$naam2 = false;
+			if($id1 != false) { //meerdere namen in bericht
+				if($id2 != false) { //te veel namen!
+					$id1 = false;
+					$id2 = false;
 					return;
 				}
-				$naam2 = $speler['NAAM'];
+				$id2 = $speler['ID'];
 			}//if
 			else {
-				$naam = $speler['NAAM'];
+				$id1 = $speler['ID'];
 			}
 		}//if
 	}//while
 
-	if($naam != false && $naam2 != false) {
+	//check of niet door andere Goochelaar verwisseld
+	if($id1 != false && $id2 != false) {
 		sqlData($resultaat,0);
 		while($speler = sqlFet($resultaat)) {
 			if($speler['ROL'] == "Goochelaar" && 
-				$speler['NAAM'] != $afzender) { //check zijn stemmen
-				if($naam != false && ($naam == $speler['STEM'] || 
-					$naam == $speler['EXTRA_STEM'])) {
-					echo "$naam was al eerder gewisseld.\n";
-					$naam = false;
+				$speler['ID'] != $afzender) { //check zijn stemmen
+				if($id1 != false && ($id1 == $speler['STEM'] || 
+					$id1 == $speler['EXTRA_STEM'])) {
+					echo "$id1 was al eerder gewisseld.\n";
+					$id1 = false;
 				}//if
-				if($naam2 != false && ($naam2 == $speler['STEM'] || 
-					$naam2 == $speler['EXTRA_STEM'])) {
-					echo "$naam2 was al eerder gewisseld.\n";
-					$naam2 = false;
+				if($id2 != false && ($id2 == $speler['STEM'] || 
+					$id2 == $speler['EXTRA_STEM'])) {
+					echo "$id2 was al eerder gewisseld.\n";
+					$id2 = false;
 				}//if
 			}//if
 		}//if
@@ -260,45 +278,46 @@ function geldigeStemGoochel($bericht,$afzender,$sid,&$naam,&$naam2) {
 //spelers op wie andere Cupido's nog niet hebben gestemd 
 //(niet meerdere geliefden voor één speler)
 //Gebruikt call by reference om direct 2 stemmen te vullen
-function geldigeStemCupi($bericht,$afzender,$sid,&$naam,&$naam2) {
+function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 	$resultaat = sqlSel("Spelers","SPEL='$sid'");
-	$naam = false;
-	$naam2 = false;
+	$id1 = false;
+	$id2 = false;
 	$teller = 0;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
-		$naam = "blanco";
+		$id1 = -1;
 		return;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { //meerdere namen in bericht
-				if($naam2 != false) { //te veel namen!
-					$naam = false;
-					$naam2 = false;
+			if($id1 != false) { //meerdere namen in bericht
+				if($id2 != false) { //te veel namen!
+					$id1 = false;
+					$id2 = false;
 					return;
 				}
-				$naam2 = $speler['NAAM'];
+				$id2 = $speler['ID'];
 			}//if
 			else {
-				$naam = $speler['NAAM'];
+				$id1 = $speler['ID'];
 			}
 		}//if
 	}//while
 
-	if($naam != false && $naam2 != false) {
+	//check of spelers niet door andere Cupido's zijn aangewezen
+	if($id1 != false && $id2 != false) {
 		sqlData($resultaat,0);
 		while($speler = sqlFet($resultaat)) {
-			if($speler['ROL'] == "Cupido" && $speler['NAAM'] != $afzender) {
-				if($naam != false && ($naam == $speler['STEM'] || 
-					$naam == $speler['EXTRA_STEM'])) {
-					echo "$naam is al verliefd op iemand.\n";
-					$naam = false;
+			if($speler['ROL'] == "Cupido" && $speler['ID'] != $afzender) {
+				if($id1 != false && ($id1 == $speler['STEM'] || 
+					$id1 == $speler['EXTRA_STEM'])) {
+					echo "$id1 is al verliefd op iemand.\n";
+					$id1 = false;
 				}//if
-				if($naam2 != false && ($naam2 == $speler['STEM'] || 
-					$naam2 == $speler['EXTRA_STEM'])) {
-					echo "$naam2 is al verliefd op iemand.\n";
-					$naam2 = false;
+				if($id2 != false && ($id2 == $speler['STEM'] || 
+					$id2 == $speler['EXTRA_STEM'])) {
+					echo "$id2 is al verliefd op iemand.\n";
+					$id2 = false;
 				}//if
 			}//if
 		}//while
@@ -311,22 +330,22 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$naam,&$naam2) {
 //bij blanco, returned "blanco"
 //anders returned alle gevonden namen, met ","ertussen.
 function geldigeStemZonde($bericht,$sid) {
-	$stem = "";
+	$stem = false;
 	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
 	if(preg_match("/\bblanco\b/i",$bericht)) {
-		$stem = "blanco";
+		$stem = -1;
 	}
 	while($speler = sqlFet($resultaat)) {
-		$naam = $speler['NAAM'];
-		if(preg_match("/\b$naam\b/i",$bericht)) {
-			if($stem == "") {
-				$stem = $naam;
+		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
+		if(preg_match("$zoek",$bericht)) {
+			if($stem == false) {
+				$stem = $speler['ID'];
 			}
-			else if($stem == "blanco") {
+			else if($stem == -1) {
 				return false;
 			}
 			else{
-				$stem = $stem . ", $naam";
+				$stem = $stem . ", " . $speler['NAAM'];
 			}
 		}//if
 	}//while
@@ -334,16 +353,16 @@ function geldigeStemZonde($bericht,$sid) {
 }//geldigeStemZonde
 
 //checkt of de speler een dode Burgemeester is
-function isDodeBurg($naam,$sid) {
+function isDodeBurg($id,$sid) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND NIEUW_DOOD=1 AND NAAM IN 
+		"SPEL='$sid' AND NIEUW_DOOD=1 AND ID IN 
 		(SELECT BURGEMEESTER FROM Spellen WHERE SID='$sid')");
 	$burgemeester = sqlFet($resultaat);
-	return ($naam == $burgemeester['NAAM']);
+	return ($id == $burgemeester['ID']);
 }//dodeBurg
 
-function zetStem($naam,$stem,$sid,$plek) {
-	sqlUp("Spelers","$plek='$stem'","SPEL='$sid' AND NAAM='$naam'");
+function zetStem($id,$stem,$sid,$plek) {
+	sqlUp("Spelers","$plek='$stem'","SPEL='$sid' AND NAAM='$id'");
 	return;
 }//zetStem
 

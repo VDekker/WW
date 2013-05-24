@@ -21,7 +21,7 @@ function dbSluit() {
 function sqlQuery($sql) {
 	global $dbconnect;
 	$resultaat = mysqli_query($dbconnect,$sql) or 
-		die("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
 		mysqli_error($dbconnect));
 	return $resultaat;
 }//sqlQuery
@@ -33,7 +33,7 @@ function sqlUp($tabel,$waardes,$eisen) {
 		$sql .= " WHERE $eisen";
 	}
 	mysqli_query($dbconnect,$sql) or 
-		die("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
 		mysqli_error($dbconnect));
 	return;
 }//sqlUp
@@ -45,7 +45,7 @@ function sqlSel($tabel,$eisen) {
 		$sql .= " WHERE $eisen";
 	}
 	$resultaat = mysqli_query($dbconnect,$sql) or 
-		die("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
 		mysqli_error($dbconnect));
 	return $resultaat;
 }//sqlSel

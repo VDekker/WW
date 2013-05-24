@@ -116,7 +116,9 @@ function stuurStop($sid) {
 	$onderwerp = "$sid: Spel gestopt";
 	$bericht .= "Helaas is het mailspel $sid door het systeembeheer gestopt. ";
 	$bericht .= "Dit spel zal niet meer doorgaan, ";
-	$bericht .= "en hierover worden geen automatische mails meer verzonden.";
+	$bericht .= "en hierover worden geen automatische mails meer verzonden. ";
+	$bericht .= "Emails over dit spel zullen niet worden geparsed ";
+	$bericht .= "door het systeem.";
 	$bericht .= "<br /><br />";
 	$bericht .= "Excuses voor het ongemak.";
 	foreach($adressen as $adres) {
@@ -124,6 +126,79 @@ function stuurStop($sid) {
 	}
 	return;
 }//stuurStop
+
+function stuurPauze($sid) {
+	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$adressen = array();
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	if(empty($adressen)) {
+		echo "Niemand om te mailen.\n";
+		return;
+	}
+
+	$onderwerp = "$sid: Spel gepauzeerd";
+	$bericht .= "Het mailspel $sid is door het systeembeheer gepauzeerd. ";
+	$bericht .= "Als het spel wordt hervat, zal je hiervan worden bericht, ";
+	$bericht .= "maar tot die tijd worden hierover geen automatische mails ";
+	$bericht .= "meer verzonden. ";
+	$bericht .= "Emails over dit spel zullen niet worden geparsed ";
+	$bericht .= "door het systeem.";
+	$bericht .= "<br /><br />";
+	$bericht .= "Excuses voor het ongemak.";
+	foreach($adressen as $adres) {
+		stuurMail($adres,$onderwerp,$bericht);
+	}
+	return;
+}//stuurPauze
+
+function stuurHervat($sid) {
+	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$adressen = array();
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	if(empty($adressen)) {
+		echo "Niemand om te mailen.\n";
+		return;
+	}
+
+	$onderwerp = "$sid: Spel hervat";
+	$bericht .= "Het mailspel $sid gaat weer door. ";
+	$bericht .= "Vanaf nu begint het weer waar het was gebleven. ";
+	$bericht .= "Mails over dit spel worden weer geparsed.";
+	$bericht .= "<br /><br />";
+	$bericht .= "Nog veel speelplezier!";
+	foreach($adressen as $adres) {
+		stuurMail($adres,$onderwerp,$bericht);
+	}
+	return;
+}//stuurHervat
+
+function stuurFoutStop($adres,$sid) {
+	$onderwerp = "$sid: Mail niet gelezen";
+	$bericht .= "Het mailspel $sid is geeindigd. ";
+	$bericht .= "Jouw mailtje is dus niet gelezen, ";
+	$bericht .= "en wordt verder genegeerd.";
+	$bericht .= "<br /><br />";
+	$bericht .= "Excuses voor het ongemak.";
+	stuurMail($adres,$onderwerp,$bericht);
+	return;
+}//stuurFoutStop
+
+function stuurFoutPauze($adres,$sid) {
+	$onderwerp = "$sid: Mail niet gelezen";
+	$bericht .= "Het mailspel $sid is gepauzeerd. ";
+	$bericht .= "Jouw mailtje is dus niet gelezen, ";
+	$bericht .= "en wordt verder genegeerd, ";
+	$bericht .= "en hier wordt ook niets mee gedaan ";
+	$bericht .= "als het spel wordt hervat.";
+	$bericht .= "<br /><br />";
+	$bericht .= "Excuses voor het ongemak.";
+	stuurMail($adres,$onderwerp,$bericht);
+	return;
+}//stuurFoutPauze
 
 function stuurInschrijving($adres,$sid) {
 	global $thuis;

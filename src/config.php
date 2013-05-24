@@ -14,6 +14,12 @@ function config($adres,$onderwerp,$bericht) {
 	if(preg_match("/query/i",$onderwerp)) {
 		adminQuery($bericht,$adres);
 	}
+	if(preg_match("/pause/i",$onderwerp)) {
+		adminPause($bericht,$adres);
+	}
+	if(preg_match("/continue/i",$onderwerp)) {
+		adminContinue($bericht,$adres);
+	}
 	if(preg_match("/stop/i",$onderwerp)) {
 		adminStop($bericht,$adres);
 	}
@@ -68,6 +74,63 @@ function adminQuery($text,$adres) {
 	}//foreach
 	return;
 }//adminQuery
+
+function adminPause($text,$adres) {
+	$spellen = explode("\r\n",$text);
+	$resultaat = sqlSel("Spellen",NULL);
+	$vlag = false;
+	while($spel = sqlFet($resultaat)) {
+		$sid = $spel['SID'];
+		if(!in_array($sid,$spellen)) {
+			continue;
+		}
+		$vlag = true;
+		sqlUp("Spellen","PAUZE=1","SID='$sid'");
+		echo "Spel gepauzeerd: $sid.\n";
+		stuurPauze($sid);
+		$onderwerp = "Spel gepauzeerd: $sid";
+		$bericht = "Het spel $sid is met succes gepauzeerd, ";
+		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
+		stuurMail($adres,$onderwerp,$bericht);
+	}//while
+	if(!$vlag) {
+		echo "Geen spel gevonden.\n";
+		$onderwerp = "Spel pauzeren mislukt";
+		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht .= "er is geen enkel spel gepauzeerd.";
+		stuurMail($adres,$onderwerp,$bericht);
+	}
+	return;
+}//adminPause
+
+function adminContinue($text,$adres) {
+	$spellen = explode("\r\n",$text);
+	$resultaat = sqlSel("Spellen",NULL);
+	$vlag = false;
+	while($spel = sqlFet($resultaat)) {
+		$sid = $spel['SID'];
+		if(!in_array($sid,$spellen)) {
+			continue;
+		}
+		$vlag = true;
+		$datum = date_create(date('Y-m-d'));
+		sqlUp("Spellen","PAUZE=0,DUUR='$datum'","SID='$sid'");
+		echo "Spel hervat: $sid.\n";
+		stuurHervat($sid);
+		$onderwerp = "Spel hervat: $sid";
+		$bericht = "Het spel $sid is met succes hervat, ";
+		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
+		stuurMail($adres,$onderwerp,$bericht);
+	}//while
+	if(!$vlag) {
+		echo "Geen spel gevonden.\n";
+		$onderwerp = "Spel hervatten mislukt";
+		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht .= "er is geen enkel spel hervat.";
+		stuurMail($adres,$onderwerp,$bericht);
+	}
+	return;
+}//adminContinue
 
 function adminStop($text,$adres) {
 	$spellen = explode("\r\n",$text);
@@ -221,7 +284,7 @@ function adminPlayers($bericht,$adres) {
 			continue;
 		}
 		$vlag = true;
-		$sql = "SELECT NAAM,GESLACHT,EMAIL,TO_MAIL,LEVEND ";
+		$sql = "SELECT ID,NAAM,GESLACHT,EMAIL,TO_MAIL,LEVEND ";
 		$sql .= "FROM Spelers WHERE SPEL='$sid'";
 		$resultaat = sqlQuery($sql);
 		if(sqlNum($resultaat) == 0) {

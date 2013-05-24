@@ -4,7 +4,6 @@ require("config.php");
 require("dbFuncties.php");
 require("faseFuncties.php");
 require("fases.php");
-require("gmailConnect.php");
 require("gmailParse.php");
 require("parseFuncties.php");
 require("parseStem.php");

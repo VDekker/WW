@@ -148,6 +148,18 @@ function mailHeksWakker($sid) {
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+
+		//infodump: op wie kan de speler stemmen voor redden/vergiftigen:
+		$text .= "<br /><br />";
+		$text .= "Je kunt een van deze speler(s) tot leven wekken:<br />";
+		$text .= "<ul>";
+		foreach($namen as $key => $naam) {
+			if($key == 0 && !$speler['NIEUWDOOD']) {
+				continue;
+			}
+			$text .= "<li>$naam</li>";
+		}
+		$text .= "</ul>";
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -741,7 +753,18 @@ function mailZonde($naam,$slachtoffers,$sid) {
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];
 	$text = vulIn($namen,$rollen,$geslachten,"",$text,$geswoorden);
+	
 	//infodump: alle schuldige spelers
+	$text .= "<br /><br />";
+	$text .= "Je hebt schuldgevoel opgewekt in:<br />";
+	$text .= "<ul>";
+	foreach($namen as $key => $naam) {
+		if($key == 0) {
+			continue;
+		}
+		$text .= "<li>$naam</li>";
+	}
+	$text .= "</ul>";
 	$text = auteur($auteur,$text);
 
 	stuurMail($adres,$onderwerp,$text);
