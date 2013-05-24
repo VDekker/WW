@@ -41,20 +41,19 @@ function gmailParse() {
 				$resultaat = sqlSel("Spellen","");
 				$gevonden = false;
 				while($spel = sqlFet($resultaat)) {
-					$sid = $spel['SID'];
-					if(preg_match("/\b$sid\b/i",$onderwerp)) {
+					$snaam = $spel['SNAAM'];
+					if(preg_match("/\b$snaam\b/i",$onderwerp)) {
 						$gevonden = true;
 						break;
 					}
 				}//while
 				if($gevonden) { // als een speltitel in het onderwerp staat
-					$resultaat = sqlSel("Spellen","SID='$sid'");
-					$spel = sqlFet($resultaat);
+					$sid = $spel['SID'];
 					if($spel['GEWONNEN'] == 1) {
-						stuurFoutStop($adres,$sid);
+						stuurFoutStop($adres,$snaam);
 					}
 					else if ($spel['PAUZE'] == 1) {
-						stuurFoutPauze($adres,$sid);
+						stuurFoutPauze($adres,$snaam);
 					}
 					else {
 						$init = $spel['INIT'];
@@ -69,7 +68,7 @@ function gmailParse() {
 					}//else
 				}//if
 				else {
-					echo "Verkeerd onderwerp (geen SID herkend), ";
+					echo "Verkeerd onderwerp (geen spelnaam herkend), ";
 					echo "of verkeerd email-adres (geen afzender herkend).\n";
 					// je komt hier als:
 					// - email adres niet bekend in het spel

@@ -5,7 +5,7 @@
 //anders: schrijf opnieuw in
 function inschrijving($adres,$bericht,$sid) {
 	$vlag = false;
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND EMAIL='$adres'");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND EMAIL='$adres'");
 	if(sqlNum($resultaat) != 0) {
 		echo "Herinschrijving.\n";
 		$vlag = true;
@@ -41,20 +41,20 @@ function inschrijving($adres,$bericht,$sid) {
 		return false;
 	}
 	if($vlag) {
-		sqlUp("Spelers","NAAM='$naam',GESLACHT=$geslacht",
-			"SPEL='$sid' AND EMAIL='$adres'");
+		sqlUp("Spelers","NAAM='$naam',SPELERFLAGS=$geslacht",
+			"SPEL=$sid AND EMAIL='$adres'");
 	}
 	else {
-		$sql = "INSERT INTO Spelers(NAAM,GESLACHT,EMAIL,SPEL) 
-			VALUES ('$naam',$geslacht,'$adres','$sid')";
+		$sql = "INSERT INTO Spelers(NAAM,SPELERFLAGS,EMAIL,SPEL) 
+			VALUES ('$naam',$geslacht,'$adres',$sid)";
 		sqlQuery($sql);
-		$resultaat = sqlSel("Spellen","SID='$sid'");
+		$resultaat = sqlSel("Spellen","SID=$sid");
 		$spel = sqlFet($resultaat);
 		$levend = $spel['LEVEND'] + 1; //één extra speler
 		if($levend == $spel['MAX_SPELERS']) {
 			zetFase(2,$sid);
 		}
-		sqlUp("Spellen","LEVEND=$levend","SID='$sid'");
+		sqlUp("Spellen","LEVEND=$levend","SID=$sid");
 	}//else
 
 	return true;
@@ -64,14 +64,14 @@ function inschrijving($adres,$bericht,$sid) {
 // of "" als het adres niet bij het spel hoort.
 function spelerID($adres,$sid) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND EMAIL='$adres' AND LEVEND=1");
+		"SPEL=$sid AND EMAIL='$adres' AND LEVEND=1");
 	$speler = sqlFet($resultaat);
 	return $speler['ID'];
 }//spelerID
 
 //zet een stem van speler op NULL
 function zetStemNULL($id,$sid,$plek) {
-	sqlUp("Spelers","$plek=NULL","SPEL='$sid' AND NAAM='$id'");
+	sqlUp("Spelers","$plek=NULL","SPEL=$sid AND NAAM='$id'");
 	return;
 }//zetStemNULL
 
@@ -80,7 +80,7 @@ function zetStemNULL($id,$sid,$plek) {
 //Kijkt of er maar 1 naam in het bericht voorkomt, of 1 blanco; 
 //deze returned hij. Als er meerdere voorkomen, geeft dan FALSE.
 function geldigeStem($bericht,$sid,$levend) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=$levend");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=$levend");
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
 		$id = -1;
@@ -109,7 +109,7 @@ function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 	if($id == -1) {
 		return $id;
 	}
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] == $rol) {
 			if($id == $speler['STEM']) {
@@ -123,7 +123,7 @@ function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 
 function geldigeStemHeks($bericht,$sid,$nieuw) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND LEVEND=1 AND NIEUW_DOOD=$nieuw");
+		"SPEL=$sid AND LEVEND=1 AND NIEUW_DOOD=$nieuw");
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) {
 		$id = -1;
@@ -146,18 +146,18 @@ function geldigeStemHeks($bericht,$sid,$nieuw) {
 //of hij niet een ontdekte Dorpsgek is:
 //deze drie stemmen altijd blanco.
 function geldigeStemBrand($id,$bericht,$sid) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ID=$id");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ID=$id");
 	$speler = sqlFet($resultaat);
-	if($speler['GEK']) {
+	if(($speler['SPELFLAGS'] & 128) == 128) {
 		echo "Dorpsgek $id mag niet stemmen.\n";
 		return -1;
 	}
-	if($speler['SCHULD']) {
+	if(($speler['SPELFLAGS'] & 2) == 2) {
 		echo "$id voelt zich schuldig en mag niet stemmen.\n";
 		return -1;
 	}
 	$stem = geldigeStem($bericht,$sid,1);
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ROL='Schout'");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Schout'");
 	while($schout = sqlFet($resultaat)) {
 		if($schout['EXTRA_STEM'] == $id) {
 			echo "$id is opgesloten en mag niet stemmen.\n";
@@ -178,11 +178,11 @@ function geldigeStemWWVP($bericht,$sid,$rol) {
 		return $id;
 	}
 	if($rol == "Weerwolf") {
-		$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1 AND 
+		$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1 AND 
 			(ROL='Weerwolf' OR ROL='Witte Weerwolf')");
 	}
 	else {
-		$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1 AND 
+		$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1 AND 
 			ROL='Vampier'");
 	}
 	while($speler = sqlFet($resultaat)) {
@@ -198,7 +198,7 @@ function geldigeStemWWVP($bericht,$sid,$rol) {
 //Gebruikt call by reference om direct 2 stemmen te vullen
 function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND LEVEND=1 AND ROL<>'Fluitspeler'");
+		"SPEL=$sid AND LEVEND=1 AND ROL<>'Fluitspeler'");
 	$id1 = false;
 	$id2 = false;
 	$teller = 0;
@@ -227,7 +227,7 @@ function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 //checkt voor Goochelaar of de stem geldig is: spelers die leven. 
 //Gebruikt call by reference om direct 2 stemmen te vullen
 function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
 	$id1 = false;
 	$id2 = false;
 	$teller = 0;
@@ -279,7 +279,7 @@ function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
 //(niet meerdere geliefden voor één speler)
 //Gebruikt call by reference om direct 2 stemmen te vullen
 function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$resultaat = sqlSel("Spelers","SPEL=$sid");
 	$id1 = false;
 	$id2 = false;
 	$teller = 0;
@@ -331,7 +331,7 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 //anders returned alle gevonden namen, met ","ertussen.
 function geldigeStemZonde($bericht,$sid) {
 	$stem = false;
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
 	if(preg_match("/\bblanco\b/i",$bericht)) {
 		$stem = -1;
 	}
@@ -355,14 +355,14 @@ function geldigeStemZonde($bericht,$sid) {
 //checkt of de speler een dode Burgemeester is
 function isDodeBurg($id,$sid) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND NIEUW_DOOD=1 AND ID IN 
-		(SELECT BURGEMEESTER FROM Spellen WHERE SID='$sid')");
+		"SPEL=$sid AND NIEUW_DOOD=1 AND ID IN 
+		(SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
 	$burgemeester = sqlFet($resultaat);
 	return ($id == $burgemeester['ID']);
 }//dodeBurg
 
 function zetStem($id,$stem,$sid,$plek) {
-	sqlUp("Spelers","$plek='$stem'","SPEL='$sid' AND NAAM='$id'");
+	sqlUp("Spelers","$plek='$stem'","SPEL=$sid AND NAAM='$id'");
 	return;
 }//zetStem
 

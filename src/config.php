@@ -81,22 +81,23 @@ function adminPause($text,$adres) {
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!in_array($sid,$spellen)) {
+		$snaam = $spel['SNAAM'];
+		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","PAUZE=1","SID='$sid'");
-		echo "Spel gepauzeerd: $sid.\n";
+		sqlUp("Spellen","PAUZE=1","SID=$sid");
+		echo "Spel gepauzeerd: $snaam.\n";
 		stuurPauze($sid);
-		$onderwerp = "Spel gepauzeerd: $sid";
-		$bericht = "Het spel $sid is met succes gepauzeerd, ";
+		$onderwerp = "Spel gepauzeerd: $snaam";
+		$bericht = "Het spel $snaam is met succes gepauzeerd, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}//while
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel pauzeren mislukt";
-		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel gepauzeerd.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -109,23 +110,24 @@ function adminContinue($text,$adres) {
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!in_array($sid,$spellen)) {
+		$snaam = $spel['SNAAM'];
+		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
 		$vlag = true;
 		$datum = date_create(date('Y-m-d'));
-		sqlUp("Spellen","PAUZE=0,DUUR='$datum'","SID='$sid'");
-		echo "Spel hervat: $sid.\n";
+		sqlUp("Spellen","PAUZE=0,DUUR='$datum'","SID=$sid");
+		echo "Spel hervat: $snaam.\n";
 		stuurHervat($sid);
-		$onderwerp = "Spel hervat: $sid";
-		$bericht = "Het spel $sid is met succes hervat, ";
+		$onderwerp = "Spel hervat: $snaam";
+		$bericht = "Het spel $snaam is met succes hervat, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}//while
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel hervatten mislukt";
-		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel hervat.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -138,22 +140,23 @@ function adminStop($text,$adres) {
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!in_array($sid,$spellen)) {
+		$snaam = $spel['SNAAM'];
+		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","GEWONNEN=1,FASE=99","SID='$sid'");
-		echo "Spel gestopt: $sid.\n";
+		sqlUp("Spellen","GEWONNEN=1,FASE=99","SID=$sid");
+		echo "Spel gestopt: $snaam.\n";
 		stuurStop($sid);
-		$onderwerp = "Spel gestopt: $sid";
-		$bericht = "Het spel $sid is met succes gestopt, ";
+		$onderwerp = "Spel gestopt: $snaam";
+		$bericht = "Het spel $snaam is met succes gestopt, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}//while
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel stoppen mislukt";
-		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel gestopt.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -166,31 +169,32 @@ function adminDelete($text,$adres) {
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!in_array($sid,$spellen)) {
+		$snaam = $spel['SNAAM'];
+		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
 		$vlag = true;
 		if($spel['GEWONNEN'] == false) {
-			echo "Spel is nog bezig, kan niet worden verwijderd: $sid.\n";
-			$onderwerp = "Verwijdering mislukt: $sid";
-			$bericht = "Spel $sid is nog bezig ";
+			echo "Spel is nog bezig, kan niet worden verwijderd: $snaam.\n";
+			$onderwerp = "Verwijdering mislukt: $snaam";
+			$bericht = "Spel $snaam is nog bezig ";
 			$bericht .= "en kan niet worden verwijderd.";
 			$bericht .= "Om het toch te verwijderen, ";
 			$bericht .= "moet het eerst stopgezet worden.";
 			stuurMail($adres,$onderwerp,$bericht);
 			continue;
 		}
-		$sql = "DELETE FROM Spellen WHERE SID='$sid'";
+		$sql = "DELETE FROM Spellen WHERE SID=$sid";
 		sqlQuery($sql);
-		echo "Spel verwijderd: $sid.\n";
-		$onderwerp = "Spel verwijderd: $sid";
-		$bericht = "Spel $sid is met succes van de database verwijderd.";
+		echo "Spel verwijderd: $snaam.\n";
+		$onderwerp = "Spel verwijderd: $snaam";
+		$bericht = "Spel $snaam is met succes van de database verwijderd.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}//while
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel verwijderen mislukt";
-		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel verwijderd.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -201,15 +205,15 @@ function adminStart($text,$adres) {
 	global $thuis;
 
 	$details = explode("\r\n",$text);
-	$sid = $details[0];
+	$snaam = $details[0];
 	$max = intval($details[1]);
 	$snel = intval($details[2]);
 	$streng = intval($details[3]);
 	$thema = $details[4];
-	if(empty($sid) || !is_string($sid)) {
-		echo "Geen SID gevonden: fout\n";
+	if(empty($snaam) || !is_string($snaam)) {
+		echo "Geen spelnaam gevonden: fout\n";
 		$onderwerp = "Spel aanmaken mislukt";
-		$bericht = "Om een spel aan te maken moet een SID gegeven worden, ";
+		$bericht = "Om een spel aan te maken moet een spelnaam gegeven worden, ";
 		$bericht .= "en eventueel een MAX_SPELERS, SNELHEID, STRENGHEID ";
 		$bericht .= "en THEMA (in deze volgorde, gescheiden door [enter]). ";
 		$bericht .= "Probeer het nog eens.";
@@ -230,12 +234,12 @@ function adminStart($text,$adres) {
 	if(empty($thema) || !is_string($thema)) {
 		$thema = "default";
 	}
-	$sql = "INSERT INTO Spellen(SID,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
-	$sql .= "VALUES ('$sid',$max,$snel,$streng,'$thema')";
+	$sql = "INSERT INTO Spellen(SNAAM,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
+	$sql .= "VALUES ('$snaam',$max,$snel,$streng,'$thema')";
 	sqlQuery($sql);
-	echo "Spel gemaakt: $sid.\n";
-	$onderwerp = "Spel aangemaakt: $sid";
-	$bericht = "Spel $sid is met succes aangemaakt:<br />";
+	echo "Spel gemaakt: $snaam.\n";
+	$onderwerp = "Spel aangemaakt: $snaam";
+	$bericht = "Spel $snaam is met succes aangemaakt:<br />";
 	$bericht .= "<br />";
 	$bericht .= "Maximaal aantal spelers = $max<br />";
 	$bericht .= "Snelheid = $snel<br />";
@@ -246,8 +250,11 @@ function adminStart($text,$adres) {
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,0);
 	}
+	$resultaat = sqlSel("Spellen","SNAAM='$snaam'");
+	$spel = sqlFet($resultaat);
+	$sid = $spel['SID'];
 	$deadline = geefDeadline($sid);
-	$onderwerp = "Uitnodiging: $sid";
+	$onderwerp = "Uitnodiging: $snaam";
 	$bericht = "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
 	$bericht .= "het zal beginnen op $deadline. ";
 	$bericht .= "Als je wilt meedoen met het spel, schrijf je dan in ";
@@ -256,7 +263,7 @@ function adminStart($text,$adres) {
 	$bericht .= "gescheiden door een komma.<br />";
 	$bericht .= "<br />";
 	$bericht .= "<u>Speldetails:</u><br />";
-	$bericht .= "Spelnaam: $sid<br />";
+	$bericht .= "Spelnaam: $snaam<br />";
 	$bericht .= "Maximaal aantal spelers: $max<br />";
 	$bericht .= "Duur van een stemronde: $snel ";
 	$bericht .= ($snel == 1) ? "dag" : "dagen";
@@ -280,28 +287,29 @@ function adminPlayers($bericht,$adres) {
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!in_array($sid,$spellen)) {
+		$snaam = $spel['SNAAM'];
+		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
 		$vlag = true;
-		$sql = "SELECT ID,NAAM,GESLACHT,EMAIL,TO_MAIL,LEVEND ";
-		$sql .= "FROM Spelers WHERE SPEL='$sid'";
+		$sql = "SELECT ID,NAAM,SPELERFLAGS,EMAIL,LEVEND ";
+		$sql .= "FROM Spelers WHERE SPEL=$sid";
 		$resultaat = sqlQuery($sql);
 		if(sqlNum($resultaat) == 0) {
-			echo "Geen spelers in spel $sid.\n";
+			echo "Geen spelers in spel $snaam.\n";
 			$onderwerp = "Spelers zoeken mislukt";
-			$bericht = "Spel $sid heeft geen spelers; ";
+			$bericht = "Spel $snaam heeft geen spelers; ";
 			$bericht .= "zo zijn er geen spelers gevonden.";
 			stuurMail($adres,$onderwerp,$bericht);
 			continue;
 		}
-		echo "Spelers van spel $sid verzonden.\n";
+		echo "Spelers van spel $snaam verzonden.\n";
 		stuurResultaatHTML($adres,$resultaat);
 	}//while
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spelers zoeken mislukt";
-		$bericht = "Er is geen geldige SID gevonden in jouw bericht; ";
+		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "geen enkele speler is gevonden.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -313,30 +321,44 @@ function adminNoMail($bericht,$adres) {
 	$resultaat = sqlSel("Spellen",NULL);
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
-		if(!strstr($bericht,$sid)) {
+		$snaam = $spel['SNAAM'];
+		if(!strstr($bericht,$snaam)) {
 			continue;
 		}
-		$resultaat2 = sqlSel("Spelers","SPEL='$sid' AND LEVEND=0");
+		$resultaat2 = sqlSel("Spelers","SPEL=$sid AND LEVEND=0");
 		while($speler = sqlFet($resultaat)) {
 			$naam = $speler['NAAM'];
 			if(!strstr($bericht,$naam)) {
 				continue;
 			}
 			$vlag = true;
-			sqlUp("Spelers","TO_MAIL=0","SPEL='$sid' AND NAAM='$naam'");
-			echo "$sid: $naam ontvangt geen mails meer.\n";
+			$id = $speler['ID'];
+			$resultaat = sqlSel("Spelers","ID=$id");
+			$speler = sqlFet($resultaat);
+			$spelerflag = $speler['SPELERFLAGS'];
+			if(!($spelerflag & 2)) {
+				echo "$snaam: $naam ontving al geen mails meer";
+				$onderwerp = "$naam: uit maillijst";
+				$bericht = "$naam in spel $snaam was al uit de maillijst ";
+				$bericht .= "gehaalt.";
+				stuurMail($adres,$onderwerp,$bericht);
+				continue;
+			}
+			$spelerflag -= 2;
+			sqlUp("Spelers","SPELERFLAGS=$spelerflag","ID=$id");
+			echo "$snaam: $naam ontvangt geen mails meer.\n";
 			$onderwerp = "$naam: uit maillijst";
-			$bericht = "$naam in spel $sid is uit de maillijst gehaald, ";
+			$bericht = "$naam in spel $snaam is uit de maillijst gehaald, ";
 			$bericht .= "en zal geen mails van dit spel meer ontvangen.";
 			stuurMail($adres,$onderwerp,$bericht);
 		}//while
-		echo "Geen speler in spel $sid gevonden.\n";
+		echo "Geen speler in spel $snaam gevonden.\n";
 	}//while
 	if(!$vlag) {
 		echo "Geen speler/spel-combinatie gevonden.\n";
 		$onderwerp = "Verwijderen uit maillijst mislukt";
 		$bericht = "Er is geen speler uit de maillijst gehaald. ";
-		$bericht .= "Zijn de SID en speler-naam goed gespeld, ";
+		$bericht .= "Zijn de spelnaam en speler-naam goed gespeld, ";
 		$bericht .= "en is de speler dood?";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
@@ -374,7 +396,8 @@ function adminStory($bericht,$adres) {
 		$verhaal = sqlEscape($onderdelen[4]);
 		$geslacht = ($onderdelen[5] == "NULL") ? 
 			"NULL" : "'" . sqlEscape($onderdelen[5]) . "'";
-		if(empty($rol) || ($fase == 0 && $onderdelen[1] != "0") || empty($verhaal)) {
+		if(empty($rol) || ($fase == 0 && $onderdelen[1] != "0") || 
+			empty($verhaal)) {
 			echo "Fout: rol, fase of verhaal ontbreekt.\n";
 			continue;
 		}

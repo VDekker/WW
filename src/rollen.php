@@ -31,14 +31,15 @@ function verdeelRol($sid) {
 		"Opdrachtgever",
 		"Dief",
 		"Waarschuwer");
-	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$resultaat = sqlSel("Spelers","SPEL=$sid");
 	while($speler = sqlFet($resultaat)) {
-		array_push($alleSpelers,$speler['NAAM']);
+		array_push($alleSpelers,$speler['ID']);
 	}
 	$aantal = count($alleSpelers);
 	$resultaat = sqlSel("Rollen","AANTAL='$aantal'");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen rolverdeling voor speleraantal $aantal.\n";
+		//TODO mail admins van deze fout
 		return false;
 	}
 	while($rolverdeling = sqlFet($resultaat)) {
@@ -53,35 +54,30 @@ function verdeelRol($sid) {
 		$burgemeester = "NULL";
 	}
 	else {
-		$burgemeester = "'blanco'";
+		$burgemeester = -1;
 	}
-	sqlUp("Spellen","LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester","SID='$sid'");
+	sqlUp("Spellen",
+		"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",
+		"SID=$sid");
 	$teller = 0;
 	for($i = 0; $i < count($rollen); $i++) {
 		while($rollen[$i] > 0) {
 			$dezeSpeler = $alleSpelers[$teller];
 			$rol = $lijst[$i];
-			$drank = "NULL";
+			$spelflags = 0;
 			if($rol == "Heks") {
-				$drank = 3;
+				$spelflags = 48; //beide drankjes
 			}
-			sqlUp("Spelers","ROL='$rol',HEKS_DRANK=$drank","SPEL='$sid' AND NAAM='$dezeSpeler'");
+			else if($rol == "Dorpsoudste") {
+				$spelflags = 64; //extra leven
+			}
+			sqlUp("Spelers","ROL='$rol',SPELFLAGS=$spelflags",
+				"SPEL=$sid AND ID=$dezeSpeler");
 			echo "$dezeSpeler is nu een $rol.\n";
 			$teller++;
 			$rollen[$i]--;
 		}
 	}//for
-
-	/*
-	//vals spelen: Jenneke en Victor zijn nooit Burgers!
-	$resultaat = sqlSel("Spelers",
-		"SPEL='$sid' AND (NAAM='Jenneke' OR NAAM='Victor')");
-	while($cheater = sqlFet($resultaat)) {
-		if($cheater['ROL'] == "Burger") {
-			verdeelRol($sid);
-		}
-	}//while
-	*/
 	
 	return;
 }//verdeelRol

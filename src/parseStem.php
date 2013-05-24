@@ -5,7 +5,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 	$init,$fase,$tweede,$max) {
 
 	global $thuis;
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND ID=$id");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ID=$id");
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
@@ -239,14 +239,14 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 			case 8:
 				if($rol == "Heks") {
 					$resultaat = sqlSel("Spelers",
-						"SPEL='$sid' AND ID=$id");
+						"SPEL=$sid AND ID=$id");
 					$heks = sqlFet($resultaat);
-					$drank = $heks['HEKS_DRANK'];
+					$drank = $heks['SPELFLAGS'];
 					$flag = 0; //houdt de keuze bij: voor mailen
 					$stem = geldigeStemHeks($bericht,$sid,1);
 					$stem2 = geldigeStemHeks($bericht,$sid,0);
 					if($stem != false && 
-						($stem == -1 || (($drank & 1) == 1))) {
+						($stem == -1 || (($drank & 16) == 16))) {
 						zetStem($id,$stem,$sid,"STEM");
 						$flag += 1;
 						//TODO mail
@@ -256,7 +256,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 						zetStemNULL($id,$sid,"STEM");
 					}
 					if($stem2 != false && $stem2 != $id && 
-						($stem2 == -1 || (($drank & 2) == 2))) {
+						($stem2 == -1 || (($drank & 32) == 32))) {
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
 						$flag += 2;
 						//TODO mail
@@ -266,9 +266,9 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 						zetStemNULL($id,$sid,"EXTRA_STEM");
 					}
 					if(($stem == false || 
-						($drank & 1 != 1)) && 
+						($drank & 16 != 16)) && 
 						($stem2 == false || $stem2 == $id || 
-						($drank & 2 != 2))) {
+						($drank & 32 != 32))) {
 						echo "Error: geen goede stem gevonden...\n";
 						stuurFoutStem($naam,$adres,$sid);
 					}
@@ -342,7 +342,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
-				else if($rol == "Jager" && isNieuwDood($id,$sid)) {
+				else if($rol == "Jager" && isNieuwDood($id)) {
 					$stem = geldigeStem($bericht,$sid,1);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
@@ -384,7 +384,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 				}
 				break;
 			case 18:
-				if($rol == "Jager" && isNieuwDood($id,$sid)) {
+				if($rol == "Jager" && isNieuwDood($id)) {
 					$stem = geldigeStem($bericht,$sid,1);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
@@ -396,7 +396,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
-				else if($rol == "Zondebok" && isNieuwDood($id,$sid)) {
+				else if($rol == "Zondebok" && isNieuwDood($id)) {
 					$stem = geldigeStemZonde($bericht,$sid);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");

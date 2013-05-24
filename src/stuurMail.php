@@ -103,7 +103,10 @@ function stuurResultaatHTML($adres,$resultaat) {
 }//stuurResultaatHTML
 
 function stuurStop($sid) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$resultaat = sqlSel("Spelers","SPEL=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -113,8 +116,8 @@ function stuurStop($sid) {
 		return;
 	}
 
-	$onderwerp = "$sid: Spel gestopt";
-	$bericht .= "Helaas is het mailspel $sid door het systeembeheer gestopt. ";
+	$onderwerp = "$snaam: Spel gestopt";
+	$bericht .= "Helaas is het mailspel $snaam door het systeembeheer gestopt. ";
 	$bericht .= "Dit spel zal niet meer doorgaan, ";
 	$bericht .= "en hierover worden geen automatische mails meer verzonden. ";
 	$bericht .= "Emails over dit spel zullen niet worden geparsed ";
@@ -128,7 +131,10 @@ function stuurStop($sid) {
 }//stuurStop
 
 function stuurPauze($sid) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$resultaat = sqlSel("Spelers","SPEL=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -138,8 +144,8 @@ function stuurPauze($sid) {
 		return;
 	}
 
-	$onderwerp = "$sid: Spel gepauzeerd";
-	$bericht .= "Het mailspel $sid is door het systeembeheer gepauzeerd. ";
+	$onderwerp = "$snaam: Spel gepauzeerd";
+	$bericht .= "Het mailspel $snaam is door het systeembeheer gepauzeerd. ";
 	$bericht .= "Als het spel wordt hervat, zal je hiervan worden bericht, ";
 	$bericht .= "maar tot die tijd worden hierover geen automatische mails ";
 	$bericht .= "meer verzonden. ";
@@ -154,7 +160,10 @@ function stuurPauze($sid) {
 }//stuurPauze
 
 function stuurHervat($sid) {
-	$resultaat = sqlSel("Spelers","SPEL='$sid'");
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$resultaat = sqlSel("Spelers","SPEL=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -164,8 +173,8 @@ function stuurHervat($sid) {
 		return;
 	}
 
-	$onderwerp = "$sid: Spel hervat";
-	$bericht .= "Het mailspel $sid gaat weer door. ";
+	$onderwerp = "$snaam: Spel hervat";
+	$bericht .= "Het mailspel $snaam gaat weer door. ";
 	$bericht .= "Vanaf nu begint het weer waar het was gebleven. ";
 	$bericht .= "Mails over dit spel worden weer geparsed.";
 	$bericht .= "<br /><br />";
@@ -176,9 +185,9 @@ function stuurHervat($sid) {
 	return;
 }//stuurHervat
 
-function stuurFoutStop($adres,$sid) {
-	$onderwerp = "$sid: Mail niet gelezen";
-	$bericht .= "Het mailspel $sid is geeindigd. ";
+function stuurFoutStop($adres,$snaam) {
+	$onderwerp = "$snaam: Mail niet gelezen";
+	$bericht .= "Het mailspel $snaam is geeindigd. ";
 	$bericht .= "Jouw mailtje is dus niet gelezen, ";
 	$bericht .= "en wordt verder genegeerd.";
 	$bericht .= "<br /><br />";
@@ -187,9 +196,9 @@ function stuurFoutStop($adres,$sid) {
 	return;
 }//stuurFoutStop
 
-function stuurFoutPauze($adres,$sid) {
-	$onderwerp = "$sid: Mail niet gelezen";
-	$bericht .= "Het mailspel $sid is gepauzeerd. ";
+function stuurFoutPauze($adres,$snaam) {
+	$onderwerp = "$snaam: Mail niet gelezen";
+	$bericht .= "Het mailspel $snaam is gepauzeerd. ";
 	$bericht .= "Jouw mailtje is dus niet gelezen, ";
 	$bericht .= "en wordt verder genegeerd, ";
 	$bericht .= "en hier wordt ook niets mee gedaan ";
@@ -202,16 +211,19 @@ function stuurFoutPauze($adres,$sid) {
 
 function stuurInschrijving($adres,$sid) {
 	global $thuis;
-	$resultaat = sqlSel("Spelers","SPEL='$sid' AND EMAIL='$adres'");
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND EMAIL='$adres'");
 	$speler = sqlFet($resultaat);
 	$naam = $speler['NAAM'];
-	$geslacht = ($speler['GESLACHT']) ? "Man" : "Vrouw";
+	$geslacht = ($speler['SPELERFLAGS'] & 1) ? "Man" : "Vrouw";
 	$adres2 = htmlentities($adres);
-	$onderwerp = "Inschrijving: $sid";
+	$onderwerp = "Inschrijving: $snaam";
 	
 	$bericht = "De inschrijving is ontvangen. ";
 	$bericht .= "Controleer aub de volgende gegevens: <br />";
-	$bericht .= "Spel: $sid <br />";
+	$bericht .= "Spel: $snaam <br />";
 	$bericht .= "Naam: $naam <br />";
 	$bericht .= "Geslacht: $geslacht <br />";
 	$bericht .= "Email-adres: $adres2 <br />";
@@ -229,7 +241,10 @@ function stuurInschrijving($adres,$sid) {
 
 function stuurInschrijvingFout($adres,$sid) {
 	global $thuis;
-	$onderwerp = "$sid: Inschrijving mislukt";
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Inschrijving mislukt";
 	
 	$bericht = "Jouw inschrijving is fout gegaan. ";
 	$bericht .= "Probeer het nog eens door een bericht te sturen naar: ";
@@ -249,7 +264,10 @@ function stuurInschrijvingFout($adres,$sid) {
 //als een stem goed ontvangen/geparsed is: stuur bericht terug naar de speler
 function stuurStem($naam,$adres,$stem,$sid) {
 	global $thuis;
-	$onderwerp = "$sid: Stem ontvangen";
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Stem ontvangen";
 	
 	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
@@ -270,7 +288,10 @@ function stuurStem($naam,$adres,$stem,$sid) {
 //stuur bericht naar de speler
 function stuurStem2($naam,$adres,$stem,$stem2,$sid) {
 	global $thuis;
-	$onderwerp = "$sid: Stem ontvangen";
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Stem ontvangen";
 	
 	$bericht .= "Hallo $naam,<br />";
 	$bericht .= "<br />";
@@ -290,7 +311,10 @@ function stuurStem2($naam,$adres,$stem,$stem2,$sid) {
 //als een mail binnen is gekomen wanneer een speler niet aan de beurt komt
 function houJeMond($naam,$adres,$sid) {
 	global $thuis;
-	$onderwerp = "$sid: Stemmen mislukt";
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Stemmen mislukt";
 	
 	$bericht .= "Hallo $naam,<br />";
 	$bericht .= "<br />";
@@ -337,7 +361,10 @@ function stuurFoutAdres($adres) {
 
 function stuurFoutStem($naam,$adres,$sid) {
 	global $thuis;
-	$onderwerp = "$sid: Fout bij stemmen";
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Fout bij stemmen";
 	
 	$bericht .= "Hallo $naam,<br />";
 	$bericht .= "<br />";

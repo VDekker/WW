@@ -2,7 +2,6 @@
 
 function fases() {
 	$resultaat = sqlSel("Spellen","");
-	echo "Fases begonnen.\n";
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
 		if($spel['GEWONNEN'] == 1 || $spel['PAUZE'] == 1) { // dit werkt niet in query
 			continue;
@@ -301,7 +300,7 @@ function fases() {
 						regelDood2($sid,10);
 						regelZetNULL1($sid);
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","GEWONNEN=1","SID='$sid'");
+							sqlUp("Spellen","GEWONNEN=1","SID=$sid");
 							//stuur mails
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
@@ -366,7 +365,7 @@ function fases() {
 					regelDood2($sid,17);
 					if(geefFase($sid) == 20) {
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","GEWONNEN=1","SID='$sid'");
+							sqlUp("Spellen","GEWONNEN=1","SID=$sid");
 							//mail gewonnen
 						}
 						//mail algemeen (brandstapel)

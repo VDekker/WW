@@ -2,10 +2,6 @@
      TODO:
 ===============
 
-  * Opschonen:  isLevend, isNieuwDood, heeftRol, verwijderStem, stemGemist, wordtWakker, beschermd, zetDood, herleef, vermoord, isGewaarschuwd, isOpgesloten, isBeschuldigd, stemWaarde, gewonnenSpeler, zetStemNULL, geldigeStemBrand krijgen een speler ID ipv. naam
-  * Opschonen:  blanco => -1
-  * Opschonen:  nog te doen: vanaf regelRollen en voorts
-
   * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
                 aangevallen? (documenteer dit!)
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
@@ -13,7 +9,10 @@
   * Opmerking:  wat gebeurt er met vorige_stem als de stem NULL was? (fix dit)
   * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
                 opeten
+  * Opmerking:  wat als de Fluitspelers allemaal op 1 dezelfde speler stemmen?
+                (en als de WW/VP dit doen?)
 
+  * Testen:  werkt alles nog na schoonmaken?
   * Testen:  kan een spel winnen?
   * Testen:  mails
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
@@ -27,14 +26,21 @@
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen en begin
+  
+  * Regelen: Jager niet wakker maken als hij al geschoten heeft (SPELFLAGS 4)
 
+  * Verhaal: bij rollen mailen; eerst specifieke rol checken en daarvoor mailen,
+             als geen verhaal voor die rol: algemene rol checken
+             als dan nog geen verhaal: default beide stappen
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
 
   * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
              (zelfde voor SID).
   * Nodig:   alle TODO's afhandelen
+  * Nodig:   als error: stuur admins en ZET OP PAUZE
 
+  * Extra:   nieuwe tabellen documenteren (de flags)
   * Extra:   anonieme help maken? (is dat de moeite waard?)
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)
@@ -51,6 +57,8 @@
   * Extra:   lijst van keuzes aan speler mailen (handig)
   * Extra:   stemWaarde verbeteren: check op burgemeester kan beter
              (hetzelfde voor isDodeBurg)
+  * Extra:   isGewaarschuwd, beschermd, isOpgesloten etc. herschrijven:
+             query of er spelers zijn met juiste rol, en target in stem/extra
 
 
 ==========================================
