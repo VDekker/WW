@@ -62,9 +62,10 @@ function inschrijving($adres,$bericht,$sid) {
 
 // geeft naam van speler gebaseerd op email adres en spel,
 // of "" als het adres niet bij het spel hoort.
+// Speler moet levend zijn, anders niet.
 function spelerID($adres,$sid) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL=$sid AND EMAIL='$adres' AND LEVEND=1");
+		"SPEL=$sid AND EMAIL='$adres' AND ((LEVEND & 1) = 1)");
 	$speler = sqlFet($resultaat);
 	return $speler['ID'];
 }//spelerID
@@ -80,7 +81,7 @@ function zetStemNULL($id,$sid,$plek) {
 //Kijkt of er maar 1 naam in het bericht voorkomt, of 1 blanco; 
 //deze returned hij. Als er meerdere voorkomen, geeft dan FALSE.
 function geldigeStem($bericht,$sid,$levend) {
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=$levend");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1)=$levend)");
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
 		$id = -1;
@@ -109,7 +110,7 @@ function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 	if($id == -1) {
 		return $id;
 	}
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] == $rol) {
 			if($id == $speler['STEM']) {
@@ -121,9 +122,11 @@ function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 	return $id;
 }//geldigeStemVerleidOpdracht
 
-function geldigeStemHeks($bericht,$sid,$nieuw) {
+//checkt of de stem geldig is:
+//$nieuw kan 3 (dode speler redden) zijn of 1 (levende speler doden)
+function geldigeStemHeks($bericht,$sid,$levend) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL=$sid AND LEVEND=1 AND NIEUW_DOOD=$nieuw");
+		"SPEL=$sid AND LEVEND=$levend");
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) {
 		$id = -1;
@@ -178,11 +181,11 @@ function geldigeStemWWVP($bericht,$sid,$rol) {
 		return $id;
 	}
 	if($rol == "Weerwolf") {
-		$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1 AND 
+		$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1) = 1) AND 
 			(ROL='Weerwolf' OR ROL='Witte Weerwolf')");
 	}
 	else {
-		$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1 AND 
+		$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1) = 1) AND 
 			ROL='Vampier'");
 	}
 	while($speler = sqlFet($resultaat)) {
@@ -198,7 +201,7 @@ function geldigeStemWWVP($bericht,$sid,$rol) {
 //Gebruikt call by reference om direct 2 stemmen te vullen
 function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL=$sid AND LEVEND=1 AND ROL<>'Fluitspeler'");
+		"SPEL=$sid AND ((LEVEND & 1) = 1) AND ROL<>'Fluitspeler'");
 	$id1 = false;
 	$id2 = false;
 	$teller = 0;
@@ -227,7 +230,7 @@ function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 //checkt voor Goochelaar of de stem geldig is: spelers die leven. 
 //Gebruikt call by reference om direct 2 stemmen te vullen
 function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1) = 1)");
 	$id1 = false;
 	$id2 = false;
 	$teller = 0;
@@ -331,7 +334,7 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 //anders returned alle gevonden namen, met ","ertussen.
 function geldigeStemZonde($bericht,$sid) {
 	$stem = false;
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ((LEVEND & 1) = 1)");
 	if(preg_match("/\bblanco\b/i",$bericht)) {
 		$stem = -1;
 	}
@@ -355,7 +358,7 @@ function geldigeStemZonde($bericht,$sid) {
 //checkt of de speler een dode Burgemeester is
 function isDodeBurg($id,$sid) {
 	$resultaat = sqlSel("Spelers",
-		"SPEL=$sid AND NIEUW_DOOD=1 AND ID IN 
+		"SPEL=$sid AND ((LEVEND & 2) = 2) AND ID IN 
 		(SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
 	$burgemeester = sqlFet($resultaat);
 	return ($id == $burgemeester['ID']);

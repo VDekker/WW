@@ -37,7 +37,7 @@ function mailWakker($rol,$sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
 	$thema = $spel['THEMA'];
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='$rol' AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='$rol' AND ((LEVEND & 1) = 1)");
 	if($rol == "Dwaas") {
 		$rol = "Ziener";
 	}
@@ -78,12 +78,12 @@ function mailGroepWakker($rol,$sid) {
 	$adressen = array();
 	if($rol == "Weerwolf") {
 		$resultaat = sqlSel("Spelers",
-			"SPEL=$sid AND LEVEND=1 AND 
+			"SPEL=$sid AND ((LEVEND & 1) = 1) AND 
 			(ROL='Weerwolf' OR ROL='Witte Weerwolf')");
 	}
 	else {
 		$resultaat = sqlSel("Spelers",
-			"SPEL=$sid AND LEVEND=1 AND ROL='$rol'");
+			"SPEL=$sid AND ((LEVEND & 1) = 1) AND ROL='$rol'");
 	}
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen levende $rol te bekennen.\n";
@@ -133,7 +133,7 @@ function mailHeksWakker($sid) {
 	$namen = array(); // vul een array van slachtoffers
 	$rollen = array();
 	$geslachten = array();
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=1 AND NIEUW_DOOD=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND LEVEND=3");
 	while($speler = sqlFet($resultaat)) {
 		array_push($namen,$speler['NAAM']);
 		array_push($rollen,$speler['ROL']);
@@ -141,7 +141,7 @@ function mailHeksWakker($sid) {
 		array_push($geslachten,$geslacht);
 	}
 
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Heks' AND LEVEND=1");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Heks' AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		if(!wordtWakker($speler['ID'],$sid)) {
 			continue;

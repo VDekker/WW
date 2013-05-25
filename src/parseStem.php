@@ -243,8 +243,8 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 					$heks = sqlFet($resultaat);
 					$drank = $heks['SPELFLAGS'];
 					$flag = 0; //houdt de keuze bij: voor mailen
-					$stem = geldigeStemHeks($bericht,$sid,1);
-					$stem2 = geldigeStemHeks($bericht,$sid,0);
+					$stem = geldigeStemHeks($bericht,$sid,3);//dode speler redden
+					$stem2 = geldigeStemHeks($bericht,$sid,1);//levende vergiftigen
 					if($stem != false && 
 						($stem == -1 || (($drank & 16) == 16))) {
 						zetStem($id,$stem,$sid,"STEM");
