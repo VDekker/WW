@@ -34,9 +34,8 @@
              als dan nog geen verhaal: default beide stappen
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
+  * Verhaal: tabel Themas maken (foreign keys zorgen voor stabiele code)
 
-  * Nodig:   bij "Geliefde","Stem" etc, ipv. VARCHAR een INT met ID van speler
-             (zelfde voor SID).
   * Nodig:   alle TODO's afhandelen
   * Nodig:   als error: stuur admins en ZET OP PAUZE
 
@@ -683,9 +682,10 @@ Raaf:               0 = Wakker worden
                     1 = Zelf beschuldigd
                     2 = Speler beschuldigd
                     9 = Blanco gestemd
-Jager:              0 = Wakker worden
-                    1 = Speler neergeschoten, nacht
-                    2 = Speler neergeschoten, dag
+Jager:              0 = Wakker worden, nacht
+                    1 = Wakker worden, dag
+                    2 = Speler neergeschoten, nacht
+                    3 = Speler neergeschoten, dag
                     9 = Blanco gestemd
 Burgemeester:       0 = Wakker worden
 (testament)         1 = Speler gekozen

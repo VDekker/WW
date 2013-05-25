@@ -141,7 +141,8 @@ function mailHeksWakker($sid) {
 		array_push($geslachten,$geslacht);
 	}
 
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Heks' AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Heks' AND 
+		((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		if(!wordtWakker($speler['ID'],$sid)) {
 			continue;
@@ -178,6 +179,37 @@ function mailHeksWakker($sid) {
 	}//while
 	return;
 }//mailHeksWakker
+
+//mailt alle overleden jagers wakker die niet geschoten hebben
+function mailJagerWakker($fase,$sid) {
+	$onderwerp = "$sid: Actie";
+	$deadline = geefDeadline($sid);
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$thema = $spel['THEMA'];
+
+	$resultaat = sqlSel("Spelers","SPEL=$sid AND ROL='Jager' AND 
+		((LEVEND & 2) = 2) AND ((SPELFLAGS & 4) = 0)");
+	while($speler = sqlFet($resultaat)) {
+		if(!wordtWakker($speler['ID'],$sid)) {
+			continue;
+		}
+		$namen = array($speler['NAAM']);
+		$rollen = array("Jager");
+		$geslachten = array($speler['SPELERFLAGS'] & 1);
+		$adres = $speler['EMAIL'];
+		$verhaal = geefVerhaal($thema,"Jager",$fase);
+		$text = $verhaal['VERHAAL'];
+		$geswoorden = $verhaal['GESLACHT'];
+		$auteur = $verhaal['AUTEUR'];
+		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+		$text = auteur($auteur,$text);
+
+		stuurMail($adres,$onderwerp,$text);
+		echo "Mail gestuurd naar $namen[0].\n";
+	}//while
+	return;
+}//mailJagerWakker
 
 //standaard functie voor mailen van een speler-actie 
 //(met slachtoffer opgeslagen in 'stem')

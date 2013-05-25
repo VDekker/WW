@@ -501,11 +501,11 @@ function regelPsycho($sid) {
 function regelWitteWW($sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
-	if(!$spel['TWEEDE_NACHT']) {
-		sqlUp("Spellen","TWEEDE_NACHT=1","SID=$sid");
+	if(($spel['FLAGS'] & 1) != 1) { // flipt de tweede nacht-flag
+		sqlUp("Spellen","FLAGS=FLAGS+1","SID=$sid");
 		return;
 	}
-	sqlUp("Spellen","TWEEDE_NACHT=0","SID=$sid");
+	sqlUp("Spellen","FLAGS=FLAGS-1","SID=$sid");
 
 	$resultaat = sqlSel("Spelers",
 		"SPEL=$sid AND ROL='Witte Weerwolf' AND ((LEVEND & 1) = 1)");
@@ -739,7 +739,7 @@ function regelRaaf($sid) {
 //regelt de Jager: indien er een dode Jager is, doodt dan ook zijn stem
 //dood hij nog een Jager, Opdrachtgever, Geliefde of Burgemeester:
 //ga dan terug in fase naar dood1.
-function regelJager($sid,$fase) {
+function regelJager($fase,$sid) {
 	$flag = false;
 	$resultaat = sqlSel("Spelers",
 		"SPEL=$sid AND ROL='Jager' AND LEVEND=3 AND ((SPELFLAGS & 4) = 0)");
@@ -762,8 +762,7 @@ function regelJager($sid,$fase) {
 		}
 		else {
 			zetDood($stem,$sid);
-			$fase2 = ($fase == 10) ? 1 : 2; //nacht of dag?
-			mailActie($id,$fase2,$sid,"EXTRA_STEM");
+			mailActie($id,$fase,$sid,"EXTRA_STEM");
 			$resultaat2 = sqlSel("Spelers","SPEL=$sid AND ID=$stem");
 			$slachtoffer = sqlFet($resultaat2);
 			if($slachtoffer['ROL'] == "Jager" || 

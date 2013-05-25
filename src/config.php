@@ -82,11 +82,11 @@ function adminPause($text,$adres) {
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
 		$snaam = $spel['SNAAM'];
-		if(!in_array($snaam,$spellen)) {
+		if(!in_array($snaam,$spellen) || $spel['STATUS'] != 0) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","PAUZE=1","SID=$sid");
+		sqlUp("Spellen","STATUS=1","SID=$sid");
 		echo "Spel gepauzeerd: $snaam.\n";
 		stuurPauze($sid);
 		$onderwerp = "Spel gepauzeerd: $snaam";
@@ -97,8 +97,8 @@ function adminPause($text,$adres) {
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel pauzeren mislukt";
-		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
-		$bericht .= "er is geen enkel spel gepauzeerd.";
+		$bericht = "Er is geen geldige spelnaam van een lopend spel gevonden ";
+		$bericht .= "in jouw bericht; er is geen enkel spel gepauzeerd.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
 	return;
@@ -111,12 +111,12 @@ function adminContinue($text,$adres) {
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
 		$snaam = $spel['SNAAM'];
-		if(!in_array($snaam,$spellen)) {
+		if(!in_array($snaam,$spellen) || $spel['STATUS'] != 1) {
 			continue;
 		}
 		$vlag = true;
 		$datum = date_create(date('Y-m-d'));
-		sqlUp("Spellen","PAUZE=0,DUUR='$datum'","SID=$sid");
+		sqlUp("Spellen","STATUS=0,DUUR='$datum'","SID=$sid");
 		echo "Spel hervat: $snaam.\n";
 		stuurHervat($sid);
 		$onderwerp = "Spel hervat: $snaam";
@@ -127,8 +127,8 @@ function adminContinue($text,$adres) {
 	if(!$vlag) {
 		echo "Geen spel gevonden.\n";
 		$onderwerp = "Spel hervatten mislukt";
-		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
-		$bericht .= "er is geen enkel spel hervat.";
+		$bericht = "Er is geen geldige spelnaam van een gepauzeerd spel gevonden ";
+		$bericht .= "in jouw bericht; er is geen enkel spel hervat.";
 		stuurMail($adres,$onderwerp,$bericht);
 	}
 	return;
@@ -145,7 +145,7 @@ function adminStop($text,$adres) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","GEWONNEN=1,FASE=99","SID=$sid");
+		sqlUp("Spellen","STATUS=2,FASE=99","SID=$sid");
 		echo "Spel gestopt: $snaam.\n";
 		stuurStop($sid);
 		$onderwerp = "Spel gestopt: $snaam";
@@ -174,7 +174,7 @@ function adminDelete($text,$adres) {
 			continue;
 		}
 		$vlag = true;
-		if($spel['GEWONNEN'] == false) {
+		if($spel['STATUS'] == 0 || $spel['STATUS'] == 1) {
 			echo "Spel is nog bezig, kan niet worden verwijderd: $snaam.\n";
 			$onderwerp = "Verwijdering mislukt: $snaam";
 			$bericht = "Spel $snaam is nog bezig ";

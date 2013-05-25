@@ -3,7 +3,7 @@
 function fases() {
 	$resultaat = sqlSel("Spellen","");
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
-		if($spel['GEWONNEN'] == 1 || $spel['PAUZE'] == 1) { // dit werkt niet in query
+		if($spel['STATUS'] != 0) { // dit werkt niet in query (??)
 			continue;
 		}
 		$sid = $spel['SID'];
@@ -174,7 +174,8 @@ function fases() {
 						mailWakker("Psychopaat",$sid);
 						zetFase(6,$sid);
 					}
-					if($spel['TWEEDE_NACHT'] && inSpel("Witte Weerwolf",$sid)) {
+					if((($spel['FLAGS'] & 1) == 1) && 
+						inSpel("Witte Weerwolf",$sid)) {
 						mailWakker("Witte Weerwolf",$sid);
 						zetFase(6,$sid);
 					}
@@ -265,7 +266,7 @@ function fases() {
 					echo "Begin regeldood.\n";
 					regelDood1($sid);
 					if(inSpel("Jager",$sid)) {
-						//TODO misschien mail Jager
+						mailJagerWakker(0,$sid); //TODO misschien mail Jager
 						zetFase(11,$sid);
 					}
 					//als Burgemeester dood
@@ -284,7 +285,7 @@ function fases() {
 					}
 				case 12:
 					if(inSpel("Jager",$sid)) {
-						regelJager($sid,10);
+						regelJager(2,$sid);
 					}
 					if(inSpel("Waarschuwer",$sid)) {
 						regelWaarschuw($sid);
@@ -300,7 +301,7 @@ function fases() {
 						regelDood2($sid,10);
 						regelZetNULL1($sid);
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","GEWONNEN=1","SID=$sid");
+							sqlUp("Spellen","STATUS=3","SID=$sid");
 							//stuur mails
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
@@ -352,7 +353,7 @@ function fases() {
 					}
 				case 19:
 					if(inSpel("Jager",$sid)) {
-						regelJager($sid,17);
+						regelJager(3,$sid);
 					}
 					if(inSpel("Zondebok",$sid)) {
 						regelZonde($sid);
@@ -365,7 +366,7 @@ function fases() {
 					regelDood2($sid,17);
 					if(geefFase($sid) == 20) {
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","GEWONNEN=1","SID=$sid");
+							sqlUp("Spellen","STATUS=3","SID=$sid");
 							//mail gewonnen
 						}
 						//mail algemeen (brandstapel)

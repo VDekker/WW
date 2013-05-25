@@ -49,16 +49,17 @@ function gmailParse() {
 				}//while
 				if($gevonden) { // als een speltitel in het onderwerp staat
 					$sid = $spel['SID'];
-					if($spel['GEWONNEN'] == 1) {
+					if($spel['STATUS'] > 1) { // voor gewonnen en gestopte spellen
+												//TODO deze twee aparte mails geven
 						stuurFoutStop($adres,$snaam);
 					}
-					else if ($spel['PAUZE'] == 1) {
+					else if ($spel['STATUS'] == 1) {
 						stuurFoutPauze($adres,$snaam);
 					}
 					else {
 						$init = $spel['INIT'];
 						$fase = $spel['FASE'];
-						$tweede = $spel['TWEEDE_NACHT'];
+						$tweede = (($spel['FLAGS'] & 1) == 1);
 						$max = $spel['MAX_SPELERS'];
 						$id = spelerID($afzender,$sid);
 						if(!empty($naam) || ($init && $fase == 1)) {
