@@ -116,7 +116,8 @@ function adminContinue($text,$adres) {
 		}
 		$vlag = true;
 		$datum = date_create(date('Y-m-d'));
-		sqlUp("Spellen","STATUS=0,DUUR='$datum'","SID=$sid");
+		$sqlDatum = date_format($datum, 'Y-m-d');
+		sqlUp("Spellen","STATUS=0,DUUR='$sqlDatum'","SID=$sid");
 		echo "Spel hervat: $snaam.\n";
 		stuurHervat($sid);
 		$onderwerp = "Spel hervat: $snaam";
