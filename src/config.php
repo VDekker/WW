@@ -209,7 +209,7 @@ function adminStart($text,$adres) {
 	$max = intval($details[1]);
 	$snel = intval($details[2]);
 	$streng = intval($details[3]);
-	$thema = $details[4];
+	$tnaam = $details[4];
 	if(empty($snaam) || !is_string($snaam)) {
 		echo "Geen spelnaam gevonden: fout\n";
 		$onderwerp = "Spel aanmaken mislukt";
@@ -231,11 +231,25 @@ function adminStart($text,$adres) {
 	if(empty($streng) || !is_int($streng)) {
 		$streng = 2;
 	}
-	if(empty($thema) || !is_string($thema)) {
-		$thema = "default";
+	if(empty($tnaam) || !is_string($tnaam)) {
+		$tnaam = "default";
 	}
+	$resultaat = sqlSel("Themas","TNAAM='$tnaam'");
+	$vlag = false;
+	while(sqlNum($resultaat) == 0) {
+		if($vlag) {
+			echo "Default-thema bestaat niet.\n";
+			//TODO stuur error and such
+			return;
+		}
+		$vlag = true;
+		echo "Opgegeven thema bestaat niet: default genomen\n";
+		$resultaat = sqlSel("Themas","TNAAM='default'");
+	}
+	$thema = sqlFet($resultaat);
+	$tid = $thema['TID'];
 	$sql = "INSERT INTO Spellen(SNAAM,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
-	$sql .= "VALUES ('$snaam',$max,$snel,$streng,'$thema')";
+	$sql .= "VALUES ('$snaam',$max,$snel,$streng,$tid)";
 	sqlQuery($sql);
 	echo "Spel gemaakt: $snaam.\n";
 	$onderwerp = "Spel aangemaakt: $snaam";
@@ -244,7 +258,7 @@ function adminStart($text,$adres) {
 	$bericht .= "Maximaal aantal spelers = $max<br />";
 	$bericht .= "Snelheid = $snel<br />";
 	$bericht .= "Strengheid = $streng<br />";
-	$bericht .= "Thema = $thema<br />";
+	$bericht .= "Thema = $tnaam<br />";
 	stuurMail($adres,$onderwerp,$bericht);
 
 	for($i = 0; $i < 5; $i++) {
@@ -270,7 +284,7 @@ function adminStart($text,$adres) {
 	$bericht .= "<br />";
 	$bericht .= "Toegestane inactiviteit: ";
 	$bericht .= "minder dan $streng stemmingen <br />";
-	$bericht .= "Thema van het spel: $thema";
+	$bericht .= "Thema van het spel: $tnaam";
 	foreach($details as $email) {
 		if(!empty($email)) {
 			stuurMail($email,$onderwerp,$bericht);
@@ -293,7 +307,7 @@ function adminPlayers($bericht,$adres) {
 		}
 		$vlag = true;
 		$sql = "SELECT ID,NAAM,SPELERFLAGS,EMAIL,LEVEND ";
-		$sql .= "FROM Spelers WHERE SPEL=$sid";
+		$sql .= "FROM Spelers WHERE SID=$sid";
 		$resultaat = sqlQuery($sql);
 		if(sqlNum($resultaat) == 0) {
 			echo "Geen spelers in spel $snaam.\n";
@@ -325,7 +339,7 @@ function adminNoMail($bericht,$adres) {
 		if(!strstr($bericht,$snaam)) {
 			continue;
 		}
-		$resultaat2 = sqlSel("Spelers","SPEL=$sid AND LEVEND=0");
+		$resultaat2 = sqlSel("Spelers","SID=$sid AND LEVEND=0");
 		while($speler = sqlFet($resultaat)) {
 			$naam = $speler['NAAM'];
 			if(!strstr($bericht,$naam)) {
@@ -377,7 +391,8 @@ function adminGames($adres) {
 	return;
 }//adminGames
 
-function adminStory($bericht,$adres) {
+function adminStory($bericht,$adres) {//TODO thema's uitvogelen; 
+                                      //     werkt nu met foreign keys
 	$stukken = explode("\r\n\r\n\r\n",$bericht);
 	$header = explode("\r\n\r\n",$stukken[0]);
 	$auteur = sqlEscape($header[0]);

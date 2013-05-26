@@ -5,7 +5,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 	$init,$fase,$tweede,$max) {
 
 	global $thuis;
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND ID=$id");
+	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
@@ -239,7 +239,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 			case 8:
 				if($rol == "Heks") {
 					$resultaat = sqlSel("Spelers",
-						"SPEL=$sid AND ID=$id");
+						"ID=$id");
 					$heks = sqlFet($resultaat);
 					$drank = $heks['SPELFLAGS'];
 					$flag = 0; //houdt de keuze bij: voor mailen
@@ -317,19 +317,30 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
-				else if($rol == "Raaf" || //TODO Raaf mag wel stem herhalen...
-					$rol == "Schout") {
+				else if($rol == "Raaf") {
 					$stem = geldigeStem($bericht,$sid,1);
-					if($stem != false && $stem != $speler['VORIGE_STEM']) {
+					if($stem != false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						echo "$rol $id kiest $stem.\n";
+						echo "Raaf $id kiest $stem.\n";
 					}
 					else {
 						echo "Error: geen goede stem gevonden...\n";
 						stuurFoutStem($naam,$adres,$sid);
 					}
-					}//else if
+				}//else if
+				else if($rol == "Schout") {
+					$stem = geldigeStem($bericht,$sid,1);
+					if($stem != false && $stem != $speler['VORIGE_STEM']) {
+						zetStem($id,$stem,$sid,"EXTRA_STEM");
+						stuurStem($naam,$adres,$stem,$sid);
+						echo "Schout $id kiest $stem.\n";
+					}
+					else {
+						echo "Error: geen goede stem gevonden...\n";
+						stuurFoutStem($naam,$adres,$sid);
+					}
+				}//else if
 				else if($rol == "Waarschuwer") { //mag niet op zichzelf stemmen
 					$stem = geldigeStemWaarschuw($bericht,$sid,1);
 					if($stem != false && $stem != $id) {

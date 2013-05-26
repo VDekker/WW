@@ -56,7 +56,7 @@ function stuurControle() {
 }//stuurControle
 
 //stuurt een error naar de systeembeheerder
-function stuurError($error) {
+function stuurError($error,$sid) {
 	global $admins,$thuis;
 	$onderwerp = "Error";
 	$alleAdmins = $admins[0];
@@ -66,6 +66,22 @@ function stuurError($error) {
 	stuurMail($alleAdmins,$onderwerp,$error);
 	die($error);
 }//stuurError
+
+//stuurt een error naar de systeembeheerder
+//en zet spel $sid op pauze
+function stuurError2($error,$sid) {
+	global $admins,$thuis;
+	$onderwerp = "Error";
+	$alleAdmins = $admins[0];
+	for($i = 1; $i < count($admins); $i++) {
+		$alleAdmins .= ", $admins[$i]";
+	}
+	stuurMail($alleAdmins,$onderwerp,$error);
+
+	sqlUp("Spellen","STATUS=1","SID=$sid");
+	echo "Spel gepauzeerd.\n";
+	die($error);
+}//stuurError2
 
 function stuurResultaatHTML($adres,$resultaat) {
 	global $thuis,$footnote;
@@ -106,7 +122,7 @@ function stuurStop($sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snaam = $spel['SNAAM'];
-	$resultaat = sqlSel("Spelers","SPEL=$sid");
+	$resultaat = sqlSel("Spelers","SID=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -134,7 +150,7 @@ function stuurPauze($sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snaam = $spel['SNAAM'];
-	$resultaat = sqlSel("Spelers","SPEL=$sid");
+	$resultaat = sqlSel("Spelers","SID=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -163,7 +179,7 @@ function stuurHervat($sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snaam = $spel['SNAAM'];
-	$resultaat = sqlSel("Spelers","SPEL=$sid");
+	$resultaat = sqlSel("Spelers","SID=$sid");
 	$adressen = array();
 	while($speler = sqlFet($resultaat)) {
 		array_push($adressen,$speler['EMAIL']);
@@ -214,7 +230,7 @@ function stuurInschrijving($adres,$sid) {
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snaam = $spel['SNAAM'];
-	$resultaat = sqlSel("Spelers","SPEL=$sid AND EMAIL='$adres'");
+	$resultaat = sqlSel("Spelers","SID=$sid AND EMAIL='$adres'");
 	$speler = sqlFet($resultaat);
 	$naam = $speler['NAAM'];
 	$geslacht = ($speler['SPELERFLAGS'] & 1) ? "Man" : "Vrouw";

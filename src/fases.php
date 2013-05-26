@@ -14,7 +14,6 @@ function fases() {
 			
 			switch($fase) {
 				case 0:
-					//mail uitgenodigden?
 					zetFase(1,$sid);
 					break;
 				case 1:
@@ -71,7 +70,8 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
-						//TODO ga naar de loop (begin na grafrover, bij case 3!)
+						sqlUp("Spellen","INIT=0","SID=$sid");
+						zetFase(3,$sid);
 					}
 					break;
 				case 7:
@@ -83,7 +83,8 @@ function fases() {
 					}
 				case 8:
 					regelOpdracht($sid);
-					//TODO ga naar de loop (begin na grafrover, bij case 3!)
+					sqlUp("Spellen","INIT=0","SID=$sid");
+					zetFase(3,$sid);
 			}//switch
 
 		}//if
@@ -266,12 +267,12 @@ function fases() {
 					echo "Begin regeldood.\n";
 					regelDood1($sid);
 					if(inSpel("Jager",$sid)) {
-						mailJagerWakker(0,$sid); //TODO misschien mail Jager
+						mailJagerWakker(0,$sid);
 						zetFase(11,$sid);
 					}
-					//als Burgemeester dood
-					//  mail deze
-					//  zetFase(11,$sid);
+					if(mailBurgWakker($sid)) {
+						zetFase(11,$sid);
+					}
 					if(geefFase($sid) == 9 || geefFase($sid) == 10) {
 						zetFase(12,$sid);
 					}
@@ -337,13 +338,19 @@ function fases() {
 					regelBrand($sid);
 				case 17:
 					regelDood1($sid);
-					//TODO if Jager dood of Zondebok dood
-					//  mail deze, en 
-					//  zetFase(18,$sid);
-					//  break;
-					//anders
-					//  zetFase(20,$sid);
-					//  break;
+					$vlag = false;
+					if(mailJagerWakker(1,$sid) {
+						zetFase(18,$sid);
+						$vlag = true;	
+					}
+					if(mailZondeWakker(1,$sid) {
+						zetFase(18,$sid);
+						$vlag = true;	
+					}
+					if(!$vlag) {
+						zetFase(20,$sid);
+					}
+					break;
 				case 18:
 					if(genoegGewacht($sid)) {
 						zetFase(19,$sid);
