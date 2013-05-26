@@ -339,7 +339,7 @@ function fases() {
 				case 17:
 					regelDood1($sid);
 					$vlag = false;
-					if(mailJagerWakker(1,$sid) {
+					if(mailJagerWakker(1,$sid)) {
 						zetFase(18,$sid);
 						$vlag = true;	
 					}
