@@ -133,7 +133,7 @@ function stuurStop($sid) {
 	}
 
 	$onderwerp = "$snaam: Spel gestopt";
-	$bericht .= "Helaas is het mailspel $snaam door het systeembeheer gestopt. ";
+	$bericht = "Helaas is het mailspel $snaam door het systeembeheer gestopt. ";
 	$bericht .= "Dit spel zal niet meer doorgaan, ";
 	$bericht .= "en hierover worden geen automatische mails meer verzonden. ";
 	$bericht .= "Emails over dit spel zullen niet worden geparsed ";
@@ -161,7 +161,7 @@ function stuurPauze($sid) {
 	}
 
 	$onderwerp = "$snaam: Spel gepauzeerd";
-	$bericht .= "Het mailspel $snaam is door het systeembeheer gepauzeerd. ";
+	$bericht = "Het mailspel $snaam is door het systeembeheer gepauzeerd. ";
 	$bericht .= "Als het spel wordt hervat, zal je hiervan worden bericht, ";
 	$bericht .= "maar tot die tijd worden hierover geen automatische mails ";
 	$bericht .= "meer verzonden. ";
@@ -190,7 +190,7 @@ function stuurHervat($sid) {
 	}
 
 	$onderwerp = "$snaam: Spel hervat";
-	$bericht .= "Het mailspel $snaam gaat weer door. ";
+	$bericht = "Het mailspel $snaam gaat weer door. ";
 	$bericht .= "Vanaf nu begint het weer waar het was gebleven. ";
 	$bericht .= "Mails over dit spel worden weer geparsed.";
 	$bericht .= "<br /><br />";
@@ -203,7 +203,7 @@ function stuurHervat($sid) {
 
 function stuurFoutStop($adres,$snaam) {
 	$onderwerp = "$snaam: Mail niet gelezen";
-	$bericht .= "Het mailspel $snaam is geeindigd. ";
+	$bericht = "Het mailspel $snaam is geeindigd. ";
 	$bericht .= "Jouw mailtje is dus niet gelezen, ";
 	$bericht .= "en wordt verder genegeerd.";
 	$bericht .= "<br /><br />";
@@ -214,7 +214,7 @@ function stuurFoutStop($adres,$snaam) {
 
 function stuurFoutPauze($adres,$snaam) {
 	$onderwerp = "$snaam: Mail niet gelezen";
-	$bericht .= "Het mailspel $snaam is gepauzeerd. ";
+	$bericht = "Het mailspel $snaam is gepauzeerd. ";
 	$bericht .= "Jouw mailtje is dus niet gelezen, ";
 	$bericht .= "en wordt verder genegeerd, ";
 	$bericht .= "en hier wordt ook niets mee gedaan ";
