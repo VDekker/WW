@@ -39,7 +39,8 @@ function verdeelRol($sid) {
 	$resultaat = sqlSel("Rollen","AANTAL=$aantal");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen rolverdeling voor speleraantal $aantal.\n";
-		stuurError("Geen rolverdeling voor speleraantal $aantal van spel $sid",$sid);
+		stuurError2("Geen rolverdeling voor speleraantal $aantal " . 
+			"van spel $sid.\n",$sid);
 		return;
 	}
 	while($rolverdeling = sqlFet($resultaat)) {
