@@ -343,7 +343,7 @@ function fases() {
 						zetFase(18,$sid);
 						$vlag = true;	
 					}
-					if(mailZondeWakker(1,$sid) {
+					if(mailZondeWakker(1,$sid)) {
 						zetFase(18,$sid);
 						$vlag = true;	
 					}
