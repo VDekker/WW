@@ -163,17 +163,10 @@ function mailHeksWakker($sid) {
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
 
-		//infodump: op wie kan de speler stemmen voor redden/vergiftigen:
-		$text .= "<br /><br />";
-		$text .= "Je kunt een van deze speler(s) tot leven wekken:<br />";
-		$text .= "<ul>";
-		foreach($namen as $key => $naam) {
-			if($key == 0 && !$speler['NIEUWDOOD']) {
-				continue;
-			}
-			$text .= "<li>$naam</li>";
+		if(!(($speler['LEVEND'] & 2) == 2)) {
+			delArrayElement($namen,0);
 		}
-		$text .= "</ul>";
+		$text = keuzeHeks($text,$speler['NAAM'],$namen,$sid);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -213,6 +206,7 @@ function mailJagerWakker($fase,$sid) {
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+		$text = keuzeJager($text,$speler['NAAM'],$sid);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);

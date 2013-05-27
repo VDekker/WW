@@ -131,6 +131,90 @@ function geefVerhaalRolverdeling($thema,$rol,$sid) {
 
 }//geefVerhaalRolverdeling
 
+function keuzeHeks($text,$heks,$doden,$sid) {
+	if(count($doden) > 0) {
+		$text .= "<br /><br />";
+		if(count($doden) == 1) {
+			$text .= "Je kunt deze speler tot leven wekken:<br />";
+		}
+		else {
+			$text .= "Je kunt een van deze spelers tot leven wekken:<br />";
+		}
+		$text .= "<ul>";
+		foreach($doden as $naam) {
+			$text .= "<li>$naam</li>";
+		}
+		$text .= "</ul>";
+	}//if
+	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
+	$levenden = sqlNum($resultaat);
+	if($levenden == 0) {
+		return $text;
+	}
+	$vlag = false;
+	while($speler = sqlFet($resultaat)) {
+		if($speler['NAAM'] == $heks) {
+			$vlag = true;
+			break;
+		}
+	}//while
+	if($levenden == 1 && $vlag) { //enige doel is ikzelf
+		return $text;
+	}
+	$text .= "<br /><br />";
+	if($levenden == 1) {
+		$text .= "Je kunt deze speler vergiftigen:<br />";
+	}
+	else {
+		$text .= "Je kunt een van deze spelers vergiftigen:<br />";
+	}
+	$text .= "<ul>";
+	while($speler = sqlFet($resultaat)) {
+		$naam = $speler['NAAM'];
+		if($naam == $heks) {
+			continue;
+		}
+		$text .= "<li>$naam</li>";
+	}//while
+	$text .= "</ul>";
+	return $text;
+}//keuzeHeks
+
+function keuzeJager($text,$jager,$sid) {
+	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$levenden = sqlNum($resultaat);
+	if($levenden == 0) {
+		return $text;
+	}
+	$vlag = false;
+	while($speler = sqlFet($resultaat)) {
+		if($speler['NAAM'] == $jager) {
+			$vlag = true;
+			break;
+		}
+	}//while
+	if($levenden == 1 && $vlag) { //enige doel is ikzelf
+		return $text;
+	}
+	$text .= "<br /><br />";
+	if($levenden == 1) {
+		$text .= "Je kunt deze speler neerschieten:<br />";
+	}
+	else {
+		$text .= "Je kunt een van deze spelers neerschieten:<br />";
+	}
+	$text .= "<ul>";
+	while($speler = sqlFet($resultaat)) {
+		$naam = $speler['NAAM'];
+		if($naam == $jager) {
+			continue;
+		}
+		$text .= "<li>$naam</li>";
+	}//while
+	$text .= "</ul>";
+	return $text;
+}//keuzeJager
+
 function auteur($auteur,$text) {
 	$text .= "<br /><br />";
 	$text .= "<font size='1'>";
