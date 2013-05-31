@@ -14,14 +14,14 @@ function dbConnect() {
 function dbSluit() {
 	global $dbconnect;
 	mysqli_close($dbconnect) or
-		stuurError("Kan verbinding met database niet sluiten:\n\n" . 
+		stuurError("Kan verbinding met database niet sluiten:<br /><br />" . 
 		mysqli_error($dbconnect));
 }
 
 function sqlQuery($sql) {
 	global $dbconnect;
 	$resultaat = mysqli_query($dbconnect,$sql) or 
-		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.<br />Query: $sql<br /><br />" . 
 		mysqli_error($dbconnect));
 	return $resultaat;
 }//sqlQuery
@@ -33,7 +33,7 @@ function sqlUp($tabel,$waardes,$eisen) {
 		$sql .= " WHERE $eisen";
 	}
 	mysqli_query($dbconnect,$sql) or 
-		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.<br />Query: $sql<br /><br />" . 
 		mysqli_error($dbconnect));
 	return;
 }//sqlUp
@@ -45,7 +45,7 @@ function sqlSel($tabel,$eisen) {
 		$sql .= " WHERE $eisen";
 	}
 	$resultaat = mysqli_query($dbconnect,$sql) or 
-		stuurError("Kon query niet uitvoeren.\nQuery: $sql\n\n" . 
+		stuurError("Kon query niet uitvoeren.<br />Query: $sql<br /><br />" . 
 		mysqli_error($dbconnect));
 	return $resultaat;
 }//sqlSel

@@ -38,7 +38,7 @@ function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
 		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
 			echo "Geen default, error.\n";
 			stuurError2(
-				"Geen default verhaal voor fase $fase van $rol," .
+				"Geen default verhaal voor fase $fase van $rol, " .
 				"met $levend levende spelers en $dood slachtoffers",$sid);
 		}
 	}//if
@@ -66,7 +66,7 @@ function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid) {
 		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
 			echo "Geen default, error.\n";
 			stuurError2(
-				"Geen default verhaal voor fase $fase van $rol," .
+				"Geen default verhaal voor fase $fase van $rol, " .
 				"met $levend levende spelers en $dood slachtoffers",$sid);
 		}
 	}//if

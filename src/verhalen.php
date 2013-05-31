@@ -2,9 +2,9 @@
 
 //mailt iedere speler AFZONDERLIJK met diens rol
 function mailRolverdeling($sid) {
-	$onderwerp = "$sid: Rol";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Rol";
 	$thema = $spel['THEMA'];
 
 	$resultaat = sqlSel("Spelers","SID=$sid");
@@ -27,7 +27,7 @@ function mailRolverdeling($sid) {
 		$text = vulIn($namen,$rollen,$geslachten,"",$text,$geswoorden);
 		$text = auteur($auteur,$text);
 
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$text);
 		echo "Rol naar $id gemaild.\n";
 	}//while
 	return 0;
@@ -37,10 +37,10 @@ function mailRolverdeling($sid) {
 //stuurt een mail naar alle spelers met die rol AFZONDERLIJK,
 //met het juiste verhaaltje
 function mailWakker($rol,$sid) {
-	$onderwerp = "$sid: Actie";
 	$deadline = geefDeadline($sid);
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='$rol' AND ((LEVEND & 1) = 1)");
 	if($rol == "Dwaas") {
@@ -72,10 +72,10 @@ function mailWakker($rol,$sid) {
 //maakt een groep spelers wakker:
 //Weerwolven (inc. Witte), Vampiers of Fluitspelers
 function mailGroepWakker($rol,$sid) {
-	$onderwerp = "$sid: Actie";
 	$deadline = geefDeadline($sid);
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$namen = array();
 	$geslachten = array();
@@ -130,10 +130,10 @@ function mailGroepWakker($rol,$sid) {
 //wekt alle Heksen afzonderlijk: geeft ook namen van slachtoffers mee
 //(alle nieuw_dode spelers; deze kunnen geredt worden)
 function mailHeksWakker($sid) {
-	$onderwerp = "$sid: Actie";
 	$deadline = geefDeadline($sid);
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$namen = array(); // vul een array van slachtoffers
 	$rollen = array();
@@ -180,10 +180,10 @@ function mailHeksWakker($sid) {
 
 //mailt alle overleden jagers wakker die niet geschoten hebben
 function mailJagerWakker($fase,$sid) {
-	$onderwerp = "$sid: Actie";
 	$deadline = geefDeadline($sid);
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$vlag = false;
 
@@ -225,10 +225,10 @@ function mailBurgWakker($sid) {
 	}
 	$speler = sqlFet($resultaat);
 
-	$onderwerp = "$sid: Testament";
 	$deadline = geefDeadline($sid);
 	$resultaat = sqlFet("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Testament";
 	$thema = $spel['THEMA'];
 
 	$namen = array($speler['NAAM']);
@@ -256,10 +256,10 @@ function mailZondeWakker($sid) {
 		return false;
 	}
 
-	$onderwerp = "$sid: Actie";
 	$deadline = geefDeadline($sid);
 	$resultaat2 = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat2);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 
 	while($speler = sqlFet($resultaat)) {
@@ -285,9 +285,9 @@ function mailZondeWakker($sid) {
 //(met slachtoffer opgeslagen in 'stem')
 //blanco werkt ook
 function mailActie($id,$fase,$sid,$plek) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -324,10 +324,10 @@ function mailActie($id,$fase,$sid,$plek) {
 
 //aparte functie voor Dief omdat het slachtoffer ook gemaild moet worden
 function mailDief($id,$sid) {
-	$onderwerp = "$sid: Actie";
-	$onderwerp2 = "$sid: Bestolen";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
+	$onderwerp2 = $spel['SNAAM'] . ": Bestolen";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -373,10 +373,10 @@ function mailDief($id,$sid) {
 
 //aparte functie voor Cupido omdat de Geliefden ook gemaild moeten worden
 function mailCupido($id,$sid) {
-	$onderwerp = "$sid: Actie";
-	$onderwerp2 = "$sid: Geliefde";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
+	$onderwerp = $spel['SNAAM'] . ": Geliefde";
 	$thema = $spel['THEMA'];
 
 	$resultaat = sqlSel("Spelers","ID=$id");
@@ -433,9 +433,9 @@ function mailCupido($id,$sid) {
 
 //aparte functie voor Opdrachtgever omdat Lijfwacht gemaild moet worden
 function mailOpdracht($id,$sid) {
-	$onderwerp = "$sid: Opdrachtgever";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Opdrachtgever";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -469,9 +469,9 @@ function mailOpdracht($id,$sid) {
 
 //aparte functie voor Welp omdat fase ongebruikelijk is
 function mailWelp($id,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -497,10 +497,10 @@ function mailWelp($id,$sid) {
 
 //aparte functie voor Klaas Vaak omdat slachtoffer ook gemaild moet worden
 function mailKlaas($id,$sid) {
-	$onderwerp = "$sid: Actie";
-	$onderwerp2 = "$sid: Slaap";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
+	$onderwerp = $spel['SNAAM'] . ": Slaap";
 	$thema = $spel['THEMA'];
 
 	$resultaat = sqlSel("Spelers","ID=$id");
@@ -548,9 +548,9 @@ function mailKlaas($id,$sid) {
 
 //aparte functie voor de Dwaas vanwege $gezien
 function mailDwaas($id,$gezien,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -582,9 +582,9 @@ function mailDwaas($id,$gezien,$sid) {
 
 //aparte functie voor Goochelaar vanwege STEM en EXTRA_STEM
 function mailGoochel($id,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -624,17 +624,28 @@ function mailGoochel($id,$sid) {
 
 //mailt verhaaltje van WW of VP naar de groep
 function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
-	$resultaat = sqlSel("Spelers","ID=$slachtoffer");
-	$speler = sqlFet($resultaat);
-	$namen = array($speler['NAAM']);
-	$rollen = array($speler['ROL']);
-	$geslacht = ($speler['SPELERFLAGS'] & 1);
-	$geslachten = array($geslacht);
+	$namen = array();
+	$rollen = array();
+	$geslachten = array();
 	$adressen = array();
+	$numSlachtoffer = 0;
+	if(!empty($slachtoffer)) {
+		$resultaat = sqlSel("Spelers","ID=$slachtoffer");
+		$speler = sqlFet($resultaat);
+		array_push($namen,$speler['NAAM']);
+		array_push($rollen,$speler['ROL']);
+		$geslacht = ($speler['SPELERFLAGS'] & 1);
+		array_push($geslachten,$geslacht);
+		$numSlachtoffer = 1;
+		echo "$rol: $slachtoffer vermoord.\n";
+	}
+	else {
+		echo "$rol: Niemand vermoord.\n";
+	}
 	foreach($spelers as $id) {
 		$resultaat = sqlSel("Spelers","ID=$id");
 		$speler = sqlFet($resultaat);
@@ -649,9 +660,8 @@ function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$sid) {
 		$adres .= ", $adressen[$i]";
 	}
 
-	echo "$rol: $slachtoffer vermoord.\n";
-
-	$verhaal = geefVerhaalGroep($thema,$rol,$fase,count($spelers),1,$sid);
+	$verhaal = geefVerhaalGroep($thema,$rol,$fase,count($spelers),
+		$numSlachtoffer,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];
@@ -666,9 +676,9 @@ function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$sid) {
 }//mailWWVPActie
 
 function mailOnschuldig($id,$targets,$stemmen,$fase,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -704,9 +714,9 @@ function mailOnschuldig($id,$targets,$stemmen,$fase,$sid) {
 //aparte functie vanwege de combinaties STEM en EXTRA_STEM 
 //die soms niet/wel nodig zijn
 function mailHeksActie($id,$stem1,$stem2,$verhaal,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -748,11 +758,11 @@ function mailHeksActie($id,$stem1,$stem2,$verhaal,$sid) {
 //mailt verhaaltje van FS naar groep,
 //en mailt ook de Betoverden
 function mailFSActie($spelers,$betoverd1,$betoverd2,$fase,$sid) {
-	$onderwerp = "$sid: Actie";
-	$onderwerp2 = "$sid: Betoverd";
 	$numBetoverd = 0;
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
+	$onderwerp = $spel['SNAAM'] . ": Betoverd";
 	$thema = $spel['THEMA'];
 	$namen = array();
 	$rollen = array();
@@ -837,10 +847,10 @@ function mailFSActie($spelers,$betoverd1,$betoverd2,$fase,$sid) {
 
 //mailt de Waarschuwer en zijn keuze
 function mailWaarschuwer($id,$sid) {
-	$onderwerp = "$sid: Actie";
-	$onderwerp2 = "$sid: Waarschuwing";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
+	$onderwerp = $spel['SNAAM'] . ": Waarschuwing";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -886,9 +896,9 @@ function mailWaarschuwer($id,$sid) {
 }//mailWaarschuwer
 
 function mailTestament($id,$fase,$sid) {
-	$onderwerp = "$sid: Testament";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Testament";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);
@@ -922,9 +932,9 @@ function mailTestament($id,$fase,$sid) {
 }//mailTestament
 
 function mailZonde($id,$slachtoffers,$sid) {
-	$onderwerp = "$sid: Actie";
 	$resultaat = sqlSel("Spellen","SID=$sid");
 	$spel = sqlFet($resultaat);
+	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel("Spelers","ID=$id");
 	$speler = sqlFet($resultaat);

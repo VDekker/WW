@@ -138,7 +138,7 @@ function gmailConnect () {
 	$imapadres = "{imap.gmail.com:993/imap/ssl}";
 	$hostnaam = $imapadres . $map;
 	$connection = imap_open($hostnaam,$thuis,$wachtwoord) or 
-		stuurError("Kan niet verbinden met Gmail:\n\n " . 
+		stuurError("Kan niet verbinden met Gmail:<br /><br /> " . 
 		imap_last_error());
 	return($connection);
 }//gmailConnect
@@ -148,7 +148,7 @@ function gmailSluit() {
 	global $gmconnect;
 
 	imap_close($gmconnect) or 
-		stuurError("Kan verbinding met Gmail niet sluiten:\n\n" . 
+		stuurError("Kan verbinding met Gmail niet sluiten:<br /><br />" . 
 		imap_last_error());
 	return;
 }//gmailSluit

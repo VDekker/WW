@@ -49,6 +49,7 @@
   * Extra:   manAdmin.pdf afmaken
   * Extra:   zijn execute-rechten nodig voor php-bestanden?
   * Extra:   alle mails in Verzonden zetten
+  * Extra:   spelernamen in echo's zetten
   * Extra:   alle echo's verwijderen... (is dit nodig?)
   * Extra:   lijst van keuzes aan speler mailen (handig)
   * Extra:   stemWaarde verbeteren: check op burgemeester kan beter

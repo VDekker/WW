@@ -103,6 +103,7 @@ function zetFase($waarde,$sid) {
 	$datum = date_create(date('Y-m-d'));
 	$sqlDatum = date_format($datum, 'Y-m-d');
 	sqlUp("Spellen","FASE=$waarde,DUUR='$sqlDatum'","SID=$sid");
+	echo "Fase op $waarde gezet.\n";
 	return;
 }//zetFase
 
@@ -184,6 +185,13 @@ function herleef($id,$sid) {
 	return;
 }//herleef
 
+//neemt alle spelers die nieuwdood zijn, en maakt ze echt dood
+function zetDood2($sid) {
+	sqlUp("Spelers","LEVEND=0","SID=$sid AND ((LEVEND & 2) = 2)");
+	echo "Alle nieuw-dode spelers gedood.\n";
+	return;
+}//zetDood2
+
 //check of de speler niet beschermd wordt, danwel aanwezig is
 //en vermoord hem (en eventueel andere slachtoffers...)
 function vermoord($id,$sid) {
@@ -212,6 +220,7 @@ function vermoord($id,$sid) {
 	}//if
 	
 	//check Slet: als de Slet bij het echte target slaapt
+	$sletInSpel = false;
 	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Slet'");
 	if(sqlNum($resultaat) > 0) {
 		$sletInSpel = true;

@@ -49,13 +49,16 @@ function verdeelRol($sid) {
 	$key = array_rand($rolTuples);
 	$rolverdeling = $rolTuples[$key];
 	$rid = $rolverdeling['RID'];
+	echo "Gekozen rolverdeling: $rid.\n";
 	$rollen = explode(",",$rolverdeling['ROLLEN']);
 	shuffle($alleSpelers);
 	if($rolverdeling['BURGEMEESTER']) {
 		$burgemeester = "NULL";
+		echo "Met Burgemeester.\n";
 	}
 	else {
 		$burgemeester = -1;
+		echo "Zonder Burgemeester.\n";
 	}
 	sqlUp("Spellen",
 		"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",

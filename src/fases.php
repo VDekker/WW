@@ -21,6 +21,7 @@ function fases() {
 						zetFase(2,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 2:
@@ -31,8 +32,12 @@ function fases() {
 						mailWakker("Dief",$sid);
 						zetFase(3,$sid);
 					}
-					else {
+					else if(inSpel("Cupido",$sid)) {
 						zetFase(4,$sid);
+					}
+					else {
+						echo "Blijf wachten.\n";
+						zetFase(6,$sid);
 					}
 					break;
 				case 3:
@@ -40,6 +45,7 @@ function fases() {
 						zetFase(4,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 4:
@@ -51,6 +57,7 @@ function fases() {
 						zetFase(5,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						zetFase(6,$sid);
 					}
 					break;
@@ -79,6 +86,7 @@ function fases() {
 						zetFase(8,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 8:
@@ -108,6 +116,7 @@ function fases() {
 						zetFase(2,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 2:
@@ -129,6 +138,7 @@ function fases() {
 						zetFase(5,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 5:
@@ -189,6 +199,7 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 7:
@@ -242,6 +253,7 @@ function fases() {
 						zetFase(9,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 9:
@@ -264,7 +276,6 @@ function fases() {
 						zetFase(11,$sid);
 					}
 				case 10:
-					echo "Begin regeldood.\n";
 					regelDood1($sid);
 					if(inSpel("Jager",$sid)) {
 						mailJagerWakker(0,$sid);
@@ -282,6 +293,7 @@ function fases() {
 						zetFase(12,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 12:
@@ -308,11 +320,13 @@ function fases() {
 						else if(empty($spel['BURGEMEESTER'])) {
 							//stuur mails (ontwaken, 
 							//nieuwe burgemeesterverkiezing) en
-							//zetFase(13,$sid);
+							zetDood2($sid);
+							zetFase(13,$sid);
 						}
 						else {
 							//stuur mails (ontwaken, brandstapelverkiezing) en
-							//zetFase(15,$sid);
+							zetDood2($sid);
+							zetFase(15,$sid);
 						}
 					}//if
 					break;
@@ -321,6 +335,7 @@ function fases() {
 						zetFase(14,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 14:
@@ -332,6 +347,7 @@ function fases() {
 						zetFase(16,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 16:
@@ -356,6 +372,7 @@ function fases() {
 						zetFase(19,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 19:
@@ -377,6 +394,7 @@ function fases() {
 							//mail gewonnen
 						}
 						//mail algemeen (brandstapel)
+						zetDood2($sid);
 						regelZetNULL2($sid);
 						zetFase(0,$sid);
 					}

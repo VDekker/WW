@@ -95,12 +95,12 @@ function regelWelp($sid) {
 	shuffle($welpen); //randomise lijst (in geval van meerdere dode WW)
 	$resultaat = sqlSel("Spelers",
 		"SID=$sid AND ROL='Weerwolf' AND ((LEVEND & 1) = 0) AND 
-		((SPELFLAGS & 8) = 0"); // deze dode wolf is nog niet geteld...
+		((SPELFLAGS & 8) = 0)"); // deze dode wolf is nog niet geteld...
 	if(sqlNum($resultaat) == 0) { //geen nieuwe dode wolven
 		return;
 	}
 	while($dodewolf = sqlFet($resultaat)) {
-		if(empty($welpen[$i])) { //geen welpen meer over
+		if(empty($welpen)) { //geen welpen meer over
 			return;
 		}
 		$id = $welpen[0];
@@ -872,8 +872,15 @@ function regelDood2($sid,$fase) {
 		$resultaat = sqlSel("Spellen","SID=$sid");
 		$spel = sqlFet($resultaat);
 		$strengheid = $spel['STRENGHEID'];
-		sqlUp("Spelers","LEVEND=2,",
+		$resultaat2 = sqlSel("Spelers",
 			"SID=$sid AND LEVEND=1 AND GEMIST>=$strengheid");
+		$num = sqlNum($resultaat2);
+		if($num > 0) {
+			sqlUp("Spelers","LEVEND=3",
+				"SID=$sid AND LEVEND=1 AND GEMIST>=$strengheid");
+			sqlUp("Spellen","LEVEND=LEVEND-$num,DOOD=DOOD+$num","SID=$sid");
+			echo "$num inactieve spelers gedood.\n";
+		}
 	}
 	return;
 }//regelDood2
@@ -937,6 +944,7 @@ function regelBrand($sid) {
 			continue;
 		}
 		heeftGestemd($id);
+		verwijderStem($id,"STEM");
 		echo "$id stemt: $stem.\n";
 		$i = stemWaarde($id,$sid);
 		$key = array_search($stem,$kandidaten);

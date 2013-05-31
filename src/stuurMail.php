@@ -56,7 +56,7 @@ function stuurControle() {
 }//stuurControle
 
 //stuurt een error naar de systeembeheerder
-function stuurError($error,$sid) {
+function stuurError($error) {
 	global $admins,$thuis;
 	$onderwerp = "Error";
 	$alleAdmins = $admins[0];
