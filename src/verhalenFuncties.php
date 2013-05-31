@@ -223,4 +223,33 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
+function ontwaakVerhaal($spel) {
+	$thema = $spel['THEMA'];
+	$sid = $spel['SID'];
+	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
+	$levend = sqlNum($resultaat);
+	$resultaat2 - sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)";
+	$dood = sqlNum($resultaat);
+
+	//jager, geliefde, dorpsoudste, badguy
+	$dodeRol = array(false,false,false,false);
+	while($speler = sqlFet($resultaat2)) {
+		if($speler['ROL'] == "Jager") {
+			$doderol[0] = true;
+		}
+		else if($speler['ROL'] == "Dorpsoudste") {
+			$doderol[2] = true;
+		}
+		else if($speler['ROL'] == "Weerwolf" || $speler['ROL'] == "Welp" ||
+			$speler['ROL'] == "Vampier" || $speler['ROL'] == "Fluitspeler" ||
+			$speler['ROL'] == "Witte Weerwolf" || 
+			$speler['ROL'] == "Psychopaat") {
+			$doderol[3] = true;
+			}
+		if($speler['GELIEFDE'] != "") {
+			$doderol[1] = true;
+		}
+	}
+}//ontwaakVerhaal
+
 ?>

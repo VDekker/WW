@@ -319,11 +319,13 @@ function fases() {
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
 							//stuur mails (ontwaken, 
-							//nieuwe burgemeesterverkiezing) en
+							//nieuwe burgemeesterverkiezing)
+							mailAlgemeenVerkeizing($sid);
 							zetDood2($sid);
 							zetFase(13,$sid);
 						}
 						else {
+							mailAlgemeenBrandstapel(0,$sid);
 							//stuur mails (ontwaken, brandstapelverkiezing) en
 							zetDood2($sid);
 							zetFase(15,$sid);
@@ -340,6 +342,7 @@ function fases() {
 					}
 				case 14:
 					regelBurgVerk($sid);
+					mailAlgemeenBrandstapel(1,$sid);
 					//stuur mails (yay, burgemeester en brandstapel...)
 					zetFase(15,$sid);
 				case 15:
@@ -393,7 +396,7 @@ function fases() {
 							sqlUp("Spellen","STATUS=3","SID=$sid");
 							//mail gewonnen
 						}
-						//mail algemeen (brandstapel)
+						mailAlgemeenInslapen($sid); //mail algemeen (brandstapel)
 						zetDood2($sid);
 						regelZetNULL2($sid);
 						zetFase(0,$sid);

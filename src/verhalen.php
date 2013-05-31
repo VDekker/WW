@@ -977,4 +977,73 @@ function mailZonde($id,$slachtoffers,$sid) {
 	return;
 }//mailZonde
 
+function mailAlgemeenVerkiezing($sid) {
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$thema = $spel['THEMA'];
+	$onderwerp = "$snaam: Algemeen"; 
+	//pak ontwaakverhaal
+	//pak burgemeester-verhaal
+	//maak samenvatting
+	//mail naar iedereen in maillijst
+	$adressen = array();
+	$resultaat = sqlSel("Spelers","SID=$sid AND ((SPELERFLAGS & 2) = 2)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	$adres = $adressen[0];
+	for($i = 1; $i < count($adres); $i++) {
+		$adres .= ", " . $adressen[$i];
+	}
+	stuurMail($adres,$onderwerp,$text);
+}//mailAlgemeenVerkiezing
+
+function mailAlgemeenBrandstapel($vlag,$sid) {
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$thema = $spel['THEMA'];
+	$onderwerp = "$snaam: Algemeen"; 
+	//als vlag=0:
+	//	pak ontwaakverhaal
+	//als vlag=1
+	//	pak verkiezing-uitslag-verhaal
+	//
+	//pak brandstapel-verhaal
+	//maak samenvatting
+	//mail naar iedereen in maillijst
+	$adressen = array();
+	$resultaat = sqlSel("Spelers","SID=$sid AND ((SPELERFLAGS & 2) = 2)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	$adres = $adressen[0];
+	for($i = 1; $i < count($adres); $i++) {
+		$adres .= ", " . $adressen[$i];
+	}
+	stuurMail($adres,$onderwerp,$text);
+}//mailAlgemeenBrandstapel
+
+function mailAlgemeenInslapen($sid) {
+	$resultaat = sqlSel("Spellen","SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$thema = $spel['THEMA'];
+	$onderwerp = "$snaam: Algemeen";
+	//pak brandstapel-uitslag-verhaal
+	//pak nacht-inleiding-verhaal
+	//mail naar iedereen in maillijst
+	$adressen = array();
+	$resultaat = sqlSel("Spelers","SID=$sid AND ((SPELERFLAGS & 2) = 2)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	$adres = $adressen[0];
+	for($i = 1; $i < count($adres); $i++) {
+		$adres .= ", " . $adressen[$i];
+	}
+	stuurMail($adres,$onderwerp,$text);
+}//mailAlgemeenInslapen
+
 ?>
