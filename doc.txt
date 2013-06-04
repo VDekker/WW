@@ -34,7 +34,6 @@
   * Verhaal: geefVerhaal verbeteren/meerdere maken
   * Verhaal: vulInDood gebruiken waar nodig
   * Verhaal: shuffle() gebruiken/controleren
-  * Verhaal: vulIn fixen (1 tuple array ipv. 3 arrays)
   
   * Regelen: Jager's EXTRA_STEM legen na algemene mail
   
