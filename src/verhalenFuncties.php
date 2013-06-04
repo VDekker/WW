@@ -318,7 +318,7 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
-function ontwaakVerhaal(&$text,&$samenvatting,$auteur,$spel) {
+function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$tuplesL = array(); //L voor levende spelers
 	$tuplesD = array(); //D voor dode spelers
 	$tuplesS = array(); //S voor Jagers/Geliefden (speciaal verhaal)
@@ -394,6 +394,10 @@ function ontwaakVerhaal(&$text,&$samenvatting,$auteur,$spel) {
 		$tuplesD,"",$text,$geswoorden);
 
 	//nu dingen aanvullen met behulp van de boom van jagers/geliefden TODO
+	foreach($boom as $id => $target) {
+		leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
+			$tuplesL,$tuplesS,$thema,"Algemeen",$sid);
+	}
 
 	//en samenvatting maken TODO
 	return;
@@ -467,14 +471,116 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 }//maakBoom
 
 //zet een 'boom' om in verhaal
-//hierbij kan $rol 'Algemeen' of 'Brandstapel' zijn
-function leesBoom($boom,&$text,$thema,$rol) {
-	foreach($boom as $id => $target) {
+//hierbij kan $rol 'Algemeen', 'Jager', 'Geliefde' of 'Brandstapel' zijn
+//$levende zijn de levende spelers, en $speciale zijn de spelers in de boom,
+//elk van hen zijn tuple-arrays
+//TODO samenvatting regelen
+function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
+	$levende,&$speciale,$thema,$rol,$sid) {
+		//vind de id
+		$index = array();
+		if(!array_search_recursive($id,$speciale,$index)) {
+			//bij blad aangekomen, doe iets anders... TODO
+		}
+		$tuple = $speciale[$index[0]];
+		$speciale = delArrayElement($speciale,$index[0]);
+
 		//kondig id aan
+		$verhaal = geefVerhaalGroep($thema,$rol,4,
+			(count($levende)+count($speciale)),1,$sid);
+		$text .= $verhaal['VERHAAL'];
+		$geswoorden = $verhaal['GESLACHT'];
+		array_push($auteur,$verhaal['AUTEUR']);
+		$text = vulInDood(array_merge($levende,$speciale),
+			$tuple,"",$text,$geswoorden);
+
 		//als id == jager: leesBoom op zijn target
+		if($tuple['ROL'] == "Jager" &&
+			($tuple['SPELFLAGS'] & 4) == 4) {
+				$doelwit = $tuple['EXTRA_STEM'];
+				if(empty($boom[$doelwit])) {
+					//doelwit is een blad
+				}
+				else {
+					leesBoom($boom[$id],$doelwit,$text,$samenvatting,
+						$auteur,$levende,$speciale,$thema,"Jager");
+				}
+		}//if
+
 		//maak id dood
+		$verhaal = geefVerhaalGroep($thema,$rol,5,
+			(count($levende)+count($speciale)),1,$sid);
+		$text .= $verhaal['VERHAAL'];
+		$geswoorden = $verhaal['GESLACHT'];
+		array_push($auteur,$verhaal['AUTEUR']);
+		$text = vulInDood(array_merge($levende,$speciale),
+			$tuple,"",$text,$geswoorden);
+
 		//als id == geliefde: kondig geliefde aan etc.
+		if($tuple['GELIEFDE'] != "" &&
+			($tuple['SPELFLAGS'] & 512) == 0) {
+				$geliefde = $tuple['GELIEFDE'];
+				if(empty($boom[$geliefde])) {
+					//geliefde is een blad
+				}
+				else {
+					leesBoom($boom[$geliefde],$geliefde,$text,$samenvatting,
+					$auteur,$levende,$speciale,$thema,"Geliefde");
+				}
+		}//if
+	}//leesBoom
+
+function leesBlad($id,&$text,&$samenvatting,&$auteur,
+	$levende,&$speciale,$thema,$sid) {
+	//vind de id
+	$index = array();
+	array_search_recursive($id,$speciale,$index);
+	$tuple = $speciale[$index[0]];
+	$speciale = delArrayElement($speciale,$index[0]);
+
+	//kondig aan
+	$verhaal = geefVerhaalGroep($thema,$rol,4,
+		(count($levende)+count($speciale)),1,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood(array_merge($levende,$speciale),
+		$tuple,"",$text,$geswoorden);
+
+	//en vermoord
+	$verhaal = geefVerhaalGroep($thema,$rol,5,
+		(count($levende)+count($speciale)),1,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood(array_merge($levende,$speciale),
+		$tuple,"",$text,$geswoorden);
+
+	return;
+}//leesBlad
+
+
+//vind een value in multidimensional arrays;
+//indexes wordt gevuld met de keys die leiden naar de value
+//van internet: 
+//http://stackoverflow.com/questions/4232497/
+//array-search-recursive-help-me-find-where-value-exists-in-multidimensional
+function array_search_recursive($needle, $haystack, &$indexes=array()) {
+	foreach ($haystack as $key => $value) {
+		if (is_array($value)) {
+			$indexes[] = $key;
+			$status = array_search_recursive($needle, $value, $indexes);
+			if ($status) {
+				return true;
+			} else {
+				$indexes = array();
+			}
+		} else if ($value == $needle) {
+			$indexes[] = $key;
+			return true;
+		}
 	}
-}//leesBoom
+	return false;
+}//array_search_recursive
 
 ?>

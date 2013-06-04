@@ -11,8 +11,9 @@
                 opeten
   * Opmerking:  wat als de Fluitspelers allemaal op 1 dezelfde speler stemmen?
                 (en als de WW/VP dit doen?)
+  * Opmerking:  wat als beide Geliefden worden vermoord (niet door hartebreuk)?
+                Dan gaat het verhaal fout. Fix dit!
 
-  * Testen:  werkt alles nog na schoonmaken?
   * Testen:  kan een spel winnen?
   * Testen:  mails
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
@@ -729,20 +730,20 @@ Jager:               0 = Wakker worden, nacht
                      1 = Wakker worden, dag
                      2 = Speler neergeschoten, nacht
                      3 = Speler neergeschoten, dag
+                     4 = Jager doelwit, aankondiging (algemeen)
+                     5 = Jager doelwit dood (algemeen)
                      9 = Blanco gestemd
 Burgemeester:        0 = Wakker worden
 (testament)          1 = Speler gekozen
                      9 = Blanco gestemd
-Algemeen            -1 = Inleiding
+Algemeen:           -1 = Inleiding
                      0 = Wakker worden, normaal
                      1 = Wakker worden, speciaal
-                     2 = Speler dood, aankondiging
-                     3 = Speler dood
-                     4 = Jager doelwit, aankondiging
-                     5 = Jager doelwit dood
-                     6 = Geliefde dood, aankondiging
-                     7 = Geliefde dood
+                     4 = Speler dood, aankondiging
+                     5 = Speler dood
                      8 = Gaan slapen
+Geliefde:            4 = Geliefde dood, aankondiging (algemeen)
+                     5 = Geliefde dood (algemeen)
 Burgemeester:
 (verkiezing)
 Brandstapel:
