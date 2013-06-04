@@ -772,7 +772,6 @@ function regelJager($fase,$sid) {
 					$flag = true;
 			}
 		}
-		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	if($flag) {
 		sqlData($resultaat,0);
@@ -836,12 +835,18 @@ function regelDood1($sid) {
 	sqlData($resultaat,0);
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
-		$geliefde = $speler['GELIEFDE'];
-		if($geliefde != "") { 
-			zetDood($geliefde,$sid);
-			echo "Geliefde $geliefde kan niet leven zonder $id en sterft.\n";
-		}
+		$geliefdeID = $speler['GELIEFDE'];
+		if($geliefdeID != "") {
+			$resultaat2 = sqlSel("Spelers","ID=$geliefdeID");
+			$geliefde = sqlFet($resultaat2);
+			if($geliefde['LEVEND'] == 1) {
+				zetDood($geliefdeID,$sid);
+				sqlUp("Spelers","SPELFLAGS=SPELFLAGS+512","ID=$geliefdeID");
+				echo "Geliefde $geliefdeID kan niet leven zonder $id en sterft.\n";
+			}
+		}//if
 	}//while
+
 	return;
 }//regelDood1
 

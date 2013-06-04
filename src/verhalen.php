@@ -10,21 +10,15 @@ function mailRolverdeling($sid) {
 	$resultaat = sqlSel("Spelers","SID=$sid");
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
-		$namen = array($speler['NAAM']);
+		$tuples = array($speler);
 		$adres = $speler['EMAIL'];
-		$rollen = array($speler['ROL']);
-		if($rollen[0] == "Dwaas") {
-			$rollen[0] = "Ziener";
-		}
-		$geslacht = ($speler['SPELERFLAGS'] & 1);
-		$geslachten = array($geslacht);
 
 		$verhaal = geefVerhaalRolverdeling($thema,$rollen[0],$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 
-		$text = vulIn($namen,$rollen,$geslachten,"",$text,$geswoorden);
+		$text = vulIn($tuples,"",$text,$geswoorden);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -51,16 +45,13 @@ function mailWakker($rol,$sid) {
 		if(!wordtWakker($id,$sid)) {
 			continue;
 		}
-		$namen = array($speler['NAAM']);
-		$geslacht = ($speler['SPELERFLAGS'] & 1);
-		$geslachten = array($geslacht);
-		$rollen = array($rol);
+		$tuples = array($speler);
 		$adres = $speler['EMAIL'];
 		$verhaal = geefVerhaal($thema,$rol,0,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
-		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+		$text = vulIn($tuples,$deadline,$text,$geswoorden);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -77,9 +68,7 @@ function mailGroepWakker($rol,$sid) {
 	$spel = sqlFet($resultaat);
 	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
-	$namen = array();
-	$geslachten = array();
-	$rollen = array();
+	$tuples = array();
 	$adressen = array();
 	if($rol == "Weerwolf") {
 		$resultaat = sqlSel("Spelers",
@@ -98,10 +87,7 @@ function mailGroepWakker($rol,$sid) {
 		if(!wordtWakker($speler['ID'],$sid)) {
 			continue;
 		}
-		array_push($namen,$speler['NAAM']);
-		array_push($rollen,$rol);
-		$geslacht = ($speler['SPELERFLAGS'] & 1);
-		array_push($geslachten,$geslacht);
+		array_push($tuples,$speler);
 		array_push($adressen,$speler['EMAIL']);
 	}
 	if(empty($namen)) {
@@ -117,13 +103,12 @@ function mailGroepWakker($rol,$sid) {
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];
-	$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+	$text = vulIn($tuples,$deadline,$text,$geswoorden);
 	$text = auteur($auteur,$text);
 
 	stuurMail($adres,$onderwerp,$text);
-	foreach($namen as $naam) {
-		echo "Mail gestuurd naar $naam.\n";
-	}
+	echo "Mail gestuurd naar $adres.\n";
+	
 	return;
 }//mailGroepWakker
 
@@ -135,15 +120,10 @@ function mailHeksWakker($sid) {
 	$spel = sqlFet($resultaat);
 	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
-	$namen = array(); // vul een array van slachtoffers
-	$rollen = array();
-	$geslachten = array();
+	$tuples = array(); // vul een array van slachtoffers
 	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=3");
 	while($speler = sqlFet($resultaat)) {
-		array_push($namen,$speler['NAAM']);
-		array_push($rollen,$speler['ROL']);
-		$geslacht = ($speler['SPELERFLAGS'] & 1);
-		array_push($geslachten,$geslacht);
+		array_push($tuples,$speler);
 	}
 
 	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Heks' AND 
@@ -152,28 +132,23 @@ function mailHeksWakker($sid) {
 		if(!wordtWakker($speler['ID'],$sid)) {
 			continue;
 		}
-		array_splice($namen,0,0,$speler['NAAM']);
-		array_splice($rollen,0,0,"Heks");
-		$geslacht = ($speler['SPELERFLAGS'] & 1);
-		array_splice($geslachten,0,0,$geslacht);
+		array_splice($tuples,0,0,$speler);
 		$adres = $speler['EMAIL'];
 		$verhaal = geefVerhaal($thema,"Heks",0,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
-		$text = vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden);
+		$text = vulIn($tuples,$deadline,$text,$geswoorden);
 
 		if(!(($speler['LEVEND'] & 2) == 2)) {
-			delArrayElement($namen,0);
+			delArrayElement($tuples,0);
 		}
-		$text = keuzeHeks($text,$speler['NAAM'],$namen,$sid);
+		$text = keuzeHeks($text,$speler['NAAM'],$tuples,$sid);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
-		echo "Mail gestuurd naar $namen[0].\n";
-		$namen = delArrayElement($namen,0);
-		$rollen = delArrayElement($rollen,0);
-		$geslachten = delArrayElement($geslachten,0);
+		echo "Mail gestuurd naar $adres.\n";
+		$tuples = delArrayElement($tuples,0);
 	}//while
 	return;
 }//mailHeksWakker
@@ -1004,12 +979,19 @@ function mailAlgemeenBrandstapel($vlag,$sid) {
 	$spel = sqlFet($resultaat);
 	$snaam = $spel['SNAAM'];
 	$thema = $spel['THEMA'];
-	$onderwerp = "$snaam: Algemeen"; 
-	//als vlag=0:
-	//	pak ontwaakverhaal
-	//als vlag=1
-	//	pak verkiezing-uitslag-verhaal
-	//
+	$onderwerp = "$snaam: Algemeen";
+	$text = "";
+	$samenvatting = "";
+	$auteur = array();
+	if(!$vlag) {
+		ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
+	}
+	else {
+		verkiezingVerhaal($text,$samenvatting,$auteur,$spel);//TODO maken
+	}
+	inleidingBrandstapel($text,$samenvatting,$auteur,$spel);//TODO maken
+	$text = plakSamenvatting($samenvatting,$text);
+	$text = auteur($auteur,$text);
 	//pak brandstapel-verhaal
 	//maak samenvatting
 	//mail naar iedereen in maillijst

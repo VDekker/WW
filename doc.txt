@@ -32,6 +32,11 @@
              als dan nog geen verhaal: default beide stappen
   * Verhaal: maak default verhalen
   * Verhaal: geefVerhaal verbeteren/meerdere maken
+  * Verhaal: vulInDood gebruiken waar nodig
+  * Verhaal: shuffle() gebruiken/controleren
+  * Verhaal: vulIn fixen (1 tuple array ipv. 3 arrays)
+  
+  * Regelen: Jager's EXTRA_STEM legen na algemene mail
   
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
@@ -177,7 +182,8 @@ SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel
                    Jager iemand neergeschoten, 8 = als Weerwolf geteld voor de 
                    Welp, 16 = bezit levenselixer van Heks, 32 = bezit gif van 
                    Heks, 64 = bezit extra leven van Dorpsoudste, 128 = als 
-                   Dorpsgek ontdekt, 256 = als Zondebok op Brandstapel gekomen).
+                   Dorpsgek ontdekt, 256 = als Zondebok op Brandstapel gekomen
+                   512 = als Geliefde gestorven).
 GELIEFDE:          Is de speler een Geliefde? (Hierin staat de ID van zijn 
                    Geliefde, of NULL.)
 LIJFWACHT:         Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
@@ -310,6 +316,15 @@ toeziet dat alle stemmen goed in de database komen, en dat ze van tevoren
 gecheckt zijn. Dit is aan de parser, niet aan de regelfuncties, omdat in geval 
 van een foute stem van enig geval, de speler moet worden teruggemaild, zodat 
 hij zijn stem kan herzien.
+
+Geliefden:
+----------
+
+Als een van de Geliefden wordt gedood, gaat ook de ander dood. Hier beschermt
+de Lijfwacht niet tegen. Dit wordt ook vermeld in de samenvatting in de algemene
+mails. Zouden beide Geliefden echter 's nachts vermoord worden (beiden worden 
+vermoord, ze sterven niet omdat de ander sterft), dan wordt er niet in de 
+samenvatting genoemd dat ze Geliefden zijn.
 
 Burgemeester:
 -------------
@@ -615,7 +630,6 @@ De verhalen hebben een rol en een fase, en met deze twee variabelen kan het
 juiste soort verhaaltje bepaald worden:
 
 Rolverdeling:       -1 = Speler rol mailen
-Inleiding:           0 = Inleiding
 Dief:               -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Burger geworden, niet gestolen (Dief)
@@ -720,6 +734,16 @@ Jager:               0 = Wakker worden, nacht
 Burgemeester:        0 = Wakker worden
 (testament)          1 = Speler gekozen
                      9 = Blanco gestemd
+Algemeen            -1 = Inleiding
+                     0 = Wakker worden, normaal
+                     1 = Wakker worden, speciaal
+                     2 = Speler dood, aankondiging
+                     3 = Speler dood
+                     4 = Jager doelwit, aankondiging
+                     5 = Jager doelwit dood
+                     6 = Geliefde dood, aankondiging
+                     7 = Geliefde dood
+                     8 = Gaan slapen
 Burgemeester:
 (verkiezing)
 Brandstapel:
@@ -753,6 +777,13 @@ Geslachten: Woorden die afhangen van het geslacht van een speler (bijv. "hem"
             paar is van het volgende paar gescheiden door een "%". In het 
             verhaal stat vervolgens "geslacht[x][y]", waarbij "y" het nummer is 
             van het paar alternatieven.
+Deadlines:  Een eventuele deadline wordt weergegeven met "deadline[0]".
+            
+Als er in verhalen ook dode spelers in voorkomen, dan moeten hun namen/rollen/
+geslachten worden ingevuld op dezelfde manier, met slechts een klein verschil:
+in plaats van "naam[x]" staat hun naam aangegeven in het verhaal met 
+"naamDood[x]". Ook bij rollen is hetzelfde aan de hand: "rol[x]" wordt 
+"rolDood[x]", en "geslacht[x][y]" wordt "geslachtDood[x][y]".
 
 Algemene mails:
 ---------------

@@ -78,10 +78,33 @@ function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid) {
 	return $tuples[$key];
 }//geefVerhaalGroep2
 
-
-function vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden) {
+function vulIn($spelers,$deadline,$text,$geswoorden) {
 	$paren = explode('%',$geswoorden);
-	foreach($namen as $speler => $naam) {
+	foreach($spelers as $i => $speler) {
+		$geslacht = $speler['SPELERFLAGS'] & 1;
+		$naam = $speler['NAAM'];
+		$rol = $speler['ROL'];
+		if($rol == "Dwaas") {
+			$rol = "Ziener";
+		}
+		if(!empty($geswoorden)) {
+			foreach($paren as $key => $paar) {
+				$alternatief = explode('&',$paar);
+				$text = str_replace("geslacht[$i][$key]",
+					$alternatief[$geslacht],$text);
+			}
+		}//if
+		$text = str_replace("naam[$i]",$naam,$text);
+		$text = str_replace("rol[$i]",$rol,$text);
+	}//foreach
+	$text = str_replace("deadline[0]",$deadline,$text);
+	return $text;
+}//vulIn
+
+function vulInDood($namenL,$namenD,$rollenL,$rollenD,
+	$geslachtenL,$geslachtenD,$deadline,$text,$geswoorden) {
+	$paren = explode('%',$geswoorden);
+	foreach($namenL as $speler => $naam) {
 		if(!empty($geswoorden)) {
 			foreach($paren as $key => $paar) {
 				$alternatief = explode('&',$paar);
@@ -91,10 +114,21 @@ function vulIn($namen,$rollen,$geslachten,$deadline,$text,$geswoorden) {
 		}
 		$text = str_replace("naam[$speler]",$naam,$text);
 		$text = str_replace("rol[$speler]",$rollen[$speler],$text);
-		$text = str_replace("deadline[0]",$deadline,$text);
 	}
+	foreach($namenD as $speler => $naam) {
+		if(!empty($geswoorden)) {
+			foreach($paren as $key => $paar) {
+				$alternatief = explode('&',$paar);
+				$text = str_replace("geslachtDood[$speler][$key]",
+					$alternatief[$geslachten[$speler]],$text);
+			}
+		}
+		$text = str_replace("naamDood[$speler]",$naam,$text);
+		$text = str_replace("rolDood[$speler]",$rollen[$speler],$text);
+	}
+	$text = str_replace("deadline[0]",$deadline,$text);
 	return $text;
-}//vulIn
+}//vulInDood
 
 function geefVerhaalRolverdeling($thema,$rol,$sid) {
 	$resultaat = sqlSel("Verhalen",
@@ -141,8 +175,8 @@ function keuzeHeks($text,$heks,$doden,$sid) {
 			$text .= "Je kunt een van deze spelers tot leven wekken:<br />";
 		}
 		$text .= "<ul>";
-		foreach($doden as $naam) {
-			$text .= "<li>$naam</li>";
+		foreach($doden as $speler) {
+			$text .= "<li>" . $speler['NAAM'] . "</li>";
 		}
 		$text .= "</ul>";
 	}//if
@@ -223,33 +257,182 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
-function ontwaakVerhaal($spel) {
+function ontwaakVerhaal(&$text,&$samenvatting,$auteur,$spel) {
+	$tuplesS = array();
+	$namenL = array(); //L voor levende spelers
+	$namenD = array(); //D voor dode spelers
+	$namenS = array(); //S voor Jagers/Geliefden (speciaal verhaal)
+	$rollenL = array();
+	$rollenD = array();
+	$rollenS = array();
+	$geslachtenL = array();
+	$geslachtenD = array();
+	$geslachtenS = array();
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
 	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
 	$levend = sqlNum($resultaat);
-	$resultaat2 - sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)";
+	while($speler = sqlFet($resultaat)) {
+		array_push($namenL,$speler['NAAM']);
+		array_push($rollenL,$speler['ROL']);
+		array_push($geslachtenL,($speler['GESLACHT'] & 1));
+	}
+	$resultaat2 = sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)");
 	$dood = sqlNum($resultaat);
 
-	//jager, geliefde, dorpsoudste, badguy
-	$dodeRol = array(false,false,false,false);
+	$speciaalVerhaal = false;
+	$doelwitten = array(); //id's van de doelwitten van de jagers
 	while($speler = sqlFet($resultaat2)) {
-		if($speler['ROL'] == "Jager") {
-			$doderol[0] = true;
+		if($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) {
+			$speciaalVerhaal = true;
+			array_push($tuplesS,$speler);
+			array_push($namenS,$speler['NAAM']);
+			array_push($rollenS,$speler['ROL']);
+			array_push($geslachtenS,($speler['GESLACHT'] & 1));
+			$levend++; //jagers zijn levend aan het begin van het verhaal
+			$dood--;
+			array_push($doelwitten,$speler['EXTRA_STEM']);
 		}
-		else if($speler['ROL'] == "Dorpsoudste") {
-			$doderol[2] = true;
+		else if($speler['GELIEFDE'] != "" && 
+			($speler['LEVEND'] & 512) == 0) {
+				$speciaalVerhaal = true;
+				array_push($tuplesS,$speler);
+				array_push($namenS,$speler['NAAM']);
+				array_push($rollenS,$speler['ROL']);
+				array_push($geslachtenS,($speler['GESLACHT'] & 1));
+				$levend++; //hartgebroken geliefden zijn levend
+				$dood--; //aan het begin van het verhaal
 		}
-		else if($speler['ROL'] == "Weerwolf" || $speler['ROL'] == "Welp" ||
-			$speler['ROL'] == "Vampier" || $speler['ROL'] == "Fluitspeler" ||
-			$speler['ROL'] == "Witte Weerwolf" || 
-			$speler['ROL'] == "Psychopaat") {
-			$doderol[3] = true;
+		else {
+			array_push($namenD,$speler['NAAM']);
+			array_push($rollenD,$speler['ROL']);
+			array_push($geslachtenD,($speler['GESLACHT'] & 1));
+		}
+	}//while
+
+	if(!$speciaalVerhaal) { //normaal verhaal
+		$verhaal = geefVerhaalGroep($thema,"Algemeen",0,$levend,$dood,$sid);
+		$text = $verhaal['VERHAAL'];
+		$geswoorden = $verhaal['GESLACHT'];
+		array_push($auteur,$verhaal['AUTEUR']);
+		$text = vulInDood($namenL,$namenD,$rollenL,$rollenD,$geslachtenL,
+			$geslachtenD,"",$text,$geswoorden);
+		//TODO samenvatting maken
+		return;
+	}
+
+	//pak alle ongevonden jagerdoelwitten uit de dode lijst
+	//en vul de resArray (gebruikt door maakBoom)
+	$resArray = array();
+	sqlData($resultaat2,0);
+	while($speler = sqlFet($resultaat2)) {
+		if(in_array($speler['ID'],$doelwitten) && 
+			in_array($speler['NAAM'],$namenD)) {
+				array_push($tuplesS,$speler);
+				array_push($namenS,$speler['NAAM']);
+				array_push($rollenS,$speler['ROL']);
+				array_push($geslachtenS,($speler['GESLACHT'] & 1));
+				$key = array_search($speler['NAAM'],$namenD);
+				$namenD = delArrayElement($namenD,$key);
+				$rollenD = delArrayElement($rollenD,$key);
+				$geslachtenD = delArrayElement($geslachtenD,$key);
+				$levend++;
+				$dood--;
 			}
-		if($speler['GELIEFDE'] != "") {
-			$doderol[1] = true;
-		}
+		array_push($resArray,$speler);
+	}//while
+
+	//maak de boom van jagers/geliefden
+	sqlData($resultaat2,0);	
+	$boom = array();
+	$boom = maakBoom(0,$tuplesS,$boom,0,$resArray);
+
+	//ontwaken/begin
+	$verhaal = geefVerhaalGroep($thema,"Algemeen",1,$levend,$dood,$sid);
+	$text = $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood(array_merge($namenL,$namenS),$namenD,
+		array_merge($rollenL,$rollenS),$rollenD,
+		array_merge($geslachtenL,$geslachtenS),$geslachtenD,
+		"",$text,$geswoorden);
+
+	//nu dingen aanvullen met behulp van de boom van jagers/geliefden TODO
+
+
+	foreach($namenS as $key => $naam) {
+		$levend--;//speciale speler gaat dood
+		$dood++;
+		array_splice($namenD,0,0,$naam);
+		array_splice($rollenD,0,0,$rollenS[$key]);
+		array_splice($geslachtenD,0,0,$geslachtenS[$key]);
+		$verhaal = geefVerhaalGroep($thema,"Algemeen",$levend,$dood,$sid);
+	}
+	//TODO pak speciaal verhaal
+	return;
 	}
 }//ontwaakVerhaal
+
+function plakSamenvatting($samenvatting,$text) {
+	$text .= "<br /><hr />";
+	$text .= "Samenvatting:<br />";
+	$text .= "<br />";
+	$text .= $samenvatting;
+	return $text;
+}
+
+function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
+	if($diepte == 0) {
+		foreach($resultaat as $speler) {
+			$key = array_search($speler,$specialeTuples);
+			if($key === false) {
+				if($speler['ROL'] == "Jager" && 
+					($speler['SPELFLAGS'] & 4) == 4) {
+						$id = $speler['ID'];
+						$boom[$id] = array();
+						array_push($boom[$id],$speler['EXTRA_STEM']);
+						$boom[$id] = maakBoom($id,$specialeTuples,$boom[$id],
+							$diepte+1,$resultaat);
+					}
+			}
+		}
+	}
+	else {
+		foreach($specialeTuples as $key => $speler) {
+			$vlag = false;
+			$key = array_search($speler['ID'],$boom);
+			if($key !== false) { //speler zit in een blad van de boom...
+				$vlag2 = false;
+				$id = $speler['ID'];
+
+				//als jager: maak een knoop van het blad
+				if($speler['ROL'] == "Jager" &&
+					($speler['SPELFLAGS'] & 4) == 4) {
+						$vlag2 = true;
+						if(!$vlag) {
+							$boom[$id] = array();
+							$vlag = true;
+						}
+						array_push($boom[$id],$speler['EXTRA_STEM']);
+					}
+				if($speler['GELIEFDE'] != "" &&
+					($speler['SPELFLAGS'] & 512) == 0) {
+						$vlag2 = true;
+						if(!$vlag) {
+							$boom[$id] = array();
+							$vlag = true;
+						}
+						array_push($boom[$id],$speler['GELIEFDE']);
+					}
+				if($vlag2) {
+					unset($boom[$key]);//verwijder het oude blad
+					$boom[$id] = maakBoom($id,$specialeTuples,$boom[$id],
+						$diepte+1,$resultaat);
+				}
+			}
+		}
+	}
+	return $boom;
+}//maakBoom
 
 ?>
