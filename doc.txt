@@ -22,6 +22,7 @@
   * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks, 
              kloppen deze?
   * Testen:  spel pauzeren/hervatten
+  * Testen:  werkt (anonieme) help?
 
   * Mailen:  verhalen implementeren voor meerdere spelers/brandstapel
   * Mailen:  stuurFoutStem maken voor specifieke rollen
@@ -41,8 +42,8 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
+  * Nodig:   help fixen: berichten worden gibberisch!
 
-  * Extra:   anonieme help maken? (is dat de moeite waard?)
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)
   * Extra:   optimaliseer gewonnenSpelers()

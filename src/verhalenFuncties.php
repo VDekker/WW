@@ -370,7 +370,14 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
 		$text = vulInDood($tuplesL,$tuplesD,"",$text,$geswoorden);
-		//TODO samenvatting maken
+
+		//samenvatting maken
+		foreach($tuplesD as $speler) {
+			$naam = $speler['NAAM'];
+			$rol = $speler['ROL'];
+			$samenvatting .= "$naam ($rol) is dood.<br />";
+		}
+		$samenvatting .= "De Dag begint.<br />";
 		return;
 	}
 	
@@ -388,19 +395,23 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		$tuplesD,"",$text,$geswoorden);
 
 	//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
+	//en samenvatting maken
 	foreach($boom as $id => $target) {
 		$resultaat = sqlSel("Spelers","NAAM='$id' AND SID=$sid");
 		$tuple = sqlFet($resultaat);
 		array_push($tuplesS,$tuple);
+		$naam = $tuple['NAAM'];
+		$rol = $tuple['ROL'];
+		$samenvatting .= "$naam ($rol) is dood.<br />";
 	}
 
-	//nu dingen aanvullen met behulp van de boom van jagers/geliefden TODO
+	//nu dingen aanvullen met behulp van de boom van jagers/geliefden
 	foreach($boom as $id => $target) {
 		leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
 			$tuplesL,$tuplesS,$thema,"Algemeen",$sid);
 	}
+	$samenvatting .= "De Dag begint.<br />";
 
-	//en samenvatting maken TODO
 	return;
 }//ontwaakVerhaal
 
@@ -474,7 +485,6 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 //hierbij kan $rol 'Algemeen', 'Jager', 'Geliefde' of 'Brandstapel' zijn
 //$levende zijn de levende spelers, en $speciale zijn de spelers in de boom,
 //elk van hen zijn tuple-arrays
-//TODO samenvatting regelen
 function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 	$levende,&$speciale,$thema,$rol,$sid) {
 		//vind de id
@@ -512,6 +522,7 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 			stuurError2($error,$sid);
 		}
 		$tuple = $speciale[$index[0]];
+		$naam = $tuple['NAAM'];
 		$speciale = delArrayElement($speciale,$index[0]);
 
 		//kondig id aan
@@ -529,15 +540,18 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 				$doelwit = $tuple['EXTRA_STEM'];
 				$resultaat = sqlSel("Spelers","ID=$doelwit");
 				$tuple2 = sqlFet($resultaat);
-				$naam = $tuple2['NAAM'];
-				if(array_key_exists($naam,$boom)) {
+				$naam2 = $tuple2['NAAM'];
+				$rol2 = $tuple2['ROL'];
+				$samenvatting .= "Jager $naam schiet $naam2 ($rol2) neer.";
+				$samenvatting .= "<br />";
+				if(array_key_exists($naam2,$boom)) {
 					//doelwit is een knoop: recursief
-					leesBoom($boom[$naam],$naam,$text,$samenvatting,
+					leesBoom($boom[$naam2],$naam2,$text,$samenvatting,
 						$auteur,$levende,$speciale,$thema,"Jager",$sid);
 				}
 				else {
 					//doelwit is een blad
-					leesBlad($naam,$text,$samenvatting,$auteur,
+					leesBlad($naam2,$text,$samenvatting,$auteur,
 						$levende,$speciale,$thema,"Jager",$sid);
 				}
 		}//if
@@ -557,22 +571,24 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 				$geliefde = $tuple['GELIEFDE'];
 				$resultaat = sqlSel("Spelers","ID=$geliefde");
 				$tuple2 = sqlFet($resultaat);
-				$naam = $tuple2['NAAM'];
-				if(array_key_exists($naam,$boom)) {
+				$naam2 = $tuple2['NAAM'];
+				$rol2 = $tuple2['ROL'];
+				$samenvatting .= "Geliefde $naam2 ($rol2) kan niet leven ";
+				$samenvatting .= "zonder $naam.<br />";
+				if(array_key_exists($naam2,$boom)) {
 					//doelwit is knoop: recursief
-					leesBoom($boom[$naam],$naam,$text,$samenvatting,
+					leesBoom($boom[$naam2],$naam2,$text,$samenvatting,
 						$auteur,$levende,$speciale,$thema,"Geliefde",$sid);
 				}
 				else {
 					//doelwit is een blad
-					leesBlad($naam,$text,$samenvatting,$auteur,
+					leesBlad($naam2,$text,$samenvatting,$auteur,
 						$levende,$speciale,$thema,"Geliefde",$sid);
 				}
 		}//if
 	}//leesBoom
 
 //leest een blad van de boom (zie leesBoom()).
-//TODO samenvatting
 function leesBlad($id,&$text,&$samenvatting,&$auteur,
 	$levende,&$speciale,$thema,$rol,$sid) {
 

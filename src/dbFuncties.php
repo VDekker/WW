@@ -68,4 +68,9 @@ function sqlEscape($text) {
 	return mysqli_real_escape_string($dbconnect,$text);
 }//sqlEscape
 
+function sqlID() {
+	global $dbconnect;
+	return mysqli_insert_id($dbconnect);
+}//sqlID
+
 ?>

@@ -26,16 +26,16 @@ function gmailParse() {
 			
 			echo "Mail van: '$afzender'\n";
 
-			if(preg_match("/\bhelp\b/i",$onderwerp)) {
-				help($afzender,$onderwerp,$bericht);
-			}
-			else if(preg_match("/config/i",$onderwerp)) {
+			if(preg_match("/config/i",$onderwerp)) {
 				echo "Config mail gevonden!\n";
 				if(!in_array($afzender,$admins)) {
 					echo "Afzender is geen admin; doe niets.\n";
 					continue;
 				}
 				config($afzender,$onderwerp,$bericht);
+			}
+			else if(preg_match("/\bhelp\b/i",$onderwerp)) {
+				help($afzender,$onderwerp,$bericht);
 			}
 			else {
 				$resultaat = sqlSel("Spellen","");

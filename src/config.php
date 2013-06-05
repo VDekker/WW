@@ -41,6 +41,9 @@ function config($adres,$onderwerp,$bericht) {
 	if(preg_match("/story/i",$onderwerp)) {
 		adminStory($bericht,$adres);
 	}
+	if(preg_match("/help/i",$onderwerp)) {
+		adminHelp($bericht,$onderwerp,$adres);
+	}
 	return;
 }//config
 
@@ -386,6 +389,7 @@ function adminGames($adres) {
 		$onderwerp = "Spellen zoeken mislukt";
 		$bericht = "Er zijn geen spellen in de database.";
 		stuurMail($adres,$onderwerp,$bericht);
+		return;
 	}
 	echo "Spellen verzonden.\n";
 	stuurResultaatHTML($adres,$resultaat);
@@ -432,24 +436,58 @@ function adminStory($bericht,$adres) {//TODO thema's uitvogelen;
 	return;
 }//adminStory
 
+function adminHelp($bericht,$onderwerp,$adres) {
+	$nummers = array();
+	if(!preg_match_all('!\d+!',$onderwerp,$nummers)) {
+		echo "Geen HID gevonden.\n";
+		$onderwerp = "Help antwoorden mislukt";
+		$bericht = "Er was geen HID gevonden in het onderwerp.";
+		stuurMail($adres,$onderwerp,$bericht);
+		return;
+	}
+	$hid = implode('', $nummers[0]);
+	echo "$hid beantwoord.\n";
+	$resultaat = sqlSel("Help","HID=$hid");
+	$help = sqlFet($resultaat);
+	$ontvanger = $help['ADRES'];
+	$onderwerp = "RE:Help";
+	stuurMail($ontvanger,$onderwerp,$bericht);
+	
+	$onderwerp = "Help verzonden";
+	$bericht = "De help-mail is verzonden: HID $hid is beantwoord.";
+	stuurMail($adres,$onderwerp,$bericht);
+	return;	
+}//adminHelp
+
 //hulp aangevraagd: $onderwerp is het originele onderwerp, 
 //en $bericht het originele bericht
 function help($afzender,$onderwerp,$bericht) {
 	global $admins;
-
+	$sql = "INSERT INTO Help(ADRES) VALUES('$afzender')";
+	sqlQuery($sql);
+	$hid = sqlID();
 	$bericht1 = base64_decode($bericht);
-	$subject = "Hulp gevraagd";
-	$message = "Hulp gevraagd door $afzender:<br />";
+	$subject = "Hulp gevraagd: $hid";
+	if(preg_match("/anoniem/i",$onderwerp)) {
+		echo "Anonieme hulp gevraagd.\n";
+		$message = "Anonieme hulp gevraagd.<br />";
+	}
+	else {
+		echo "Hulp gevraagd door $afzender.\n";
+		$message = "Hulp gevraagd door $afzender:<br />";
+	}
 	$message .= "Onderwerp: $onderwerp <br />";
+	$message .= "HID: $hid <br />";
 	$message .= "<br />";
 	$message .= $bericht1;
 	$alleAdmins = $admins[0];
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
+	echo "$onderwerp\n";
+	echo "$bericht\n";
+	echo "$hid\n";
 	stuurMail($alleAdmins,$subject,$message);
-	echo "Onderwerp: $onderwerp\n";
-	echo "$bericht1\n";
 	return;
 }//help
 
