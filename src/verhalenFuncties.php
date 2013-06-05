@@ -327,42 +327,40 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
 	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
-	$levend = sqlNum($resultaat);
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
 	}
 	$resultaat2 = sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)");
-	$dood = sqlNum($resultaat2);
 
 	$speciaalVerhaal = false;
 	$doelwitten = array(); //id's van de doelwitten van de jagers
 	while($speler = sqlFet($resultaat2)) {
-		$vlag = false;
 		if($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) {
-			$vlag = true;
 			$speciaalVerhaal = true;
 			$res = sqlSel("Spelers","ID=" . $speler['EXTRA_STEM']);
 			$target = sqlFet($res);
 			array_push($tuplesS,$target);
-			$levend++; //jagers zijn levend aan het begin van het verhaal
-			$dood--;
 			array_push($doelwitten,$speler['EXTRA_STEM']);
 		}
 		if($speler['GELIEFDE'] != "" && 
 			($speler['LEVEND'] & 512) == 0) {
-				$vlag = true;
 				$speciaalVerhaal = true;
 				$res = sqlSel("Spelers","ID=" . $speler['GELIEFDE']);
 				$target = sqlFet($res);
 				array_push($tuplesS,$target);
-				$levend++; //hartgebroken geliefden zijn levend
-				$dood--; //aan het begin van het verhaal
-		}
-		if(!$vlag) {
-			array_push($tuplesD,$speler);
 		}
 		array_push($resArray,$speler);
 	}//while
+
+	foreach($resArray as $speler) {
+		if(!in_array($speler,$tuplesS) && 
+			!($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) && 
+			!($speler['GELIEFDE'] != "" && ($speler['LEVEND'] & 512) == 0)) {
+			array_push($tuplesD,$speler);
+		}
+	}
+	$dood = count($tuplesD);
+	$levend = count($tuplesL) + count($tuplesS);
 
 	//bij normaal verhaal (geen jagers/geliefden dood)
 	if(!$speciaalVerhaal) {
