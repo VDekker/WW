@@ -87,9 +87,7 @@ function stuurResultaatHTML($adres,$resultaat) {
 	global $thuis,$footnote;
 	$onderwerp = "Query";
 	
-	$bericht = "
-		<table border='1'>
-		    <tr>";
+	$bericht = "<table border='1'><tr>";
 	$tuple = sqlFet($resultaat);
 	foreach($tuple as $key => $value) {
 		if(is_int($key)) {

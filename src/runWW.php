@@ -32,6 +32,16 @@ else {
 	gmailParse(); // check of er mails zijn en reageer hierop
 	fases(); // regel alle stemmen, fases, stuurt mails
 
+	
+	$text = "";
+	$samenvatting = "";
+	$auteur = array();
+	$resultaat = sqlSel("Spellen","SID=1");
+	$spel = sqlFet($resultaat);
+	ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
+	echo $text;
+	
+	/*
 	$boom = array();
 	$speciaal = array();
 	$resArray = array();
@@ -49,7 +59,17 @@ else {
 		}
 		array_push($resArray,$speler);
 	}
+	echo "Speciaal:\n";
+	var_dump($speciaal);
+	echo "\n\nBoom vooraf:\n";
+	var_dump($boom);
+	echo "\n\nresArray:\n";
+	var_dump($resArray);
 	$boom = maakBoom(0,$speciaal,$boom,0,$resArray);
+	echo "\n\nBoom na-af:\n";
+	var_dump($boom);
+*/
+	
 
 }
 gmailSluit();

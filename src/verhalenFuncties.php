@@ -170,7 +170,7 @@ function vulInDood($tuplesL,$tuplesD,$deadline,$text,$geswoorden) {
 		$text = str_replace("naam[$i]",$naam,$text);
 		$text = str_replace("rol[$i]",$rol,$text);
 	}
-	foreach($namenD as $speler => $naam) {
+	foreach($tuplesD as $i => $speler) {
 		$geslacht = $speler['SPELERFLAGS'] & 1;
 		$naam = $speler['NAAM'];
 		$rol = $speler['ROL'];
@@ -319,9 +319,11 @@ function auteur($auteur,$text) {
 }//auteur
 
 function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
+	echo "Aangeroepen: ontwaakVerhaal.\n";
 	$tuplesL = array(); //L voor levende spelers
 	$tuplesD = array(); //D voor dode spelers
 	$tuplesS = array(); //S voor Jagers/Geliefden (speciaal verhaal)
+	$resArray = array();
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
 	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
@@ -330,31 +332,41 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		array_push($tuplesL,$speler);
 	}
 	$resultaat2 = sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)");
-	$dood = sqlNum($resultaat);
+	$dood = sqlNum($resultaat2);
 
 	$speciaalVerhaal = false;
 	$doelwitten = array(); //id's van de doelwitten van de jagers
 	while($speler = sqlFet($resultaat2)) {
+		$vlag = false;
 		if($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) {
+			$vlag = true;
 			$speciaalVerhaal = true;
-			array_push($tuplesS,$speler);
+			$res = sqlSel("Spelers","ID=" . $speler['EXTRA_STEM']);
+			$target = sqlFet($res);
+			array_push($tuplesS,$target);
 			$levend++; //jagers zijn levend aan het begin van het verhaal
 			$dood--;
 			array_push($doelwitten,$speler['EXTRA_STEM']);
 		}
-		else if($speler['GELIEFDE'] != "" && 
+		if($speler['GELIEFDE'] != "" && 
 			($speler['LEVEND'] & 512) == 0) {
+				$vlag = true;
 				$speciaalVerhaal = true;
-				array_push($tuplesS,$speler);
+				$res = sqlSel("Spelers","ID=" . $speler['GELIEFDE']);
+				$target = sqlFet($res);
+				array_push($tuplesS,$target);
 				$levend++; //hartgebroken geliefden zijn levend
 				$dood--; //aan het begin van het verhaal
 		}
-		else {
+		if(!$vlag) {
 			array_push($tuplesD,$speler);
 		}
+		array_push($resArray,$speler);
 	}//while
 
-	if(!$speciaalVerhaal) { //normaal verhaal
+	//bij normaal verhaal (geen jagers/geliefden dood)
+	if(!$speciaalVerhaal) {
+		echo "Normaal verhaal gewenst.\n";
 		$verhaal = geefVerhaalGroep($thema,"Algemeen",0,$levend,$dood,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
@@ -363,23 +375,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		//TODO samenvatting maken
 		return;
 	}
-
-	//pak alle ongevonden jagerdoelwitten uit de dode lijst
-	//en vul de resArray (gebruikt door maakBoom)
-	$resArray = array();
-	sqlData($resultaat2,0);
-	while($speler = sqlFet($resultaat2)) {
-		if(in_array($speler['ID'],$doelwitten) && 
-			in_array($speler['NAAM'],$namenD)) {
-				array_push($tuplesS,$speler);
-				$key = array_search($speler,$tuplesD);
-				$tuplesD = delArrayElement($tuplesD,$key);
-				$levend++;
-				$dood--;
-			}
-		array_push($resArray,$speler);
-	}//while
-
+	
 	//maak de boom van jagers/geliefden
 	sqlData($resultaat2,0);	
 	$boom = array();
@@ -393,6 +389,13 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$text = vulInDood(array_merge($tuplesL,$tuplesS),
 		$tuplesD,"",$text,$geswoorden);
 
+	//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
+	foreach($boom as $id => $target) {
+		$resultaat = sqlSel("Spelers","NAAM='$id' AND SID=$sid");
+		$tuple = sqlFet($resultaat);
+		array_push($tuplesS,$tuple);
+	}
+
 	//nu dingen aanvullen met behulp van de boom van jagers/geliefden TODO
 	foreach($boom as $id => $target) {
 		leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
@@ -401,7 +404,6 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 
 	//en samenvatting maken TODO
 	return;
-	}
 }//ontwaakVerhaal
 
 function plakSamenvatting($samenvatting,$text) {
@@ -423,7 +425,7 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 			if($key === false) {
 				if($speler['ROL'] == "Jager" && 
 					($speler['SPELFLAGS'] & 4) == 4) {
-						$id = $speler['ID'];
+						$id = $speler['NAAM'];
 						$boom[$id] = array();
 						array_push($boom[$id],$speler['EXTRA_STEM']);
 						$boom[$id] = maakBoom($id,$specialeTuples,$boom[$id],
@@ -438,7 +440,7 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 			$key = array_search($speler['ID'],$boom);
 			if($key !== false) { //speler zit in een blad van de boom...
 				$vlag2 = false;
-				$id = $speler['ID'];
+				$id = $speler['NAAM'];
 
 				//als jager: maak een knoop van het blad
 				if($speler['ROL'] == "Jager" &&
@@ -480,7 +482,36 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		//vind de id
 		$index = array();
 		if(!array_search_recursive($id,$speciale,$index)) {
-			//bij blad aangekomen, doe iets anders... TODO
+			//hier hoor je niet te komen...
+			$error = "Iets ging fout in leesBoom, ";
+			$error .= "en de functie kwam op onontdekt terrein: ";
+			$error .= "array_search_recursive() kon de naam $id";
+			$error .= "die in de boom stond niet vinden ";
+			$error .= "in de array met speciale tuples:<br />";
+			$error .= "<table border = '1'><tr>";
+			foreach($speciale[0] as $key => $value) {
+				if(is_int($key)) {
+					continue;
+				}//if
+				$error .= "<th>";
+				$error .= htmlspecialchars($key);
+				$error .= "</th>";
+			}//foreach
+			$error .= "</tr>";
+			foreach($speciale as $tuple) {
+				$error .= "<tr>";
+				foreach($tuple as $key => $value) {
+					if(is_int($key)) {
+						continue;
+					}//if
+					$error .= "<th>";
+					$error .= htmlspecialchars($value);
+					$error .= "</th>";
+				}//foreach
+				$error .= "</tr>";
+			}
+			$error .= "</table>";
+			stuurError2($error,$sid);
 		}
 		$tuple = $speciale[$index[0]];
 		$speciale = delArrayElement($speciale,$index[0]);
@@ -492,18 +523,24 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
 		$text = vulInDood(array_merge($levende,$speciale),
-			$tuple,"",$text,$geswoorden);
+			array($tuple),"",$text,$geswoorden);
 
 		//als id == jager: leesBoom op zijn target
 		if($tuple['ROL'] == "Jager" &&
 			($tuple['SPELFLAGS'] & 4) == 4) {
 				$doelwit = $tuple['EXTRA_STEM'];
-				if(empty($boom[$doelwit])) {
-					//doelwit is een blad
+				$resultaat = sqlSel("Spelers","ID=$doelwit");
+				$tuple2 = sqlFet($resultaat);
+				$naam = $tuple2['NAAM'];
+				if(array_key_exists($naam,$boom)) {
+					//doelwit is een knoop: recursief
+					leesBoom($boom[$naam],$naam,$text,$samenvatting,
+						$auteur,$levende,$speciale,$thema,"Jager",$sid);
 				}
 				else {
-					leesBoom($boom[$id],$doelwit,$text,$samenvatting,
-						$auteur,$levende,$speciale,$thema,"Jager");
+					//doelwit is een blad
+					leesBlad($naam,$text,$samenvatting,$auteur,
+						$levende,$speciale,$thema,"Jager",$sid);
 				}
 		}//if
 
@@ -514,24 +551,33 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
 		$text = vulInDood(array_merge($levende,$speciale),
-			$tuple,"",$text,$geswoorden);
+			array($tuple),"",$text,$geswoorden);
 
 		//als id == geliefde: kondig geliefde aan etc.
 		if($tuple['GELIEFDE'] != "" &&
 			($tuple['SPELFLAGS'] & 512) == 0) {
 				$geliefde = $tuple['GELIEFDE'];
-				if(empty($boom[$geliefde])) {
-					//geliefde is een blad
+				$resultaat = sqlSel("Spelers","ID=$geliefde");
+				$tuple2 = sqlFet($resultaat);
+				$naam = $tuple2['NAAM'];
+				if(array_key_exists($naam,$boom)) {
+					//doelwit is knoop: recursief
+					leesBoom($boom[$naam],$naam,$text,$samenvatting,
+						$auteur,$levende,$speciale,$thema,"Geliefde",$sid);
 				}
 				else {
-					leesBoom($boom[$geliefde],$geliefde,$text,$samenvatting,
-					$auteur,$levende,$speciale,$thema,"Geliefde");
+					//doelwit is een blad
+					leesBlad($naam,$text,$samenvatting,$auteur,
+						$levende,$speciale,$thema,"Geliefde",$sid);
 				}
 		}//if
 	}//leesBoom
 
+//leest een blad van de boom (zie leesBoom()).
+//TODO samenvatting
 function leesBlad($id,&$text,&$samenvatting,&$auteur,
-	$levende,&$speciale,$thema,$sid) {
+	$levende,&$speciale,$thema,$rol,$sid) {
+
 	//vind de id
 	$index = array();
 	array_search_recursive($id,$speciale,$index);
@@ -545,7 +591,7 @@ function leesBlad($id,&$text,&$samenvatting,&$auteur,
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
 	$text = vulInDood(array_merge($levende,$speciale),
-		$tuple,"",$text,$geswoorden);
+		array($tuple),"",$text,$geswoorden);
 
 	//en vermoord
 	$verhaal = geefVerhaalGroep($thema,$rol,5,
@@ -554,11 +600,10 @@ function leesBlad($id,&$text,&$samenvatting,&$auteur,
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
 	$text = vulInDood(array_merge($levende,$speciale),
-		$tuple,"",$text,$geswoorden);
+		array($tuple),"",$text,$geswoorden);
 
 	return;
 }//leesBlad
-
 
 //vind een value in multidimensional arrays;
 //indexes wordt gevuld met de keys die leiden naar de value
