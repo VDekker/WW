@@ -124,10 +124,7 @@ function verwijderStem($id,$plek) {
 
 //hoogt het aantal gemiste stemmen van een speler met 1 op
 function stemGemist($id) {
-	$resultaat = sqlSel(3,"ID=$id");
-	$speler = sqlFet($resultaat);
-	$gemist = $speler['GEMIST'] + 1;
-	sqlUp(3,"GEMIST=$gemist","ID=$id");
+	sqlUp(3,"GEMIST=GEMIST+1","ID=$id");
 	return;
 }//stemGemist
 
@@ -137,41 +134,23 @@ function heeftGestemd($id) {
 	return;
 }//heeftGestemd
 
-//checkt of een speler wakker wordt: 
-//staat hij in de stem van Klaas Vaak of niet?
-function wordtWakker($id,$sid) {
-	if(!inSpel("Klaas Vaak",$sid)) {
-		return true;
-	}
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Klaas Vaak'");
-	while($speler = sqlFet($resultaat)) {
-		if($speler['STEM'] == $id) {
-			return false;
-		}
-	}//while
-	return true;
+//checkt of een speler wakker wordt
+function wordtWakker($id) {
+	$resultaat = sqlSel(3,"ID=$id");
+	$speler = sqlFet($resultaat);
+	return(($speler['SPELFLAGS'] & 16384) == 16384);
 }//wordtWakker
 
 //controleert of een speler beschermt is door de Genezer
-function beschermd($id,$sid) {
-	if(!inSpel("Genezer",$sid)) {
-		return false;
-	}
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Genezer' AND ((LEVEND & 1) = 1)");
-	while($speler = sqlFet($resultaat)) {
-		$stem = $speler['STEM'];
-		if($stem == $id) {
-			return true;
-		}
-	}//while
-	return false;
+function beschermd($id) {
+	$resultaat = sqlSel(3,"ID=$id");
+	$speler = sqlFet($resultaat);
+	return (($speler['SPELFLAGS'] & 8192) == 8192);
 }//beschermd
 
 //dood de speler
 function zetDood($id,$sid) {
 	sqlUp(3,"LEVEND=3","ID=$id");
-	$resultaat = sqlSel(4,"SID=$sid");
-	$spel = sqlFet($resultaat);
 	sqlUp(4,"LEVEND=LEVEND-1,DOOD=DOOD+1","SID=$sid");
 	return;
 }//zetDood
@@ -179,8 +158,6 @@ function zetDood($id,$sid) {
 //wekt de speler weer tot leven
 function herleef($id,$sid) {
 	sqlUp(3,"LEVEND=1","ID=$id");
-	$resultaat = sqlSel(4,"SID=$sid");
-	$spel = sqlFet($resultaat);
 	sqlUp(4,"LEVEND=LEVEND+1,DOOD=DOOD-1","SID=$sid");
 	return;
 }//herleef
@@ -196,7 +173,6 @@ function zetDood2($sid) {
 //en vermoord hem (en eventueel andere slachtoffers...)
 function vermoord($id,$sid) {
 	$rol = heeftRol($id);
-	$genezerInSpel = inSpel("Genezer",$sid);
 	$dorpsoudsteInSpel = inSpel("Dorpsoudste",$sid);
 	$targets = array($id); // Voeg alle targets toe aan deze array!
 
@@ -246,7 +222,7 @@ function vermoord($id,$sid) {
 	//nu alle targets verzameld zijn: kijk welke beschermd zijn, 
 	//of misschien niet aanwezig...
 	foreach($targets as $key => $target) {
-		if($genezerInSpel && beschermd($target,$sid)) {
+		if(beschermd($target,$sid)) {
 			echo "$target is beschermd.\n";
 			$targets = delArrayElement($targets,$key);
 			continue; //vermoord hem dan niet
@@ -308,12 +284,11 @@ function isBeschuldigd($id,$sid) {
 	return sqlNum($resultaat);
 }//isBeschuldigd
 
-//zet de stemmen van Klaas Vaak, Genezer, Slet, 
+//zet de stemmen van Slet, 
 //Verleidster en Goochelaar op NULL, en onthoudt de oude stemmen
 function regelZetNULL1($sid) {
 	$resultaat = sqlSel(3,
-		"SID=$sid AND (ROL='Klaas Vaak' OR ROL='Genezer' OR 
-		ROL='Slet' OR ROL='Verleidster' OR ROL='Goochelaar')");
+		"SID=$sid AND (ROL='Slet' OR ROL='Verleidster' OR ROL='Goochelaar')");
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
 		$stem = $speler['STEM'];

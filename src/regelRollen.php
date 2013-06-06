@@ -171,7 +171,12 @@ function regelKlaasVaak($sid) {
 			mailActie($id,9,$sid,"STEM");
 			continue;
 		}
+		echo "Klaas Vaak $id laat $stem slapen.\n";
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+16384",
+			"ID=$stem AND ((SPELFLAGS & 16384) = 0)");
+		sqlUp(3,"VORIGE_STEM=$stem","ID=$id");
 		mailKlaas($id,$sid);
+		verwijderStem($id,"STEM");
 	}//while
 	return;
 }//regelKlaasVaak
@@ -197,7 +202,11 @@ function regelGenezer($sid) {
 			continue;
 		}
 		echo "Genezer $id beschermt $stem.\n";
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+8192",
+			"ID=$stem AND ((SPELFLAGS & 8192) = 0)");
+		sqlUp(3,"VORIGE_STEM=$stem","ID=$id");
 		mailActie($id,1,$sid,"STEM");
+		verwijderStem($id,"STEM");
 	}//while
 	return;
 }//regelGenezer

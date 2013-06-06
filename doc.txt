@@ -4,9 +4,6 @@
 
   * Opmerking:  wat als de dode Burgemeester als opvolger een nieuw-dode speler 
                 kiest?--dan moet hij zijn keuze herzien
-  * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
-                aangevallen? (documenteer dit!) --dan overleeft hij de eerste, 
-                en sterft hij bij de tweede aanval (geen extra leven meer).
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
                 Brandstapel eindigt? (fix dit!)
   * Opmerking:  wat gebeurt er met vorige_stem als de stem NULL was? (fix dit)
@@ -16,7 +13,6 @@
                 (en als de WW/VP dit doen?)
   * Opmerking:  wat als beide Geliefden worden vermoord (niet door hartebreuk)?
                 Dan gaat het ontwaakverhaal fout. Fix dit!
-  * Opmerking:  het systeem kan geen accenten aan: documenteer dit!
 
   * Testen:  kan een spel winnen?
   * Testen:  mails
@@ -28,7 +24,6 @@
   * Testen:  spel pauzeren/hervatten
   * Testen:  werkt (anonieme) help?
 
-  * Mailen:  verhalen implementeren voor meerdere spelers/brandstapel
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen en begin
@@ -52,21 +47,13 @@
              (anders terugzetten op ongelezen...?)
   * Extra:   optimaliseer gewonnenSpelers()
   * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
-  * Extra:   bij queries/check op levend: voeg "AND LEVEND=1" toe aan query
-  * Extra:   speler-tabel: vat alle vlag-kolommen samen in één kolom (met 
-             bitflags)
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf afmaken
-  * Extra:   zijn execute-rechten nodig voor php-bestanden?
   * Extra:   alle mails in Verzonden zetten
   * Extra:   spelernamen in echo's zetten
-  * Extra:   alle echo's verwijderen... (is dit nodig?)
   * Extra:   lijst van keuzes aan speler mailen (handig)
   * Extra:   stemWaarde verbeteren: check op burgemeester kan beter
              (hetzelfde voor isDodeBurg)
-  * Extra:   isGewaarschuwd, beschermd, isOpgesloten etc. herschrijven:
-             query of er spelers zijn met juiste rol, en target in stem/extra
-
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER
@@ -190,7 +177,8 @@ SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel
                    Dorpsgek ontdekt, 256 = als Zondebok op Brandstapel gekomen
                    512 = als Geliefde gestorven, 1024 = Teken van de Raaf, 
                    2048 = opgesloten door Schout, 4096 = gewaarschuwd door 
-                   Waarschuwer).
+                   Waarschuwer, 8192 = beschermd door Genezer, 16384 = in slaap 
+                   gesust door Klaas Vaak).
 GELIEFDE:          Is de speler een Geliefde? (Hierin staat de ID van zijn 
                    Geliefde, of NULL.)
 LIJFWACHT:         Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
