@@ -318,8 +318,31 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
+function auteurMeerdere($auteurs,$text) {
+	$text .= "<br /><br />";
+	$text .= "<font size='1'>";
+	$text .= "Verhaaltje geschreven door ";
+	$auteurs = array_unique($auteurs);
+	$max = count($auteurs);
+	for($i = 0; $i < $max; $i++) {
+		if($max - $i == 1) { //de laatste auteur
+			$text .= $auteurs[$i] . ".<br />";
+		}
+		else if($max - $i == 2) { //de een-na laatste auteur
+			$text .= $auteurs[$i] . " en ";
+		}
+		else {
+			$text .= $auteurs[$i] . ", ";
+		}
+	}
+	$text .= "</font>";
+
+	return $text;
+}//auteurMeerdere
+
 //maakt het ontwaak-deel van een algemene mail
 //TODO dorpsoudste afvangen
+//TODO dode burgemeester (plus opvolger) afvangen
 function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: ontwaakVerhaal.\n";
 	$tuplesL = array(); //L voor levende spelers
@@ -644,8 +667,52 @@ function array_search_recursive($needle, $haystack, &$indexes=array()) {
 	return false;
 }//array_search_recursive
 
-function verkiezingVerhaal(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
-	echo "Aangeroepen: verkiezingVerhaal.\n";
+function verkiezingInleiding(&$text,&$samenvatting,&$auteur,$spel) {
+	echo "Aangeroepen: verkiezingInleiding.\n";
+
+	$burgID = $spel['VORIGE_BURG'];
+	$vlag = false;
+	if($burgID == "") {
+		//geen vorige burgemeester
+		$vlag = true;
+		$burgArray = array();
+	}
+	else {
+		$resultaat = sqlSel(3,"ID=$burgID");
+		$burgemeester = sqlFet($resultaat);
+		$burgNaam = $burgemeester['NAAM'];
+		$burgArray = array($burgemeester);
+	}
+	$tuplesL = array(); //L voor levende spelers
+	$thema = $spel['THEMA'];
+	$sid = $spel['SID'];
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1 AND ID<>$burgID");
+	while($speler = sqlFet($resultaat)) {
+		array_push($tuplesL,$speler);
+	}
+
+	//maak verhaal (met burg apart van alle andere levende spelers)
+	$verhaal = geefVerhaalGroep($thema,"Burgemeester",3,count($tuplesL),
+		count($burgArray),$sid);
+	$text = $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood($tuplesL,$burgArray,"",$text,$geswoorden);
+
+	//samenvatting maken
+	if(!$vlag) {
+		$samenvatting .= "De vorige Burgemeester ($naam) is dood.<br />";
+		$samenvatting .= "Een nieuwe Burgemeesterverkiezing begint.<br />";
+	}
+	else {
+		$samenvatting .= "De Burgemeesterverkiezing begint.<br />";
+	}
+
+	return;
+}//verkiezingInleiding
+
+function verkiezingUitslag(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
+	echo "Aangeroepen: verkiezingUitslag.\n";
 
 	$burgID = $spel['BURGEMEESTER'];
 	$vlag = false;
@@ -669,7 +736,7 @@ function verkiezingVerhaal(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
 	}
 
 	//maak verhaal (met burg apart van alle andere levende spelers)
-	$verhaal = geefVerhaalGroep($thema,"Algemeen",0,count($tuplesL),
+	$verhaal = geefVerhaalGroep($thema,"Burgemeester",4,count($tuplesL),
 		count($burgArray),$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -690,10 +757,121 @@ function verkiezingVerhaal(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
 	foreach($overzicht as $naam => $stem) {
 		$samenvatting .= "$naam stemt op $stem.<br />";
 	}
-	$samenvatting .= "<br />";
-	$samenvatting .= "De Dag begint.<br />";
 
 	return;
-}//verkiezingVerhaal
+}//verkiezingUitslag
+
+function spelerOverzicht($spel) {
+	$sid = $spel['SID'];
+	$burg = $spel['BURGEMEESTER'];
+	$samenvatting = "Overzicht:<br />";
+	$samenvatting .= "<br />";
+	if($burg == "") {
+		$samenvatting .= "Geen Burgemeester.<br />";
+		$samenvatting .= "<br />";
+	}
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
+	$aantal = sqlNum($resultaat);
+	$samenvatting .= "$aantal levende spelers:<br />";
+	$samenvatting .= "<ul>";
+	while($speler = sqlFet($resultaat)) {
+		$naam = $speler['NAAM'];
+		$samenvatting .= "<li>$naam ";
+		if($speler['ROL'] == "Dorpsgek" && 
+			($speler['SPELFLAGS'] & 128) == 128) {
+				$samenvatting .= "(Dorpsgek)";
+			}
+		if($speler['ID'] == $burg) {
+			$samenvatting .= "(Burgemeester)";
+		}
+		if($speler['SPELFLAGS'] & 2) == 2) {
+				$samenvatting .= "(Schuldgevoel)";
+		}
+		$samenvatting .= "</li>";
+	}
+	$samenvatting .= "</ul><br />";
+	$samenvatting .= "<br />";
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND<>1");
+	$aantal = sqlNum($resultaat);
+	$samenvatting .= "$aantal dode spelers:<br />";
+	$samenvatting .= "<ul>";
+	while($speler = sqlFet($resultaat)) {
+		$naam = $speler['NAAM'];
+		$rol = $speler['ROL'];
+		$samenvatting .= "<li>$naam ($rol)</li>";
+	}
+	$samenvatting .= "</ul><br />";
+
+	return $samenvatting;
+}//spelerOverzicht
+
+function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
+	echo "Aangeroepen: brandstapelInleiding.\n";
+
+	$tuplesL = array(); //L voor levende spelers
+	$tuplesD = array(); //D voor nieuwdode spelers
+	$thema = $spel['THEMA'];
+	$sid = $spel['SID'];
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
+	while($speler = sqlFet($resultaat)) {
+		array_push($tuplesL,$speler);
+	}
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 2) = 2)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($tuplesD,$speler);
+	}
+
+	//maak verhaal
+	$verhaal = geefVerhaalGroep($thema,"Brandstapel",1,count($tuplesL),
+		count($tuplesD),$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood($tuplesL,$tuplesD,"",$text,$geswoorden);
+
+	//Raaf verhaaltje achtervoegen
+	$resultaat = sqlSel(3,
+		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 1024) = 1024)");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat) {
+			$naam = $speler['NAAM'];
+			$key = array_search($speler,$tuplesL);
+			delArrayElement($tuplesL,$key);
+			$verhaal = geefVerhaalGroep($thema,"Raaf",3,count($tuplesL),
+				1,$sid);
+			$text .= $verhaal['VERHAAL'];
+			$geswoorden = $verhaal['GESLACHT'];
+			array_push($auteur,$verhaal['AUTEUR']);
+			$text = vulInDood($tuplesL,array($speler),"",$text,$geswoorden);
+			array_push($tuplesL,$speler);
+			$samenvatting .= "$naam krijgt het Teken van de Raaf.<br />";
+		}
+	}
+
+	//Schout verhaaltje achtervoegen
+	$resultaat = sqlSel(3,
+		"SID=$sid AND ((SPELFLAGS & 2048) = 2048)");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat) {
+			$naam = $speler['NAAM'];
+			$key = array_search($speler,$tuplesL);
+			delArrayElement($tuplesL,$key);
+			$verhaal = geefVerhaalGroep($thema,"Schout",3,count($tuplesL),
+				1,$sid);
+			$text .= $verhaal['VERHAAL'];
+			$geswoorden = $verhaal['GESLACHT'];
+			array_push($auteur,$verhaal['AUTEUR']);
+			$text = vulInDood($tuplesL,array($speler),"",$text,$geswoorden);
+			array_push($tuplesL,$speler);
+			$samenvatting .= "$naam is opgesloten ";
+			$samenvatting .= "en doet niet mee met de stemming.<br />";
+		}
+	}
+
+	//samenvatting maken
+	$samenvatting .= "De Brandstapelstemming begint.<br />";
+
+	return;
+}//brandstapelInleiding
 
 ?>

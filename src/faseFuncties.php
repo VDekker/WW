@@ -292,44 +292,20 @@ function vermoord($id,$sid) {
 
 //checkt of een speler door de Waarschuwer(s) gewaarschuwd is
 function isGewaarschuwd($id,$sid) {
-	if(!inSpel("Waarschuwer",$sid)) {
-		return false;
-	}
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Waarschuwer'");
-	while($speler = sqlFet($resultaat)) {
-		if($speler['EXTRA_STEM'] == $id) {
-			return true;
-		}
-	}//while
-	return false;
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 4096) = 4096)");
+	return sqlNum($resultaat);
 }//isGewaarschuwd
 
 //checkt of een speler door de Schout(en) is opgesloten
 function isOpgesloten($id,$sid) {
-	if(!inSpel("Schout",$sid)) {
-		return false;
-	}
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
-	while($speler = sqlFet($resultaat)) {
-		if($speler['EXTRA_STEM'] == $id) {
-			return true;
-		}
-	}//while
-	return false;
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 2048) = 2048)");
+	return sqlNum($resultaat);
 }//isOpgesloten
 
 //checkt of een speler door de Raaf (of Raven) is beschuldigd
 function isBeschuldigd($id,$sid) {
-	if(!inSpel("Raaf",$sid)) {
-		return false;
-	}
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Raaf'");
-	while($speler = sqlFet($resultaat)) {
-		if($speler['EXTRA_STEM'] == $id) {
-			return true;
-		}
-	}//while
-	return false;
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 1024) = 1024)");
+	return sqlNum($resultaat);
 }//isBeschuldigd
 
 //zet de stemmen van Klaas Vaak, Genezer, Slet, 
@@ -356,24 +332,6 @@ function regelZetNULL1($sid) {
 	}
 	return;
 }//regelZetNULL1
-
-//zet de stemmen van de Raaf, Schout en Waarschuwer
-//op NULL en onthoudt de stem van de Schout
-function regelZetNULL2($sid) {
-	sqlUp(3,"EXTRA_STEM=NULL","SID=$sid AND (ROL='Raaf' OR 
-		ROL='Waarschuwer')");
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
-	while($speler = sqlFet($resultaat)) {
-		$id = $speler['ID'];
-		$stem = $speler['EXTRA_STEM'];
-		if(empty($stem)) {
-			continue;
-		}
-		sqlUp("Speler","EXTRA_STEM=NULL,VORIGE_STEM='$stem'",
-			"ID=$id");
-	}
-	return;
-}//regelZetNULL2
 
 //berekent de zwaarte van de stem van een speler 
 //(+1 als Burgemeester, +1 als Gewaarschuwd)

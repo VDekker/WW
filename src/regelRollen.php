@@ -678,7 +678,10 @@ function regelWaarschuw($sid) {
 			mailActie($id,9,$sid,"EXTRA_STEM");
 			continue;
 		}
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+4096",
+			"ID=$stem AND ((SPELFLAGS & 4096) = 0)");
 		mailWaarschuwer($id,$sid); //mail zowel Waarschuwer als keuze
+		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	return;
 }//regelWaarschuw
@@ -703,7 +706,11 @@ function regelSchout($sid) {
 			mailActie($id,9,$sid,"EXTRA_STEM");
 			continue;
 		}
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+2048",
+			"ID=$stem AND ((SPELFLAGS & 2048) = 0)");
+		sqlUp(3,"VORIGE_STEM=$stem","ID=$id"); //tegen herhaling
 		mailActie($id,1,$sid,"EXTRA_STEM");
+		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	return;
 }//regelSchout
@@ -728,7 +735,10 @@ function regelRaaf($sid) {
 			mailActie($id,9,$sid,"EXTRA_STEM");
 			continue;
 		}
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+1024",
+			"ID=$stem AND ((SPELFLAGS & 1024) = 0)");
 		mailActie($id,1,$sid,"EXTRA_STEM");
+		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	return;
 }//regelRaaf
@@ -802,18 +812,18 @@ function regelBurgemeester($sid) {
 	$stem = $speler['STEM'];
 	if($stem == "") {
 		stemGemist($id);
-		sqlUp(4,"BURGEMEESTER=NULL","SID=$sid");
+		sqlUp(4,"BURGEMEESTER=NULL,VORIGE_BURG=$id","SID=$sid");
 		echo "$id heeft niet gestemd.\n";
 		return;
 	}
 	heeftGestemd($id);
 	if($stem == -1) {
 		mailTestament($id,9,$sid);
-		sqlUp(4,"BURGEMEESTER=NULL","SID=$sid");
+		sqlUp(4,"BURGEMEESTER=NULL,VORIGE_BURG=$id","SID=$sid");
 		return;
 	}
 	mailTestament($id,1,$sid);
-	sqlUp(4,"BURGEMEESTER=$stem","SID=$sid");
+	sqlUp(4,"BURGEMEESTER=$stem,VORIGE_BURG=$id","SID=$sid");
 	verwijderStem($id,"STEM");
 	return;
 }//regelBurgemeester
@@ -976,24 +986,21 @@ function regelBrand($sid) {
 		}
 	}//while
 
-	if(inSpel("Raaf",$sid)) { // voeg het Teken van de Raaf bij de stemmen
-		$resultaat = sqlSel(3,"SID=$sid AND ROL='Raaf'");
+	//voeg het Teken van de Raaf bij de stemmen
+	$resultaat = sqlSel(3,
+		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 1024) = 1024)");
+	if(sqlNum($resultaat)) {
 		while($speler = sqlFet($resultaat)) {
 			$id = $speler['ID'];
-			$teken = $speler['EXTRA_STEM'];
-			verwijderStem($id,"EXTRA_STEM");
-			if($teken == "" || $teken == -1) {
-				continue;
-			}
-			$key = array_search($teken,$kandidaten);
-			if($key == false) {
-				array_push($kandidaten,$teken);
+			echo "$id krijgt het Teken van de Raaf.\n";
+			$key = array_search($id,$kandidaten);
+			if(!$key) {
+				array_push($kandidaten,$id);
 				array_push($stemmen,2);
 			}
-			else {
+			else{
 				$stemmen[$key] += 2;
 			}
-			echo "$teken krijgt het Teken van de Raaf.\n";
 		}//while
 	}//if
 
@@ -1013,19 +1020,16 @@ function regelBrand($sid) {
 			$stemmen = delArrayElement($stemmen,$key);
 		}//while
 	}//if
-
-	if(inSpel("Schout",$sid)) { // haal opgesloten spelers uit de lijst
-		$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
+	
+	//haal de opgesloten spelers (door Schout) uit de lijst
+	$resultaat = sqlSel(3,
+		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 2048) = 2048)");
+	if(sqlNum($resultaat)) {
 		while($speler = sqlFet($resultaat)) {
 			$id = $speler['ID'];
-			$opgesloten = $speler['EXTRA_STEM'];
-			verwijderStem($id,"EXTRA_STEM");
-			if($opgesloten == "" || $opgesloten == -1) {
-				continue;
-			}
-			echo "$opgesloten is opgesloten.\n";
-			$key = array_search($opgesloten,$kandidaten);
-			if($key == false) { // dan zit hij er niet tussen, doe niets
+			echo "$id is opgesloten.\n";
+			$key = array_search($id,$kandidaten);
+			if(!$key) {
 				continue;
 			}
 			$kandidaten = delArrayElement($kandidaten,$key);

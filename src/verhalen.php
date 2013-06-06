@@ -843,13 +843,24 @@ function mailAlgemeenVerkiezing($sid) {
 	$snaam = $spel['SNAAM'];
 	$thema = $spel['THEMA'];
 	$onderwerp = "$snaam: Algemeen"; 
-	//pak ontwaakverhaal TODO
+
+	//pak ontwaakverhaal
 	$text = "";
-	$samenvatting = "Samenvatting:<br /><br />";
+	$samenvatting = "";
 	$auteur = array();
 	ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
-	//pak burgemeester-verhaal TODO
-	//maak samenvatting
+
+	//pak burgemeester-verhaal
+	verkiezingInleiding($text,$samenvatting,$auteur,$spel);
+	
+	//samenvatting: levende en dode spelers
+	$samenvatting .= "<br />";
+	$samenvatting .= spelerOverzicht($spel);
+
+	//en voeg samenvatting samen met text
+	$text = plakSamenvatting($samenvatting,$text);
+	$text = auteurMeerdere($auteur,$text);
+
 	//mail naar iedereen in maillijst
 	$adressen = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((SPELERFLAGS & 2) = 2)");
@@ -870,19 +881,26 @@ function mailAlgemeenBrandstapel($vlag,$overzicht,$sid) {
 	$thema = $spel['THEMA'];
 	$onderwerp = "$snaam: Algemeen";
 	$text = "";
-	$samenvatting = "Samenvatting:<br /><br />";
+	$samenvatting = "";
 	$auteur = array();
 	if(!$vlag) {
 		ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
 	}
 	else {
-		verkiezingVerhaal($text,$samenvatting,$auteur,$overzicht,$spel);
+		verkiezingUitslag($text,$samenvatting,$auteur,$overzicht,$spel);
 	}
-	inleidingBrandstapel($text,$samenvatting,$auteur,$spel);//TODO maken
-	$text = plakSamenvatting($samenvatting,$text);
-	$text = auteur($auteur,$text);
+
 	//pak brandstapel-verhaal
+	brandstapelInleiding($text,$samenvatting,$auteur,$spel);
+	
 	//maak samenvatting
+	$samenvatting .= "<br />";
+	$samenvatting .= spelerOverzicht($spel);
+
+	//en voeg samenvatting samen met text
+	$text = plakSamenvatting($samenvatting,$text);
+	$text = auteurMeerdere($auteur,$text);
+
 	//mail naar iedereen in maillijst
 	$adressen = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((SPELERFLAGS & 2) = 2)");
@@ -903,7 +921,13 @@ function mailAlgemeenInslapen($sid) {
 	$thema = $spel['THEMA'];
 	$onderwerp = "$snaam: Algemeen";
 	//pak brandstapel-uitslag-verhaal TODO
-	//pak nacht-inleiding-verhaal
+	
+	//pak nacht-inleiding-verhaal TODO
+	
+	//en voeg samenvatting samen met text
+	$text = plakSamenvatting($samenvatting,$text);
+	$text = auteurMeerdere($auteur,$text);
+
 	//mail naar iedereen in maillijst
 	$adressen = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((SPELERFLAGS & 2) = 2)");

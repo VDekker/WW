@@ -2,17 +2,20 @@
      TODO:
 ===============
 
+  * Opmerking:  wat als de dode Burgemeester als opvolger een nieuw-dode speler 
+                kiest?--dan moet hij zijn keuze herzien
   * Opmerking:  wat gebeurt er als de Dorpsoudste door WW en VP wordt 
-                aangevallen? (documenteer dit!)
+                aangevallen? (documenteer dit!) --dan overleeft hij de eerste, 
+                en sterft hij bij de tweede aanval (geen extra leven meer).
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
                 Brandstapel eindigt? (fix dit!)
   * Opmerking:  wat gebeurt er met vorige_stem als de stem NULL was? (fix dit)
   * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
-                opeten
+                opeten (documenteer dit)
   * Opmerking:  wat als de Fluitspelers allemaal op 1 dezelfde speler stemmen?
                 (en als de WW/VP dit doen?)
   * Opmerking:  wat als beide Geliefden worden vermoord (niet door hartebreuk)?
-                Dan gaat het verhaal fout. Fix dit!
+                Dan gaat het ontwaakverhaal fout. Fix dit!
   * Opmerking:  het systeem kan geen accenten aan: documenteer dit!
 
   * Testen:  kan een spel winnen?
@@ -37,6 +40,7 @@
   * Verhaal: geefVerhaal verbeteren/meerdere maken
   * Verhaal: vulInDood gebruiken waar nodig
   * Verhaal: shuffle() gebruiken/controleren
+  * Verhaal: deadlines toevoegen
   
   * Regelen: Jager's EXTRA_STEM legen na algemene mail
   
@@ -184,7 +188,9 @@ SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel
                    Welp, 16 = bezit levenselixer van Heks, 32 = bezit gif van 
                    Heks, 64 = bezit extra leven van Dorpsoudste, 128 = als 
                    Dorpsgek ontdekt, 256 = als Zondebok op Brandstapel gekomen
-                   512 = als Geliefde gestorven).
+                   512 = als Geliefde gestorven, 1024 = Teken van de Raaf, 
+                   2048 = opgesloten door Schout, 4096 = gewaarschuwd door 
+                   Waarschuwer).
 GELIEFDE:          Is de speler een Geliefde? (Hierin staat de ID van zijn 
                    Geliefde, of NULL.)
 LIJFWACHT:         Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
@@ -721,11 +727,13 @@ Waarschuwer:         0 = Wakker worden
                      9 = Blanco gestemd
 Schout:              0 = Wakker worden
                      1 = Zelf opgesloten
-                     2 = Speler opgesloten
+                     2 = Speler opgesloten (Schout)
+                     3 = Speler opgesloten (algemeen)
                      9 = Blanco gestemd
 Raaf:                0 = Wakker worden 
                      1 = Zelf beschuldigd
                      2 = Speler beschuldigd
+                     3 = Teken van de Raaf (algemeen)
                      9 = Blanco gestemd
 Jager:               0 = Wakker worden, nacht
                      1 = Wakker worden, dag
@@ -735,7 +743,10 @@ Jager:               0 = Wakker worden, nacht
                      5 = Jager doelwit dood (algemeen)
                      9 = Blanco gestemd
 Burgemeester:        0 = Wakker worden
-(testament)          1 = Speler gekozen
+                     1 = Speler gekozen
+                     2 = Opvolger (algemeen)
+                     3 = Stemming, inleiding
+                     4 = Stemming, uitslag
                      9 = Blanco gestemd
 Algemeen:           -1 = Inleiding
                      0 = Wakker worden, normaal
@@ -745,8 +756,6 @@ Algemeen:           -1 = Inleiding
                      8 = Gaan slapen
 Geliefde:            4 = Geliefde dood, aankondiging (algemeen)
                      5 = Geliefde dood (algemeen)
-Burgemeester:
-(verkiezing)
 Brandstapel:
 Zondebok:            0 = Wakker worden
                      1 = Speler(s) gekozen (hoeveel?)

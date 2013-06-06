@@ -397,7 +397,6 @@ function fases() {
 						}
 						mailAlgemeenInslapen($sid);
 						zetDood2($sid);
-						regelZetNULL2($sid);
 						zetFase(0,$sid);
 					}
 					break;
