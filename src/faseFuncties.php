@@ -8,7 +8,7 @@ function delArrayElement($array,$key) {
 
 //pakt de DUUR in database
 function krijgDatum($sid) {
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
 	$datum = date_create($spel['DUUR']);
 	return $datum;
@@ -50,7 +50,7 @@ function geefWeekdag($getal) {
 //(systeemtijd + snelheid)
 function geefDeadline($sid) {
 	$datum = date_create(date('Y-m-d'));
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snelheid = $spel['SNELHEID'];
 	$duur = date_interval_create_from_date_string("$snelheid days");
@@ -63,7 +63,7 @@ function geefDeadline($sid) {
 //vergelijkt de faseduur met huidige datum
 //true als het tijd is om naar de volgende fase te gaan
 function genoegGewacht($sid) {
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
 	$snelheid = $spel['SNELHEID'];
 	$duur = vergelijkDatum($sid);
@@ -72,7 +72,7 @@ function genoegGewacht($sid) {
 
 //returned true als gegeven rol in het spel zit, anders false
 function inSpel($rol,$sid) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='$rol'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='$rol'");
 	return (sqlNum($resultaat) > 0);
 }//inSpel
 
@@ -80,20 +80,20 @@ function inSpel($rol,$sid) {
 //ook nieuw_dode spelers vallen hieronder 
 //(ze komen nog aan de beurt als ze net die nacht zijn vermoord...)
 function isLevend($id) {
-	$resultaat = sqlSel("Spelers","ID=$id");
+	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	return (($speler['LEVEND'] & 1) == 1);
 }//isLevend
 
 function isNieuwDood($id) {
-	$resultaat = sqlSel("Spelers","ID=$id");
+	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	return (($speler['LEVEND'] & 2) == 2);
 }//isNieuwDood
 
 //geeft de rol van een speler
 function heeftRol($id) {
-	$resultaat = sqlSel("Spelers","ID=$id");
+	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	return $speler['ROL'];
 }//heeftRol
@@ -102,14 +102,14 @@ function heeftRol($id) {
 function zetFase($waarde,$sid) {
 	$datum = date_create(date('Y-m-d'));
 	$sqlDatum = date_format($datum, 'Y-m-d');
-	sqlUp("Spellen","FASE=$waarde,DUUR='$sqlDatum'","SID=$sid");
+	sqlUp(4,"FASE=$waarde,DUUR='$sqlDatum'","SID=$sid");
 	echo "Fase op $waarde gezet.\n";
 	return;
 }//zetFase
 
 //geeft de fase van het spel
 function geefFase($sid) {
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
 	return $spel['FASE'];
 }//geefFase
@@ -118,22 +118,22 @@ function geefFase($sid) {
 //waarbij stem STEM of EXTRA_STEM kan zijn
 //(dit staat in $plek)
 function verwijderStem($id,$plek) {
-	sqlUp("Spelers","$plek=NULL","ID=$id");
+	sqlUp(3,"$plek=NULL","ID=$id");
 	return;
 }//verwijderStem
 
 //hoogt het aantal gemiste stemmen van een speler met 1 op
 function stemGemist($id) {
-	$resultaat = sqlSel("Spelers","ID=$id");
+	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	$gemist = $speler['GEMIST'] + 1;
-	sqlUp("Spelers","GEMIST=$gemist","ID=$id");
+	sqlUp(3,"GEMIST=$gemist","ID=$id");
 	return;
 }//stemGemist
 
 //zet het aantal gemiste stemmen van een speler op 0
 function heeftGestemd($id) {
-	sqlUp("Spelers","GEMIST=0","ID=$id");
+	sqlUp(3,"GEMIST=0","ID=$id");
 	return;
 }//heeftGestemd
 
@@ -143,7 +143,7 @@ function wordtWakker($id,$sid) {
 	if(!inSpel("Klaas Vaak",$sid)) {
 		return true;
 	}
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Klaas Vaak'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Klaas Vaak'");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['STEM'] == $id) {
 			return false;
@@ -157,7 +157,7 @@ function beschermd($id,$sid) {
 	if(!inSpel("Genezer",$sid)) {
 		return false;
 	}
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Genezer' AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Genezer' AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		$stem = $speler['STEM'];
 		if($stem == $id) {
@@ -169,25 +169,25 @@ function beschermd($id,$sid) {
 
 //dood de speler
 function zetDood($id,$sid) {
-	sqlUp("Spelers","LEVEND=3","ID=$id");
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	sqlUp(3,"LEVEND=3","ID=$id");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
-	sqlUp("Spellen","LEVEND=LEVEND-1,DOOD=DOOD+1","SID=$sid");
+	sqlUp(4,"LEVEND=LEVEND-1,DOOD=DOOD+1","SID=$sid");
 	return;
 }//zetDood
 
 //wekt de speler weer tot leven
 function herleef($id,$sid) {
-	sqlUp("Spelers","LEVEND=1","ID=$id");
-	$resultaat = sqlSel("Spellen","SID=$sid");
+	sqlUp(3,"LEVEND=1","ID=$id");
+	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
-	sqlUp("Spellen","LEVEND=LEVEND+1,DOOD=DOOD-1","SID=$sid");
+	sqlUp(4,"LEVEND=LEVEND+1,DOOD=DOOD-1","SID=$sid");
 	return;
 }//herleef
 
 //neemt alle spelers die nieuwdood zijn, en maakt ze echt dood
 function zetDood2($sid) {
-	sqlUp("Spelers","LEVEND=0","SID=$sid AND ((LEVEND & 2) = 2)");
+	sqlUp(3,"LEVEND=0","SID=$sid AND ((LEVEND & 2) = 2)");
 	echo "Alle nieuw-dode spelers gedood.\n";
 	return;
 }//zetDood2
@@ -201,7 +201,7 @@ function vermoord($id,$sid) {
 	$targets = array($id); // Voeg alle targets toe aan deze array!
 
 	//check Goochelaar...
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Goochelaar'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Goochelaar'");
 	if(sqlNum($resultaat) > 0) {
 		while($goochelaar = sqlFet($resultaat)) {
 			$stem = $goochelaar['STEM'];
@@ -221,7 +221,7 @@ function vermoord($id,$sid) {
 	
 	//check Slet: als de Slet bij het echte target slaapt
 	$sletInSpel = false;
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Slet'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Slet'");
 	if(sqlNum($resultaat) > 0) {
 		$sletInSpel = true;
 		while($slet = sqlFet($resultaat)) {
@@ -234,7 +234,7 @@ function vermoord($id,$sid) {
 
 	//check Verleidster: als het echte target de Verleidster is...
 	if($rol == "Verleidster") {
-		$resultaat = sqlSel("Spelers","ID=$id");
+		$resultaat = sqlSel(3,"ID=$id");
 		$speler = sqlFet($resultaat);
 		$stem = $speler['STEM'];
 		if($stem != "" && $stem != 0 && $stem != $id) {
@@ -252,18 +252,18 @@ function vermoord($id,$sid) {
 			continue; //vermoord hem dan niet
 		}
 		if($dorpsoudsteInSpel && heeftRol($target) == "Dorpsoudste") {
-			$resultaat = sqlSel("Spelers","ID=$target");
+			$resultaat = sqlSel(3,"ID=$target");
 			$speler = sqlFet($resultaat);
 			if(($speler['SPELFLAGS'] & 64) == 64) {
 				echo "Dorpsoudste $target overleeft de aanval.\n";
-				sqlUp("Spelers","SPELFLAGS=SPELFLAGS-64",
+				sqlUp(3,"SPELFLAGS=SPELFLAGS-64",
 					"ID=$id");
 				$targets = delArrayElement($targets,$key);
 				continue;
 			}
 		}//if
 		else if($sletInSpel && heeftRol($target) == "Slet") {
-			$resultaat = sqlSel("Spelers","ID=$id");
+			$resultaat = sqlSel(3,"ID=$id");
 			$speler = sqlFet($resultaat);
 			$stem = $speler['STEM'];
 			if($stem != "" && $stem != 0 && $stem != $id) {
@@ -273,7 +273,7 @@ function vermoord($id,$sid) {
 			}
 		}//else if
 		if(inSpel("Verleidster",$sid)) {
-			$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Verleidster'");
+			$resultaat = sqlSel(3,"SID=$sid AND ROL='Verleidster'");
 			while($speler = sqlFet($resultaat)) {
 				if($speler['STEM'] == $target && $speler['ID'] != $id) {
 					echo "$target is verleid door " . $speler['ID'] . ".\n";
@@ -295,7 +295,7 @@ function isGewaarschuwd($id,$sid) {
 	if(!inSpel("Waarschuwer",$sid)) {
 		return false;
 	}
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Waarschuwer'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Waarschuwer'");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['EXTRA_STEM'] == $id) {
 			return true;
@@ -309,7 +309,7 @@ function isOpgesloten($id,$sid) {
 	if(!inSpel("Schout",$sid)) {
 		return false;
 	}
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Schout'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['EXTRA_STEM'] == $id) {
 			return true;
@@ -323,7 +323,7 @@ function isBeschuldigd($id,$sid) {
 	if(!inSpel("Raaf",$sid)) {
 		return false;
 	}
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Raaf'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Raaf'");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['EXTRA_STEM'] == $id) {
 			return true;
@@ -335,7 +335,7 @@ function isBeschuldigd($id,$sid) {
 //zet de stemmen van Klaas Vaak, Genezer, Slet, 
 //Verleidster en Goochelaar op NULL, en onthoudt de oude stemmen
 function regelZetNULL1($sid) {
-	$resultaat = sqlSel("Spelers",
+	$resultaat = sqlSel(3,
 		"SID=$sid AND (ROL='Klaas Vaak' OR ROL='Genezer' OR 
 		ROL='Slet' OR ROL='Verleidster' OR ROL='Goochelaar')");
 	while($speler = sqlFet($resultaat)) {
@@ -345,13 +345,13 @@ function regelZetNULL1($sid) {
 			continue;
 		}
 		if($speler['ROL'] == "Goochelaar") {
-			sqlUp("Spelers",
+			sqlUp(3,
 				"STEM=NULL,EXTRA_STEM=NULL,VORIGE_STEM='$stem',
 				VORIGE_STEM_EXTRA='$stem2'",
 				"ID=$id");
 			continue;
 		}
-		sqlUp("Spelers","STEM=NULL,VORIGE_STEM='$stem'",
+		sqlUp(3,"STEM=NULL,VORIGE_STEM='$stem'",
 			"ID=$id");
 	}
 	return;
@@ -360,9 +360,9 @@ function regelZetNULL1($sid) {
 //zet de stemmen van de Raaf, Schout en Waarschuwer
 //op NULL en onthoudt de stem van de Schout
 function regelZetNULL2($sid) {
-	sqlUp("Spelers","EXTRA_STEM=NULL","SID=$sid AND (ROL='Raaf' OR 
+	sqlUp(3,"EXTRA_STEM=NULL","SID=$sid AND (ROL='Raaf' OR 
 		ROL='Waarschuwer')");
-	$resultaat = sqlSel("Spelers","SID=$sid AND ROL='Schout'");
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
 		$stem = $speler['EXTRA_STEM'];
@@ -384,7 +384,7 @@ function stemWaarde($id,$sid) {
 	if(isGewaarschuwd($id,$sid)) {
 		$waarde++;
 	}
-	$resultaat = sqlSel("Spelers",
+	$resultaat = sqlSel(3,
 		"SID=$sid AND ID IN 
 		(SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
 	$burgemeester = sqlFet($resultaat);
@@ -404,7 +404,7 @@ function hoogsteStem($stemmen) {
 //checkt of de Fluitspelers een spel gewonnen hebben:
 //als alle andere levende spelers betoverd zijn
 function gewonnenFS($sid) {
-	$resultaat = sqlSel("Spelers",
+	$resultaat = sqlSel(3,
 		"SID=$sid AND ((LEVEND & 1) = 1) AND ROL<>'Fluitspeler'");
 	while($speler = sqlFet($resultaat)) {
 		if(!($speler['SPELFLAGS'] & 1)) {
@@ -418,7 +418,7 @@ function gewonnenFS($sid) {
 //als de enige levende spelers Weerwolf of Welp zijn.
 //uitzondering is een eventuele Geliefde, die wel mag leven.
 function gewonnenWW($sid,$uitzondering,$uitzondering2) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] != "Weerwolf" && $speler['ROL'] != "Welp" && 
 			$speler['ID'] != $uitzondering && $speler['ID'] != $uitzondering2) {
@@ -431,7 +431,7 @@ function gewonnenWW($sid,$uitzondering,$uitzondering2) {
 //checkt of de Vampiers een spel gewonnen hebben:
 //als de enige levende spelers Vampier zijn.
 function gewonnenVP($sid,$uitzondering,$uitzondering2) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] != "Vampier" && 
 			$speler['ID'] != $uitzondering && $speler['ID'] != $uitzondering2) {
@@ -444,7 +444,7 @@ function gewonnenVP($sid,$uitzondering,$uitzondering2) {
 //checkt of een Psychopaat of Witte Weerwolf een spel gewonnen heeft:
 //als dat de enige overgebleven speler is.
 function gewonnenPsyWit($sid,$uitzondering,$uitzondering2) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(sqlNum($resultaat) > 2) {
 		return false;
 	}
@@ -462,7 +462,7 @@ function gewonnenPsyWit($sid,$uitzondering,$uitzondering2) {
 //als er geen levende Weerwolven, Welpen, Vampiers, Witte Weerwolven,
 //Psychopaten of Fluitspelers zijn
 function gewonnenB($sid,$uitzondering,$uitzondering2) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	while($speler = sqlFet($resultaat)) {
 		$rol = $speler['ROL'];
 		if(($rol == "Weerwolf" || $rol == "Welp" ||
@@ -481,7 +481,7 @@ function gewonnenB($sid,$uitzondering,$uitzondering2) {
 //en dan -> check of zijn rol wint (optimalisatie mogelijk...)
 //flag is true als een geliefde wordt gecheckt
 function gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,$flag) {
-	$resultaat = sqlSel("Spelers",
+	$resultaat = sqlSel(3,
 		"SID=$sid AND ((LEVEND & 1) = 1) AND LIJFWACHT=$id");
 	if(sqlNum($resultaat) == 1) { //als je een lijfwacht bent...
 		$opdracht = sqlFet($resultaat);
@@ -491,7 +491,7 @@ function gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,$flag) {
 		}
 	}
 	if(!empty($geliefde) && !$flag) { //als je geliefde bent...
-		$resultaat = sqlSel("Spelers","ID=$geliefde");
+		$resultaat = sqlSel(3,"ID=$geliefde");
 		$speler = sqlFet($resultaat);
 		if(!gewonnenSpeler($speler['ID'],$speler['ROL'],$id,
 			$speler['LIJFWACHT'],$sid,true)) {
@@ -520,7 +520,7 @@ function gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,$flag) {
 //checkt of een spel gewonnen is door een team
 function gewonnen($sid) {
 	$gewonnenSpelers = array();
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(sqlNum($resultaat) == 0) {
 		echo "Alle spelers dood; gelijkspel...\n";
 		//TODO maak verhaaltje

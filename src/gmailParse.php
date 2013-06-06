@@ -38,7 +38,7 @@ function gmailParse() {
 				help($afzender,$onderwerp,$bericht);
 			}
 			else {
-				$resultaat = sqlSel("Spellen","");
+				$resultaat = sqlSel(4,"");
 				$gevonden = false;
 				while($spel = sqlFet($resultaat)) {
 					$snaam = $spel['SNAAM'];
@@ -115,7 +115,7 @@ function zoekControle() {
 //stuurt alle mails in tabel Mails opnieuw, en haalt ze uit de tabel
 //(aangeroepen als controle niet gevonden is)
 function herhaalMails() {
-	$resultaat = sqlSel("Mails","");
+	$resultaat = sqlSel(1,"");
 	while($mail = sqlFet($resultaat)) {
 		mail($mail['ADRES'],$mail['ONDERWERP'],
 			$mail['BERICHT'],$mail['HEADERS']);
@@ -124,7 +124,9 @@ function herhaalMails() {
 }//herhaalMails
 
 function verwijderMails() {
-	$sql = "DELETE FROM Mails";
+	global $tabellen;
+	$tabel = $tabellen[1];
+	$sql = "DELETE FROM $tabel";
 	sqlQuery($sql);
 	return;
 }//verwijderMails

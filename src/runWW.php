@@ -18,6 +18,8 @@ date_default_timezone_set("Europe/Amsterdam");
 $admin = "Victor Dekker <eudyptes.crestatus@gmail.com>";
 $admin2 = "Jenneke Buwalda <ciel.celestis@gmail.com>";
 $admins = array($admin,$admin2);
+$tabellen = array("Help","Mails","Rollen","Spelers",
+	"Spellen","Themas","Verhalen");
 $thuis = "WWautoVerteller@gmail.com";
 $handleiding = "http://www.liacs.nl/~vdekker/WW/pdf/man.pdf";
 $dbconnect = dbConnect();
@@ -28,13 +30,18 @@ if(!zoekControle()) {
 	herhaalMails(); //stuur alle vorige mails opnieuw
 }
 else {
+	echo "Controle gevonden.\n";
 	verwijderMails(); //haalt alle oude mails uit de database
+	echo "Begin parsen.\n";
 	gmailParse(); // check of er mails zijn en reageer hierop
+	echo "Begin regelen.\n";
 	fases(); // regel alle stemmen, fases, stuurt mails
 }
+echo "Sluit alles.\n";
 gmailSluit();
 dbSluit();
 
 stuurControle(); // voor controleren van mailen
+echo "Klaar.\n";
 
 ?>

@@ -13,6 +13,7 @@
                 (en als de WW/VP dit doen?)
   * Opmerking:  wat als beide Geliefden worden vermoord (niet door hartebreuk)?
                 Dan gaat het verhaal fout. Fix dit!
+  * Opmerking:  het systeem kan geen accenten aan: documenteer dit!
 
   * Testen:  kan een spel winnen?
   * Testen:  mails
@@ -42,7 +43,6 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
-  * Nodig:   help fixen: berichten worden gibberisch!
 
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)

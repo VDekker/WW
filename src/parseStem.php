@@ -5,7 +5,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 	$init,$fase,$tweede,$max) {
 
 	global $thuis;
-	$resultaat = sqlSel("Spelers","ID=$id");
+	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
@@ -238,8 +238,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 				break;
 			case 8:
 				if($rol == "Heks") {
-					$resultaat = sqlSel("Spelers",
-						"ID=$id");
+					$resultaat = sqlSel(3,"ID=$id");
 					$heks = sqlFet($resultaat);
 					$drank = $heks['SPELFLAGS'];
 					$flag = 0; //houdt de keuze bij: voor mailen

@@ -26,8 +26,9 @@ function sqlQuery($sql) {
 	return $resultaat;
 }//sqlQuery
 
-function sqlUp($tabel,$waardes,$eisen) {
-	global $dbconnect;
+function sqlUp($i,$waardes,$eisen) {
+	global $dbconnect,$tabellen;
+	$tabel = $tabellen[$i];
 	$sql = "UPDATE $tabel SET $waardes";
 	if(!empty($eisen)) {
 		$sql .= " WHERE $eisen";
@@ -38,8 +39,9 @@ function sqlUp($tabel,$waardes,$eisen) {
 	return;
 }//sqlUp
 
-function sqlSel($tabel,$eisen) {
-	global $dbconnect;
+function sqlSel($i,$eisen) {
+	global $dbconnect,$tabellen;
+	$tabel = $tabellen[$i];
 	$sql = "SELECT * FROM $tabel";
 	if(!empty($eisen)) {
 		$sql .= " WHERE $eisen";

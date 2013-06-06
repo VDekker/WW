@@ -31,12 +31,12 @@ function verdeelRol($sid) {
 		"Opdrachtgever",
 		"Dief",
 		"Waarschuwer");
-	$resultaat = sqlSel("Spelers","SID=$sid");
+	$resultaat = sqlSel(3,"SID=$sid");
 	while($speler = sqlFet($resultaat)) {
 		array_push($alleSpelers,$speler['ID']);
 	}
 	$aantal = count($alleSpelers);
-	$resultaat = sqlSel("Rollen","AANTAL=$aantal");
+	$resultaat = sqlSel(2,"AANTAL=$aantal");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen rolverdeling voor speleraantal $aantal.\n";
 		stuurError2("Geen rolverdeling voor speleraantal $aantal " . 
@@ -60,8 +60,7 @@ function verdeelRol($sid) {
 		$burgemeester = -1;
 		echo "Zonder Burgemeester.\n";
 	}
-	sqlUp("Spellen",
-		"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",
+	sqlUp(4,"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",
 		"SID=$sid");
 	$teller = 0;
 	for($i = 0; $i < count($rollen); $i++) {
@@ -75,7 +74,7 @@ function verdeelRol($sid) {
 			else if($rol == "Dorpsoudste") {
 				$spelflags = 64; //extra leven
 			}
-			sqlUp("Spelers","ROL='$rol',SPELFLAGS=$spelflags",
+			sqlUp(3,"ROL='$rol',SPELFLAGS=$spelflags",
 				"ID=$dezeSpeler");
 			echo "$dezeSpeler is nu een $rol.\n";
 			$teller++;

@@ -1,7 +1,7 @@
 <?php
 
 function fases() {
-	$resultaat = sqlSel("Spellen","");
+	$resultaat = sqlSel(4,"");
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
 		if($spel['STATUS'] != 0) { // dit werkt niet in query (??)
 			continue;
@@ -77,7 +77,7 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
-						sqlUp("Spellen","INIT=0","SID=$sid");
+						sqlUp(4,"INIT=0","SID=$sid");
 						zetFase(3,$sid);
 					}
 					break;
@@ -91,7 +91,7 @@ function fases() {
 					}
 				case 8:
 					regelOpdracht($sid);
-					sqlUp("Spellen","INIT=0","SID=$sid");
+					sqlUp(4,"INIT=0","SID=$sid");
 					zetFase(3,$sid);
 			}//switch
 
@@ -314,19 +314,19 @@ function fases() {
 						regelDood2($sid,10);
 						regelZetNULL1($sid);
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","STATUS=3","SID=$sid");
-							//stuur mails
+							sqlUp(4,"STATUS=3","SID=$sid");
+							//stuur mails TODO
+							//kan dit in algemene mail?
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
 							//stuur mails (ontwaken, 
 							//nieuwe burgemeesterverkiezing)
-							mailAlgemeenVerkeizing($sid);
+							mailAlgemeenVerkiezing($sid);
 							zetDood2($sid);
 							zetFase(13,$sid);
 						}
 						else {
-							mailAlgemeenBrandstapel(0,$sid);
-							//stuur mails (ontwaken, brandstapelverkiezing) en
+							mailAlgemeenBrandstapel(0,array(),$sid);
 							zetDood2($sid);
 							zetFase(15,$sid);
 						}
@@ -341,9 +341,8 @@ function fases() {
 						break;
 					}
 				case 14:
-					regelBurgVerk($sid);
-					mailAlgemeenBrandstapel(1,$sid);
-					//stuur mails (yay, burgemeester en brandstapel...)
+					$overzicht = regelBurgVerk($sid);
+					mailAlgemeenBrandstapel(1,$overzicht,$sid);
 					zetFase(15,$sid);
 				case 15:
 					if(genoegGewacht($sid)) {
@@ -393,10 +392,10 @@ function fases() {
 					regelDood2($sid,17);
 					if(geefFase($sid) == 20) {
 						if(gewonnen($sid)) {
-							sqlUp("Spellen","STATUS=3","SID=$sid");
-							//mail gewonnen
+							sqlUp(4,"STATUS=3","SID=$sid");
+							//mail gewonnen TODO
 						}
-						mailAlgemeenInslapen($sid); //mail algemeen (brandstapel)
+						mailAlgemeenInslapen($sid);
 						zetDood2($sid);
 						regelZetNULL2($sid);
 						zetFase(0,$sid);

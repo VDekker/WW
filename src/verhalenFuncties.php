@@ -2,11 +2,11 @@
 
 //geeft een willekeurig verhaal volgens de criteria
 function geefVerhaal($thema,$rol,$fase,$sid) {
-	$resultaat = sqlSel("Verhalen",
+	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel("Verhalen",
+		$resultaat = sqlSel(6,
 			"ROL='$rol' AND FASE=$fase AND THEMA IN
 			(SELECT TID FROM Themas WHERE TNAAM='default')");
 		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
@@ -27,12 +27,12 @@ function geefVerhaal($thema,$rol,$fase,$sid) {
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder levende spelers gebruikt worden
 function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel("Verhalen",
+	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
 		LEVEND<=$levend AND DOOD=$dood");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel("Verhalen",
+		$resultaat = sqlSel(6,
 			"ROL='$rol' AND FASE=$fase AND LEVEND<=$levend AND DOOD=$dood AND
 			THEMA IN (SELECT TID FROM Themas WHERE TNAAM='default')");
 		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
@@ -55,12 +55,12 @@ function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
 //eventueel mogen minder dode spelers gebruikt worden
 //(gebruikt voor Zondebok en Onschuldige Meisje)
 function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel("Verhalen",
+	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
 		LEVEND=$levend AND DOOD<=$dood");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel("Verhalen",
+		$resultaat = sqlSel(6,
 			"ROL='$rol' AND FASE=$fase AND LEVEND=$levend AND DOOD<=$dood AND
 			THEMA IN (SELECT TID FROM Themas WHERE TNAAM='default'");
 		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
@@ -192,21 +192,21 @@ function vulInDood($tuplesL,$tuplesD,$deadline,$text,$geswoorden) {
 }//vulInDood
 
 function geefVerhaalRolverdeling($thema,$rol,$sid) {
-	$resultaat = sqlSel("Verhalen",
+	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=-1");
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen intro voor specifieke rol, probeer algemeen...\n";
-		$resultaat = sqlSel("Verhalen",
+		$resultaat = sqlSel(6,
 			"THEMA=$thema AND ROL='Rolverdeling' AND FASE=-1");
 		if(sqlNum($resultaat) == 0) {
 			echo "Geen algemene intro voor dit thema, ";
 			echo "probeer specifieke default...\n";
-			$resultaat = sqlSel("Verhalen",
+			$resultaat = sqlSel(6,
 				"ROL='$rol' AND FASE=-1 AND THEMA IN
 				(SELECT TID FROM Themas WHERE TNAAM='default')");
 			if(sqlNum($resultaat) == 0) {
 				echo "Geen specifieke default, probeer algemene default...\n";
-				$resultaat = sqlSel("Verhalen",
+				$resultaat = sqlSel(6,
 					"ROL='Rolverdeling' AND FASE=-1 AND THEMA IN
 					(SELECT TID FROM Themas WHERE TNAAM='default')");
 				if(sqlNum($resultaat) == 0) { //helemaal fucked
@@ -241,7 +241,7 @@ function keuzeHeks($text,$heks,$doden,$sid) {
 		}
 		$text .= "</ul>";
 	}//if
-	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
 	$levenden = sqlNum($resultaat);
 	if($levenden == 0) {
 		return $text;
@@ -276,7 +276,7 @@ function keuzeHeks($text,$heks,$doden,$sid) {
 }//keuzeHeks
 
 function keuzeJager($text,$jager,$sid) {
-	$resultaat = sqlSel("Spelers","SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	$levenden = sqlNum($resultaat);
 	if($levenden == 0) {
 		return $text;
@@ -318,6 +318,8 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
+//maakt het ontwaak-deel van een algemene mail
+//TODO dorpsoudste afvangen
 function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: ontwaakVerhaal.\n";
 	$tuplesL = array(); //L voor levende spelers
@@ -326,18 +328,18 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$resArray = array();
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
-	$resultaat = sqlSel("Spelers","SID=$sid AND LEVEND=1");
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
 	}
-	$resultaat2 = sqlSel("Spelers","SID=$sid AND ((LEVEND & 2) = 2)");
+	$resultaat2 = sqlSel(3,"SID=$sid AND ((LEVEND & 2) = 2)");
 
 	$speciaalVerhaal = false;
 	$doelwitten = array(); //id's van de doelwitten van de jagers
 	while($speler = sqlFet($resultaat2)) {
 		if($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) {
 			$speciaalVerhaal = true;
-			$res = sqlSel("Spelers","ID=" . $speler['EXTRA_STEM']);
+			$res = sqlSel(3,"ID=" . $speler['EXTRA_STEM']);
 			$target = sqlFet($res);
 			array_push($tuplesS,$target);
 			array_push($doelwitten,$speler['EXTRA_STEM']);
@@ -345,7 +347,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		if($speler['GELIEFDE'] != "" && 
 			($speler['LEVEND'] & 512) == 0) {
 				$speciaalVerhaal = true;
-				$res = sqlSel("Spelers","ID=" . $speler['GELIEFDE']);
+				$res = sqlSel(3,"ID=" . $speler['GELIEFDE']);
 				$target = sqlFet($res);
 				array_push($tuplesS,$target);
 		}
@@ -397,7 +399,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
 	//en samenvatting maken
 	foreach($boom as $id => $target) {
-		$resultaat = sqlSel("Spelers","NAAM='$id' AND SID=$sid");
+		$resultaat = sqlSel(3,"NAAM='$id' AND SID=$sid");
 		$tuple = sqlFet($resultaat);
 		array_push($tuplesS,$tuple);
 		$naam = $tuple['NAAM'];
@@ -538,7 +540,7 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		if($tuple['ROL'] == "Jager" &&
 			($tuple['SPELFLAGS'] & 4) == 4) {
 				$doelwit = $tuple['EXTRA_STEM'];
-				$resultaat = sqlSel("Spelers","ID=$doelwit");
+				$resultaat = sqlSel(3,"ID=$doelwit");
 				$tuple2 = sqlFet($resultaat);
 				$naam2 = $tuple2['NAAM'];
 				$rol2 = $tuple2['ROL'];
@@ -569,7 +571,7 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		if($tuple['GELIEFDE'] != "" &&
 			($tuple['SPELFLAGS'] & 512) == 0) {
 				$geliefde = $tuple['GELIEFDE'];
-				$resultaat = sqlSel("Spelers","ID=$geliefde");
+				$resultaat = sqlSel(3,"ID=$geliefde");
 				$tuple2 = sqlFet($resultaat);
 				$naam2 = $tuple2['NAAM'];
 				$rol2 = $tuple2['ROL'];
@@ -641,5 +643,57 @@ function array_search_recursive($needle, $haystack, &$indexes=array()) {
 	}
 	return false;
 }//array_search_recursive
+
+function verkiezingVerhaal(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
+	echo "Aangeroepen: verkiezingVerhaal.\n";
+
+	$burgID = $spel['BURGEMEESTER'];
+	$vlag = false;
+	if($burgID == -1) {
+		//geen burg gekozen: doe iets anders
+		$vlag = true;
+		$burgArray = array();
+	}
+	else {
+		$resultaat = sqlSel(3,"ID=$burgID");
+		$burgemeester = sqlFet($resultaat);
+		$burgNaam = $burgemeester['NAAM'];
+		$burgArray = array($burgemeester);
+	}
+	$tuplesL = array(); //L voor levende spelers
+	$thema = $spel['THEMA'];
+	$sid = $spel['SID'];
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1 AND ID<>$burgID");
+	while($speler = sqlFet($resultaat)) {
+		array_push($tuplesL,$speler);
+	}
+
+	//maak verhaal (met burg apart van alle andere levende spelers)
+	$verhaal = geefVerhaalGroep($thema,"Algemeen",0,count($tuplesL),
+		count($burgArray),$sid);
+	$text = $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulInDood($tuplesL,$burgArray,"",$text,$geswoorden);
+
+	//samenvatting maken
+	$samenvatting .= "De Burgemeesterverkiezing is geweest.<br />";
+	if($vlag) {
+		$samenvatting .= "Vanwege gelijkspel ";
+		$samenvatting .= "is er geen Burgemeester gekozen.<br />";
+	}
+	else {
+		$samenvatting .= "$burgNaam is tot Burgemeester verkozen.<br />";
+	}
+	$samenvatting .= "<br />";
+	$samenvatting .= "Uitslag:<br />";
+	foreach($overzicht as $naam => $stem) {
+		$samenvatting .= "$naam stemt op $stem.<br />";
+	}
+	$samenvatting .= "<br />";
+	$samenvatting .= "De Dag begint.<br />";
+
+	return;
+}//verkiezingVerhaal
 
 ?>

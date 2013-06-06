@@ -80,7 +80,7 @@ function adminQuery($text,$adres) {
 
 function adminPause($text,$adres) {
 	$spellen = explode("\r\n",$text);
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
@@ -89,7 +89,7 @@ function adminPause($text,$adres) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","STATUS=1","SID=$sid");
+		sqlUp(4,"STATUS=1","SID=$sid");
 		echo "Spel gepauzeerd: $snaam.\n";
 		stuurPauze($sid);
 		$onderwerp = "Spel gepauzeerd: $snaam";
@@ -109,7 +109,7 @@ function adminPause($text,$adres) {
 
 function adminContinue($text,$adres) {
 	$spellen = explode("\r\n",$text);
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
@@ -120,7 +120,7 @@ function adminContinue($text,$adres) {
 		$vlag = true;
 		$datum = date_create(date('Y-m-d'));
 		$sqlDatum = date_format($datum, 'Y-m-d');
-		sqlUp("Spellen","STATUS=0,DUUR='$sqlDatum'","SID=$sid");
+		sqlUp(4,"STATUS=0,DUUR='$sqlDatum'","SID=$sid");
 		echo "Spel hervat: $snaam.\n";
 		stuurHervat($sid);
 		$onderwerp = "Spel hervat: $snaam";
@@ -140,7 +140,7 @@ function adminContinue($text,$adres) {
 
 function adminStop($text,$adres) {
 	$spellen = explode("\r\n",$text);
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
@@ -149,7 +149,7 @@ function adminStop($text,$adres) {
 			continue;
 		}
 		$vlag = true;
-		sqlUp("Spellen","STATUS=2,FASE=99","SID=$sid");
+		sqlUp(4,"STATUS=2,FASE=99","SID=$sid");
 		echo "Spel gestopt: $snaam.\n";
 		stuurStop($sid);
 		$onderwerp = "Spel gestopt: $snaam";
@@ -168,8 +168,10 @@ function adminStop($text,$adres) {
 }//adminStop
 
 function adminDelete($text,$adres) {
+	global $tabellen;
+	$tabel = $tabellen[4];
 	$spellen = explode("\r\n",$text);
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
@@ -188,7 +190,7 @@ function adminDelete($text,$adres) {
 			stuurMail($adres,$onderwerp,$bericht);
 			continue;
 		}
-		$sql = "DELETE FROM Spellen WHERE SID=$sid";
+		$sql = "DELETE FROM $tabel WHERE SID=$sid";
 		sqlQuery($sql);
 		echo "Spel verwijderd: $snaam.\n";
 		$onderwerp = "Spel verwijderd: $snaam";
@@ -206,8 +208,9 @@ function adminDelete($text,$adres) {
 }//adminDelete
 
 function adminStart($text,$adres) {
-	global $thuis;
+	global $thuis,$tabellen;
 
+	$tabel = $tabellen[4];
 	$details = explode("\r\n",$text);
 	$snaam = $details[0];
 	$max = intval($details[1]);
@@ -238,7 +241,7 @@ function adminStart($text,$adres) {
 	if(empty($tnaam) || !is_string($tnaam)) {
 		$tnaam = "default";
 	}
-	$resultaat = sqlSel("Themas","TNAAM='$tnaam'");
+	$resultaat = sqlSel(5,"TNAAM='$tnaam'");
 	$vlag = false;
 	while(sqlNum($resultaat) == 0) {
 		if($vlag) {
@@ -248,11 +251,11 @@ function adminStart($text,$adres) {
 		}
 		$vlag = true;
 		echo "Opgegeven thema bestaat niet: default genomen\n";
-		$resultaat = sqlSel("Themas","TNAAM='default'");
+		$resultaat = sqlSel(5,"TNAAM='default'");
 	}
 	$thema = sqlFet($resultaat);
 	$tid = $thema['TID'];
-	$sql = "INSERT INTO Spellen(SNAAM,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
+	$sql = "INSERT INTO $tabel(SNAAM,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
 	$sql .= "VALUES ('$snaam',$max,$snel,$streng,$tid)";
 	sqlQuery($sql);
 	echo "Spel gemaakt: $snaam.\n";
@@ -268,7 +271,7 @@ function adminStart($text,$adres) {
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,0);
 	}
-	$resultaat = sqlSel("Spellen","SNAAM='$snaam'");
+	$resultaat = sqlSel(4,"SNAAM='$snaam'");
 	$spel = sqlFet($resultaat);
 	$sid = $spel['SID'];
 	$deadline = geefDeadline($sid);
@@ -300,8 +303,10 @@ function adminStart($text,$adres) {
 }//adminStart
 
 function adminPlayers($bericht,$adres) {
+	global $tabellen;
+	$tabel = $tabellen[3];
 	$spellen = explode("\r\n",$text);
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	$vlag = false;
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
@@ -311,7 +316,7 @@ function adminPlayers($bericht,$adres) {
 		}
 		$vlag = true;
 		$sql = "SELECT ID,NAAM,SPELERFLAGS,EMAIL,LEVEND ";
-		$sql .= "FROM Spelers WHERE SID=$sid";
+		$sql .= "FROM $tabel WHERE SID=$sid";
 		$resultaat = sqlQuery($sql);
 		if(sqlNum($resultaat) == 0) {
 			echo "Geen spelers in spel $snaam.\n";
@@ -336,14 +341,14 @@ function adminPlayers($bericht,$adres) {
 
 function adminNoMail($bericht,$adres) {
 	$vlag = false;
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	while($spel = sqlFet($resultaat)) {
 		$sid = $spel['SID'];
 		$snaam = $spel['SNAAM'];
 		if(!strstr($bericht,$snaam)) {
 			continue;
 		}
-		$resultaat2 = sqlSel("Spelers","SID=$sid AND LEVEND=0");
+		$resultaat2 = sqlSel(3,"SID=$sid AND LEVEND=0");
 		while($speler = sqlFet($resultaat)) {
 			$naam = $speler['NAAM'];
 			if(!strstr($bericht,$naam)) {
@@ -351,7 +356,7 @@ function adminNoMail($bericht,$adres) {
 			}
 			$vlag = true;
 			$id = $speler['ID'];
-			$resultaat = sqlSel("Spelers","ID=$id");
+			$resultaat = sqlSel(3,"ID=$id");
 			$speler = sqlFet($resultaat);
 			$spelerflag = $speler['SPELERFLAGS'];
 			if(!($spelerflag & 2)) {
@@ -363,7 +368,7 @@ function adminNoMail($bericht,$adres) {
 				continue;
 			}
 			$spelerflag -= 2;
-			sqlUp("Spelers","SPELERFLAGS=$spelerflag","ID=$id");
+			sqlUp(3,"SPELERFLAGS=$spelerflag","ID=$id");
 			echo "$snaam: $naam ontvangt geen mails meer.\n";
 			$onderwerp = "$naam: uit maillijst";
 			$bericht = "$naam in spel $snaam is uit de maillijst gehaald, ";
@@ -383,7 +388,7 @@ function adminNoMail($bericht,$adres) {
 }//adminNoMail
 
 function adminGames($adres) {
-	$resultaat = sqlSel("Spellen",NULL);
+	$resultaat = sqlSel(4,NULL);
 	if(sqlNum($resultaat) == 0) {
 		echo "Geen spellen aanwezig.\n";
 		$onderwerp = "Spellen zoeken mislukt";
@@ -397,7 +402,9 @@ function adminGames($adres) {
 }//adminGames
 
 function adminStory($bericht,$adres) {//TODO thema's uitvogelen; 
-                                      //     werkt nu met foreign keys
+								//     werkt nu met foreign keys
+	global $tabellen;
+	$tabel = $tabellen[6];
 	$stukken = explode("\r\n\r\n\r\n",$bericht);
 	$header = explode("\r\n\r\n",$stukken[0]);
 	$auteur = sqlEscape($header[0]);
@@ -427,7 +434,7 @@ function adminStory($bericht,$adres) {//TODO thema's uitvogelen;
 		if(($dood == 0 && $onderdelen[3] != "0")) {
 			$dood = "NULL";
 		}
-		$sql = "INSERT INTO Verhalen(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
+		$sql = "INSERT INTO $tabel(THEMA,AUTEUR,LEVEND,DOOD,ROL,FASE,";
 		$sql .= "VERHAAL,GESLACHT) VALUES ('$thema','$auteur',$levend,$dood,";
 		$sql .= "'$rol',$fase,'$verhaal',$geslacht)";
 		sqlQuery($sql);
@@ -447,7 +454,7 @@ function adminHelp($bericht,$onderwerp,$adres) {
 	}
 	$hid = implode('', $nummers[0]);
 	echo "$hid beantwoord.\n";
-	$resultaat = sqlSel("Help","HID=$hid");
+	$resultaat = sqlSel(1,"HID=$hid");
 	$help = sqlFet($resultaat);
 	$ontvanger = $help['ADRES'];
 	$onderwerp = "RE:Help";
@@ -462,11 +469,11 @@ function adminHelp($bericht,$onderwerp,$adres) {
 //hulp aangevraagd: $onderwerp is het originele onderwerp, 
 //en $bericht het originele bericht
 function help($afzender,$onderwerp,$bericht) {
-	global $admins;
-	$sql = "INSERT INTO Help(ADRES) VALUES('$afzender')";
+	global $admins,$tabellen;
+	$tabel = $tabellen[1];
+	$sql = "INSERT INTO $tabel(ADRES) VALUES('$afzender')";
 	sqlQuery($sql);
 	$hid = sqlID();
-	$bericht1 = base64_decode($bericht);
 	$subject = "Hulp gevraagd: $hid";
 	if(preg_match("/anoniem/i",$onderwerp)) {
 		echo "Anonieme hulp gevraagd.\n";
@@ -479,13 +486,13 @@ function help($afzender,$onderwerp,$bericht) {
 	$message .= "Onderwerp: $onderwerp <br />";
 	$message .= "HID: $hid <br />";
 	$message .= "<br />";
-	$message .= $bericht1;
+	$message .= $bericht;
 	$alleAdmins = $admins[0];
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
 	echo "$onderwerp\n";
-	echo "$bericht\n";
+	echo "$message\n";
 	echo "$hid\n";
 	stuurMail($alleAdmins,$subject,$message);
 	return;
