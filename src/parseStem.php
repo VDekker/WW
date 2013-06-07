@@ -409,7 +409,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 				else if($rol == "Zondebok" && isNieuwDood($id)) {
 					$stem = geldigeStemZonde($bericht,$sid);
 					if($stem != false) {
-						zetStem($id,$stem,$sid,"STEM");
+						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						//TODO mail
 						echo "Zondebok $id wil schuldgevoel opwekken in $stem.\n";
 					}

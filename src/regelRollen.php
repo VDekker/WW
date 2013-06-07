@@ -844,9 +844,17 @@ function regelDood1($sid) {
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
 		$lijfwacht = $speler['LIJFWACHT'];
-		if($lijfwacht != "" && isLevend($lijfwacht)) {
+		while(!empty($lijfwacht) && isLevend($lijfwacht)) {
 			zetDood($lijfwacht,$sid);
+			sqlUp(3,"SPELFLAGS=SPELFLAGS+32768",
+				"ID=$lijfwacht AND ((SPELFLAGS & 32768) = 0)");
 			herleef($id,$sid);
+			sqlUp(3,"SPELFLAGS=SPELFLAGS-32768",
+				"ID=$id AND ((SPELFLAGS & 32768) = 32768)");
+			$res = sqlSel(3,"ID=$lijfwacht");
+			$sp = sqlFet($res);
+			$id = $sp['ID'];
+			$lijfwacht = $sp['LIJFWACHT'];
 			echo "Lijfwacht $lijfwacht sterft om $id te redden.\n";
 		}
 	}//while
@@ -911,10 +919,7 @@ function regelDood2($sid,$fase) {
 
 //regelt alle stemmen van de Burgemeesterverkiezing
 function regelBurgVerk($sid) {
-	$overzicht1 = array();
-	$overzicht2 = array();
-	$kandidaten = array(-1); // init met blanco, om errors te voorkomen
-	$stemmen = array(0);
+	$overzichtTotaal = array(-1 => "blanco");
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
@@ -923,48 +928,63 @@ function regelBurgVerk($sid) {
 		if($stem == "") { //niet gestemd...
 			stemGemist($id);
 			echo "$id heeft niet gestemd.\n";
-			continue;
+			$stem = -2;
 		}
-		heeftGestemd($id);
-		verwijderStem($id,"STEM");
-		echo "$id stemt: $stem.\n";
-		array_push($overzicht1,$naam);
-		array_push($overzicht2,$stem);
-		$key = array_search($stem,$kandidaten);
-		if($key == false) { // nog niet eerder op deze persoon gestemd
-			array_push($kandidaten,$stem);
-			array_push($stemmen,1);
+		else {
+			heeftGestemd($id);
+			verwijderStem($id,"STEM");
+			echo "$id stemt: $stem.\n";
 		}
-		else { // anders: tel 1 stem erbij op
-			$stemmen[$key]++;
+		if(array_key_exists($stem,$overzichtTotaal)) {
+			array_push($overzichtTotaal[$stem],$naam);
+		}
+		else {
+			$overzichtTotaal[$stem] = array($naam);
 		}
 	}//while
 
 	//verbeter overzicht: namen waar id's staan (bij de stemmen)
-	foreach($overzicht2 as $key => $id) {
-		$resultaat = sqlSel(3,"ID=$id");
-		$speler = sqlFet($resultaat);
-		$overzicht2[$key] = $speler['NAAM'];
-	}
-	$overzichtTotaal = array_combine($overzicht1,$overzicht2);
+	sqlData($resultaat,0);
+	while($speler = sqlFet($resultaat)) {
+		$id = $speler['ID'];
+		$naam = $speler['NAAM'];
+		if(array_key_exists($id,$overzichtTotaal) {
+			$overzichtTotaal[$naam] = $overzichtTotaal[$id];
+			unset($overzichtTotaal[$id]);
+		}
+	}//while
 
-	//nu de uitslag maken
-	$blanco = array_keys($kandidaten,-1);
+	//haal de blanco stemmen weg
+	$blanco = array_keys($overzichtTotaal,-1);
 	foreach($blanco as $blancokey) {
-		$kandidaten = delArrayElement($kandidaten,$blancokey);
-		$stemmen = delArrayElement($stemmen,$blancokey);
+		$overzichtTotaal = delArrayElement($overzichtTotaal,$blancokey);
 	}
-	if(empty($stemmen)) { //er waren enkel blanco stemmen...
-		//TODO mail verhaaltje
+
+	//haal de lege stemmen weg
+	$blanco = array_keys($overzichtTotaal,-2);
+	foreach($blanco as $blancokey) {
+		$overzichtTotaal = delArrayElement($overzichtTotaal,$blancokey);
+	}
+
+	//als er geen stemmen overblijven: voortaan geen Burgemeester meer
+	if(empty($overzichtTotaal)) {
 		sqlUp(4,"BURGEMEESTER=-1","SID=$sid");
 		echo "Burgemeesterverkiezing: enkel blanco stemmen geteld.\n";
 		return;
 	}
-	$keys = hoogsteStem($stemmen);
-	$burgemeester = $kandidaten[array_rand($keys)];
+
+	//pak nu de hoogste stem (bij meerdere: neem een willekeurige)
+	$max = 0;
+	shuffle($overzichtTotaal);
+	foreach($overzichtTotaal as $stem => $namen) {
+		if(count($namen) > $max) {
+			$burgemeester = $stem;
+			$max = $count($namen);
+		}
+	}
 	sqlUp(4,"BURGEMEESTER='$burgemeester'","SID=$sid");
 	echo "De nieuwe Burgemeester is $burgemeester.\n";
-	//TODO mail verhaaltje
+
 	return $overzichtTotaal;
 }//regelBurgVerk
 
@@ -982,7 +1002,6 @@ function regelBrand($sid) {
 			continue;
 		}
 		heeftGestemd($id);
-		verwijderStem($id,"STEM");
 		echo "$id stemt: $stem.\n";
 		$i = stemWaarde($id,$sid);
 		$key = array_search($stem,$kandidaten);
@@ -996,8 +1015,10 @@ function regelBrand($sid) {
 	}//while
 
 	//voeg het Teken van de Raaf bij de stemmen
-	$resultaat = sqlSel(3,
-		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 1024) = 1024)");
+	$eis = "SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 1024) = 1024) AND ";
+	$eis .= "((SPELFLAGS & 2048) = 0) AND "; //tegen opgesloten spelers
+	$eis .= "(((SPELFLAGS & 128) = 0) OR ROL<>'Dorpsgek')"; //tegen dorpsgekken
+	$resultaat = sqlSel(3,$eis);
 	if(sqlNum($resultaat)) {
 		while($speler = sqlFet($resultaat)) {
 			$id = $speler['ID'];
@@ -1013,49 +1034,23 @@ function regelBrand($sid) {
 		}//while
 	}//if
 
-	$dorpsgek = inSpel("Dorpsgek",$sid);
-	if($dorpsgek) { // check op ontdekte Dorpsgek
-		$resultaat = sqlSel(3,
-			"SID=$sid AND LEVEND=1 AND ROL='Dorpsgek' AND 
-			((SPELFLAGS & 128) = 128");
-		while($speler = sqlFet($resultaat)) {
-			$id = $speler['ID'];
-			echo "$id is gek en op hem wordt niet gestemd.\n";
-			$key = array_search($id,$kandidaten);
-			if($key == false) {
-				continue;
-			}
-			$kandidaten = delArrayElement($kandidaten,$key);
-			$stemmen = delArrayElement($stemmen,$key);
-		}//while
-	}//if
-	
-	//haal de opgesloten spelers (door Schout) uit de lijst
-	$resultaat = sqlSel(3,
-		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 2048) = 2048)");
-	if(sqlNum($resultaat)) {
-		while($speler = sqlFet($resultaat)) {
-			$id = $speler['ID'];
-			echo "$id is opgesloten.\n";
-			$key = array_search($id,$kandidaten);
-			if(!$key) {
-				continue;
-			}
-			$kandidaten = delArrayElement($kandidaten,$key);
-			$stemmen = delArrayElement($stemmen,$key);
-		}//while
-	}//if
-
-	//haal alle schuldgevoel weg
+	//haal alle schuldgevoel, tekens van de raaf en opgeslotenheid weg
 	sqlUp(3,"SPELFLAGS=(SPELFLAGS-2)",
-		"SID=$sid AND (SPELFLAGS & 2)");
+		"SID=$sid AND ((SPELFLAGS & 2) = 2)");
+	sqlUp(3,"SPELFLAGS=(SPELFLAGS-1024)",
+		"SID=$sid AND ((SPELFLAGS & 1024) = 1024)");
+	sqlUp(3,"SPELFLAGS=(SPELFLAGS-2048)",
+		"SID=$sid AND ((SPELFLAGS & 2048) = 2048)");
 
+	//haal alle blanco stemmen weg
 	$blanco = array_keys($kandidaten,-1);
 	foreach($blanco as $blancokey) {
 		$kandidaten = delArrayElement($kandidaten,$blancokey);
 		$stemmen = delArrayElement($stemmen,$blancokey);
 	}
-	if(empty($stemmen)) { //enkel blanco stemmen, check voor Zondebok
+
+	//er waren enkel blanco stemmen: check voor Zondebok, anders niks.
+	if(empty($stemmen)) {
 		$resultaat = sqlSel(3,
 			"SID=$sid AND LEVEND=1 AND ROL='Zondebok'");
 		if(sqlNum($resultaat) > 0) {
@@ -1074,6 +1069,8 @@ function regelBrand($sid) {
 		}
 		return;
 	}//if
+
+	//pak de hoogste stem
 	$keys = hoogsteStem($stemmen);
 	if(count($keys) > 1) { // gelijkspel
 		echo "Gelijkspel! Hoogste stemmen: " . $kandidaten[$keys[0]] . 
@@ -1112,22 +1109,22 @@ function regelBrand($sid) {
 		}//else
 	}//if
 
+	//bij geen gelijkspel
 	$slachtoffer = $kandidaten[$keys[0]];
 	$aantal = $stemmen[$keys[0]];
 	if($dorpsgek) { //check op Dorpsgek
 		$resultaat = sql(3,
 			"ID=$slachtoffer AND ROL='Dorpsgek'");
 		if(sqlNum($resultaat) > 0) { // slachtoffer is gek
-			echo "$slachtoffer blijkt gek en mag leven.\n";
+			echo "$slachtoffer is gek verklaard en mag leven.\n";
 			sqlUp(3,"SPELFLAGS=SPELFLAGS+128",
 				"ID=$slachtoffer");
 			return;
 		}
-	}//if	
+	}//if
 	zetDood($slachtoffer,$sid);
 	echo "$slachtoffer eindigt op de Brandstapel met $aantal stemmen.\n";
 	return;
-	//TODO mail verhaaltje
 }//regelBrand
 
 //regelt de stemmen van de Zondebok
@@ -1139,7 +1136,7 @@ function regelZonde($sid) {
 	}
 	$zondebok = sqlFet($resultaat);
 	$id = $zondebok['ID'];
-	$stem = $zondebok['STEM'];
+	$stem = $zondebok['EXTRA_STEM'];
 	sqlUp(3,"SPELFLAGS=SPELFLAGS-256","ID=$id");
 	if($stem == "") {
 		stemGemist($id);
@@ -1149,7 +1146,7 @@ function regelZonde($sid) {
 	heeftGestemd($id);
 	verwijderStem($id,"STEM");
 	if($stem == -1) {
-		mailActie($id,9,$sid,"STEM");
+		mailActie($id,9,$sid,"EXTRA_STEM");
 		continue;
 	}
 

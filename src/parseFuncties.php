@@ -153,7 +153,7 @@ function geldigeStemHeks($bericht,$sid,$levend) {
 function geldigeStemBrand($id,$bericht,$sid) {
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
-	if(($speler['SPELFLAGS'] & 128) == 128) {
+	if($speler['ROL'] == "Dorpsgek" && ($speler['SPELFLAGS'] & 128) == 128) {
 		echo "Dorpsgek $id mag niet stemmen.\n";
 		return -1;
 	}
@@ -161,18 +161,24 @@ function geldigeStemBrand($id,$bericht,$sid) {
 		echo "$id voelt zich schuldig en mag niet stemmen.\n";
 		return -1;
 	}
+	if(($speler['SPELFLAGS'] & 2048) == 2048) {
+		echo "$id is opgesloten en mag niet stemmen.\n";
+		return -1;
+	}
 	$stem = geldigeStem($bericht,$sid,1);
-	$resultaat = sqlSel(3,"SID=$sid AND ROL='Schout'");
-	while($schout = sqlFet($resultaat)) {
-		if($schout['EXTRA_STEM'] == $id) {
-			echo "$id is opgesloten en mag niet stemmen.\n";
+	if($stem != -1) { //controleer de stem
+		$resultaat = sqlSel(3,"ID=$stem");
+		$speler = sqlFet($resultaat);
+		if($speler['ROL'] == "Dorpsgek" && 
+			($speler['SPELFLAGS'] & 128) == 128) {
+			echo "$id mag niet op Dorpsgek $stem stemmen.\n";
 			return -1;
 		}
-		if($stem != -1 && $stem == $schout['EXTRA_STEM']) {
-			echo "$id stemt op $stem, die is opgesloten.\n";
-			return false;
+		if(($speler['SPELFLAGS'] & 2048) == 2048) {
+			echo "$id mag niet op opgesloten $stem stemmen.\n";
+			return -1;
 		}
-	}//while
+	}
 	return $stem;
 }//geldigeStemBrand
 
