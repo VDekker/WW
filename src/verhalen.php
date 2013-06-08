@@ -917,12 +917,26 @@ function mailAlgemeenBrandstapel($vlag,$overzicht,$sid) {
 function mailAlgemeenInslapen($sid) {
 	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
+	$sid = $spel['SID'];
 	$snaam = $spel['SNAAM'];
 	$thema = $spel['THEMA'];
 	$onderwerp = "$snaam: Algemeen";
+	$tuplesL = array();
+
 	//pak brandstapel-uitslag-verhaal TODO
 	
-	//pak nacht-inleiding-verhaal TODO
+	//pak nacht-inleiding-verhaal
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
+	while($speler = sqlFet($resultaat)) {
+		array_push($tuplesL,$speler);
+	}
+	shuffle($tuplesL);
+	$verhaal = geefVerhaalGroep2($thema,"Algemeen",6,count($tuplesL),0,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	$auteur = $verhaal['AUTEUR'];
+	$text = vulIn($tuples,"",$text,$geswoorden);
+	$samenvatting .= "De Nacht begint.<br />";
 	
 	//en voeg samenvatting samen met text
 	$text = plakSamenvatting($samenvatting,$text);

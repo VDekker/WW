@@ -3,7 +3,7 @@
 function fases() {
 	$resultaat = sqlSel(4,"");
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
-		if($spel['STATUS'] != 0) { // dit werkt niet in query (??)
+		if($spel['STATUS'] != 0) { // dit werkt niet in query (??) TODO check
 			continue;
 		}
 		$sid = $spel['SID'];
@@ -13,7 +13,7 @@ function fases() {
 		if($spel['INIT']) { // initialiseer-fase van het spel
 			
 			switch($fase) {
-				case 0:
+				case 0: //TODO verwijderen
 					zetFase(1,$sid);
 					break;
 				case 1:
@@ -36,7 +36,6 @@ function fases() {
 						zetFase(4,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
 						zetFase(6,$sid);
 					}
 					break;
@@ -57,7 +56,6 @@ function fases() {
 						zetFase(5,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
 						zetFase(6,$sid);
 					}
 					break;
@@ -66,6 +64,7 @@ function fases() {
 						zetFase(6,$sid);
 					}
 					else {
+						echo "Blijf wachten.\n";
 						break;
 					}
 				case 6:
