@@ -7,6 +7,7 @@
 \usepackage{titlesec}
 \usepackage{tabularx}
 \usepackage{graphicx}
+\usepackage{fancybox}
 \usepackage{hyperref} %moet als laatste package staan!
 
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{lem}{}
@@ -327,30 +328,30 @@
     
     \begin{center}
       \begin{tabular}{r|l}
-	\multirow{4}{*}{Burgers}
-	 & De Burgers hebben gewonnen als er geen \\
-	 & kwade rollen (Weerwolf, Welp, Witte Weerwolf, \\
-	 & Vampier, Psychopaat en Fluitspeler) meer \\
-	 & over zijn. \\
-	\hline
-	\multirow{3}{*}{Weerwolven}
-	 & Als de enige levende spelers danwel Weerwolven, \\
-	 & danwel Welpen zijn, dan hebben de Weerwolven \\
-	 & gewonnen. \\
-	\hline
-	\multirow{3}{*}{Vampiers}
-	 & Als er enkel Vampiers over zijn tussen de \\
-	 & levende spelers, dan hebben de Vampiers \\
-	 & gewonnen. \\
-	\hline
-	\multirow{3}{*}{Fluitspelers}
-	 & Als elke levende speler, met uitzondering van \\
-	 & de Fluitspelers betoverd zijn, hebben de \\
-	 & Fluitspelers gewonnen. \\
-	\hline
-	\multirow{2}{*}{Eigen} 
-	 & Als enkel deze speler is overgebleven, dan \\
-	 & heeft deze speler gewonnen. \\
+        \multirow{4}{*}{Burgers}
+         & De Burgers hebben gewonnen als er geen \\
+         & kwade rollen (Weerwolf, Welp, Witte Weerwolf, \\
+         & Vampier, Psychopaat en Fluitspeler) meer \\
+         & over zijn. \\
+        \hline
+        \multirow{3}{*}{Weerwolven}
+         & Als de enige levende spelers danwel Weerwolven, \\
+         & danwel Welpen zijn, dan hebben de Weerwolven \\
+         & gewonnen. \\
+        \hline
+        \multirow{3}{*}{Vampiers}
+         & Als er enkel Vampiers over zijn tussen de \\
+         & levende spelers, dan hebben de Vampiers \\
+         & gewonnen. \\
+        \hline
+        \multirow{3}{*}{Fluitspelers}
+         & Als elke levende speler, met uitzondering van \\
+         & de Fluitspelers betoverd zijn, hebben de \\
+         & Fluitspelers gewonnen. \\
+        \hline
+        \multirow{2}{*}{Eigen} 
+         & Als enkel deze speler is overgebleven, dan \\
+         & heeft deze speler gewonnen. \\
       \end{tabular}
     \end{center}
     
@@ -360,17 +361,17 @@
 
     \begin{center}
       \begin{tabular}{r|l}
-	\multirow{4}{*}{Burgers/Weerwolven}
-	 & Als alle andere teams dood zijn, en van de \\
-	 & Burgers is slechts de eerste Geliefde over, \\
-	 & en van de Weerwolven slechts de tweede Geliefde, \\
-	 & Dan hebben deze Geliefden gewonnen.\\
-	\hline
-	\multirow{4}{*}{Burgers/Fluitspelers}
-	 & Als alle andere teams dood zijn, en van de \\
-	 & Fluitspelers is slechts de Geliefde over, \\
-	 & en alle levende Burgers zijn betoverd, dan \\
-	 & hebben deze Geliefden gewonnen. \\
+        \multirow{4}{*}{Burgers/Weerwolven}
+         & Als alle andere teams dood zijn, en van de \\
+         & Burgers is slechts de eerste Geliefde over, \\
+         & en van de Weerwolven slechts de tweede Geliefde, \\
+         & Dan hebben deze Geliefden gewonnen.\\
+        \hline
+        \multirow{4}{*}{Burgers/Fluitspelers}
+         & Als alle andere teams dood zijn, en van de \\
+         & Fluitspelers is slechts de Geliefde over, \\
+         & en alle levende Burgers zijn betoverd, dan \\
+         & hebben deze Geliefden gewonnen. \\
       \end{tabular}
     \end{center}
     
@@ -431,14 +432,14 @@
     Een voorbeeld:
     
     \begin{center}
-      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
-	\hline
-	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
-	Van: & $<$mijn\_account@gmail.com$>$ \\
-	Onderwerp: & WWspelnaam \\[\baselineskip]	
-	Bericht: & NAAM, man \\  
-	\hline
-      \end{tabularx}
+      \shadowbox{
+        \begin{tabularx}{0.75\textwidth}[c]{r X}
+          Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+          Van: & $<$mijn\_account@gmail.com$>$ \\
+          Onderwerp: & WWspelnaam \\[\baselineskip]	
+          Bericht: & NAAM, man \\
+        \end{tabularx}
+      }
     \end{center}
     
     Als deze email verstuurd wordt, zal de speler worden ingeschreven in het spel `WWspelnaam' met naam `NAAM', en emailadres `$<$main\_account@gmail.com$>$'. Zijn geslacht zal mannelijk zijn.

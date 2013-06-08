@@ -7,6 +7,7 @@
 \usepackage{titlesec}
 \usepackage{tabularx}
 \usepackage{graphicx}
+\usepackage{fancybox}
 \usepackage{hyperref} %moet als laatste package staan!
 
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{lem}{}
@@ -66,58 +67,57 @@
     Een voorbeeld:
     
     \begin{center}
-      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
-	\hline
-	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
-	Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
-	Onderwerp: & config start \\[\baselineskip]	
-	Bericht: & wachtwoord \\
-	 & Spelnaam \\
-	 & 15 \\
-	 & 3 \\
-	 & 1 \\
-	 & Wakkerdam \\
-	\hline
-      \end{tabularx}
+      \shadowbox{
+        \begin{tabularx}{0.75\textwidth}[c]{r X}
+          Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+          Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
+          Onderwerp: & config start \\[\baselineskip]	
+          Bericht: & wachtwoord \\
+           & Spelnaam \\
+           & 15 \\
+           & 3 \\
+           & 1 \\
+           & Wakkerdam \\
+        \end{tabularx}
+      }
     \end{center}
     
     Als een van deze parameters ontbreekt, dan wordt hij met de standaard opgevuld, behalve bij de naam; als de naam ontbreekt, dan kan er geen spel worden gestart, en wordt een foutmelding naar de systeembeheerder gestuurd. In het volgende voorbeeld staan ook de standaardwaardes aangegeven tussen blokhaakjes. Dze kunnen leeggelaten worden, al moet de regel dan geheel leeg blijven (dus een witregel worden).
     
     \begin{center}
-      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
-	\hline
-	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
-	Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
-	Onderwerp: & config start \\[\baselineskip]	
-	Bericht: & wachtwoord \\
-	 & Spelnaam \\
-	 & [18] \\
-	 & [2] \\
-	 & [2] \\
-	 & [default] \\
-	\hline
-      \end{tabularx}
+      \shadowbox{
+        \begin{tabularx}{0.75\textwidth}[c]{r X}
+          Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+          Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
+          Onderwerp: & config start \\[\baselineskip]	
+          Bericht: & wachtwoord \\
+           & Spelnaam \\
+           & [18] \\
+           & [2] \\
+           & [2] \\
+           & [default] \\
+        \end{tabularx}
+      }
     \end{center}
     
     Als een spel succesvol is aangemaakt, dan wordt de systeembeheerder hiervan op de hoogte gesteld. Als er ook mensen moeten worden uitgenodigd voor het spel, moeten deze onder het thema worden toegevoegd, waarbij elk emailadres een aparte regel krijgt:
     
     \begin{center}
-      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
-	\hline
-	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
-	Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
-	Onderwerp: & config start \\[\baselineskip]	
-	Bericht: & wachtwoord \\
-	 & Spelnaam \\
-	 & 15 \\
-	 & 3 \\
-	 & 1 \\
-	 & Wakkerdam \\
-	 & speler1@gmail.com \\
-	 & speler\_2@hotmail.com \\
-	 & derde.speler@eenandermailadres.com \\
-	\hline
-      \end{tabularx}
+      \shadowbox{
+        \begin{tabularx}{0.75\textwidth}[c]{r X}
+          Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+          Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
+          Bericht: & wachtwoord \\
+           & Spelnaam \\
+           & 15 \\
+           & 3 \\
+           & 1 \\
+           & Wakkerdam \\
+           & speler1@gmail.com \\
+           & speler\_2@hotmail.com \\
+           & derde.speler@eenandermailadres.com \\
+        \end{tabularx}
+      }
     \end{center}
   
   \subsection{Spel stoppen}
@@ -125,19 +125,21 @@
     Het kan mogelijk zijn dat een spel, om onvoorziene redenen, stilgelegd moet worden; dan moet deze functie worden uitgevoerd, door `stop' toe te voegen aan het onderwerp. In het bericht staat dan het spel dat gestopt moet worden (dit kunnen ook meerdere spellen zijn, \emph{mits deze op aparte regels staan:}
     
     \begin{center}
-      \begin{tabularx}{0.75\textwidth}[c]{|r X|}
-	\hline
-	Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
-	Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
-	Onderwerp: & config stop \\[\baselineskip]	
-	Bericht: & wachtwoord \\
-	 & Spel1 \\
-	 & Spel2 \\
-	\hline
+      \shadowbox{
+        \begin{tabularx}{0.75\textwidth}[c]{r X}
+          Aan: & \href{mailto:<WWautoVerteller@gmail.com>}{$<$WWautoVerteller@gmail.com$>$} \\
+          Van: & $<$systeembeheerder@een\_mail\_adres.com$>$ \\
+          Onderwerp: & config stop \\[\baselineskip]	
+          Bericht: & wachtwoord \\
+           & Spel1 \\
+           & Spel2 \\
       \end{tabularx}
+      }
     \end{center}
     
     Let wel op: gestopte spellen kunnen niet worden hervat, maar zijn voorgoed stilgelegd!
+  
+  \subsection{Spel pauzeren}
   
   \subsection{Spel verwijderen}
   
@@ -146,6 +148,14 @@
   \subsection{Spellen bekijken}
   
   \subsection{Speler uit de maillijst halen}
+  
+  \subsection{Vraag beantwoorden}
+  
+  \subsection{Vraag verwijderen}
+  
+  \subsection{Verhalen invoegen}
+  
+  \subsection{Verhalen verwijderen}
   
   \subsection{SQL queries uitvoeren}
 

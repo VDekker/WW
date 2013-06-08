@@ -305,7 +305,7 @@ voorgoed op 0 gezet.
 Rollen:
 -------
 
-De rollen die zijn geïmplementeerd, samen met keuzes die bij deze rollen 
+De rollen die zijn geimplementeerd, samen met keuzes die bij deze rollen 
 komen. Verder kan men ervanuitgaan dat, tenzij anders vermeld, de parser erop 
 toeziet dat alle stemmen goed in de database komen, en dat ze van tevoren 
 gecheckt zijn. Dit is aan de parser, niet aan de regelfuncties, omdat in geval 
@@ -331,7 +331,7 @@ BURGEMEESTER op NULL staat, dan komen 's ochtends verkiezingen). Een
 Burgemeester kan, wanneer hij dood gaat, een nieuwe Burgemeester aanwijzen, of 
 "blanco" stemmen en daarmee een nieuwe verkiezingsronde starten.
 De verkiezingsronde verloopt precies zoals de Brandstapelronde, met 
-uitzondering dat iedereen (inclusief Dorpsgek!) één stem heeft, ongeacht 
+uitzondering dat iedereen (inclusief Dorpsgek!) een stem heeft, ongeacht 
 Schout or Waarschuwer. Ook het Teken van de Raaf telt nog niet mee.
 
 Als een speler de meeste stemmen krijgt, wordt hij de nieuwe Burgemeester. Is 
@@ -342,7 +342,7 @@ Burgemeester in de rest van het spel (deze wordt op "blanco" gezet).
 
 Als een Burgemeester dood gaat, moet hij zijn opvolger kiezen. Dit gaat door 
 een stem naar het gebruikelijke adres te sturen, met daarin (in het onderwerp 
-of het bericht) één of meerdere van de volgende (hoofdletter-ongevoelige) 
+of het bericht) een of meerdere van de volgende (hoofdletter-ongevoelige) 
 woorden: "Burgemeester", "Testament", "Opvolger".
 
 Dief:
@@ -363,13 +363,13 @@ Cupido:
 De twee Geliefden die Cupido aanwijst worden in zijn STEM en EXTRA_STEM 
 opgeslagen totdat het in het kopje GELIEFDE van de spelers zelf wordt 
 opgeslagen (gedaan door de regelfunctie). Wanneer er echter meerdere Cupido's 
-voorkomen in één spel, kan het gebeuren dat beide Cupido's dezelfde speler(s) 
+voorkomen in een spel, kan het gebeuren dat beide Cupido's dezelfde speler(s) 
 kiezen. Zo'n geval moet door de parser worden gevonden, en afgevangen door de 
 tweede Cupido (die het laatst zijn stemmen opgaf) te vragen om zijn stemmen te 
 herzien. Hierbij krijgt deze wel informatie over Geliefden die hij niet hoort 
 te hebben, maar dit is onvermijdelijk. Een andere optie zou zijn geweest om 
-per speler meerdere Geliefden bij te houden, maar dit zou dan óf in een 
-oneindig aantal kolommen moeten, óf in een text-kolom die moeilijker te parsen 
+per speler meerdere Geliefden bij te houden, maar dit zou dan of in een 
+oneindig aantal kolommen moeten, of in een text-kolom die moeilijker te parsen 
 zou worden. Daarom is voor de eerste optie gekozen.
 Cupido mag 'blanco' stemmen, zou hij hiervoor kiezen. 
 
@@ -380,7 +380,7 @@ De speler die door de Opdrachtgever wordt aangewezen, opgeslagen in STEM,
 wordt zijn Lijfwacht. Deze Lijfwacht zal voor zijn Opdrachtgever sterven, 
 wanneer deze dood zou gaan op welke manier dan ook, behalve inactiviteit, of 
 doordat de Geliefde van de Opdrachtgever sterft.
-Een speler is maximaal van één Opdrachtgever de Lijfwacht; mochten meerdere 
+Een speler is maximaal van een Opdrachtgever de Lijfwacht; mochten meerdere 
 Opdrachtgevers dezelfde speler als Lijfwacht willen, dan moet de tweede 
 Opdrachtgever zijn stem herzien.
 
@@ -430,7 +430,7 @@ vermoorden).
 Fluitspeler:
 ------------
 
-In het geval van meerdere Fluitspelers in één spel: deze Fluitspelers werken 
+In het geval van meerdere Fluitspelers in een spel: deze Fluitspelers werken 
 samen. Om elk van hen apart te laten opereren zou voor elk van de 
 (ongedefineerd hoeveel) Fluitspelers moeten worden bijgehouden wie er Betoverd 
 is. Dit is uiterst moeilijk als niet onmogelijk. Hierom is besloten dat 
@@ -462,7 +462,7 @@ De Jager mag ook "blanco" stemmen, mocht dit gewenst zijn.
 Dorpsoudste:
 ------------
 
-De Dorpsoudste kan éénmaal een aanval van de Weerwolven, Vampiers, Psychopaat 
+De Dorpsoudste kan eenmaal een aanval van de Weerwolven, Vampiers, Psychopaat 
 of Witte Weerwolf overleven. Hij heeft wat dat betreft dus een extra leven. 
 Dit wordt bijgehouden in de kolom EXTRA_LEVEN van de spelers, en hierop wordt 
 gecheckt wanneer een van deze monsters hem probeert te vermoorden (in de 
@@ -562,9 +562,9 @@ WEERWOLVEN:     Als de levende spelers enkel Weerwolven of Welpen zijn, hebben
                 de Weerwolven gewonnen.
 VAMPIERS:       Als de levende spelers enkel Vampiers zijn, hebben de Vampiers
                 gewonnen.
-WITTE WEERWOLF: Als er enkel één Witte Weerwolf levend is, heeft deze Witte 
+WITTE WEERWOLF: Als er enkel een Witte Weerwolf levend is, heeft deze Witte 
                 Weerwolf gewonnen.
-PSYCHOPAAT:     Als er enkel één Psychopaat levend is, heeft deze Psychopaat
+PSYCHOPAAT:     Als er enkel een Psychopaat levend is, heeft deze Psychopaat
                 gewonnen.
 BURGERS:        Als er enkel burgerrollen (Burger, Grafrover, Cupido, 
                 Opdrachtgever, Klaas Vaak, Genezer, Ziener, Priester, Slet, 
