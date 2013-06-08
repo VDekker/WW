@@ -615,12 +615,12 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 				if(array_key_exists($naam2,$boom)) {
 					//doelwit is knoop: recursief
 					leesBoom($boom[$naam2],$naam2,$text,$samenvatting,
-						$auteur,$levende,$speciale,$thema,"Geliefde",$sid);
+						$auteur,$levende,$speciale,$thema,"Cupido",$sid);
 				}
 				else {
 					//doelwit is een blad
 					leesBlad($naam2,$text,$samenvatting,$auteur,
-						$levende,$speciale,$thema,"Geliefde",$sid);
+						$levende,$speciale,$thema,"Cupido",$sid);
 				}
 		}//if
 	}//leesBoom
