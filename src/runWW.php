@@ -25,6 +25,7 @@ $handleiding = "http://www.liacs.nl/~vdekker/WW/pdf/man.pdf";
 $dbconnect = dbConnect();
 $gmconnect = gmailConnect();
 
+/*
 if(!zoekControle()) {
 	echo "Controle niet gevonden.\n";
 	herhaalMails(); //stuur alle vorige mails opnieuw
@@ -37,6 +38,20 @@ else {
 	echo "Begin regelen.\n";
 	fases(); // regel alle stemmen, fases, stuurt mails
 }
+ */
+
+$text = "";
+$samenvatting = "";
+$auteur = array();
+$resultaat = sqlSel(4,"SID=1");
+$spel = sqlFet($resultaat);
+ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
+
+echo "Verhaaltje:\n";
+echo "$text\n\n";
+echo "Samenvatting:\n";
+echo "$samenvatting\n\n";
+
 echo "Sluit alles.\n";
 gmailSluit();
 dbSluit();

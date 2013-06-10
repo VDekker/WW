@@ -948,7 +948,7 @@ function regelBurgVerk($sid) {
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
 		$naam = $speler['NAAM'];
-		if(array_key_exists($id,$overzichtTotaal) {
+		if(array_key_exists($id,$overzichtTotaal)) {
 			$overzichtTotaal[$naam] = $overzichtTotaal[$id];
 			unset($overzichtTotaal[$id]);
 		}

@@ -2,19 +2,19 @@
 
 //geeft een willekeurig verhaal volgens de criteria
 function geefVerhaal($thema,$rol,$fase,$sid) {
-	$resultaat = sqlSel(6,
-		"THEMA=$thema AND ROL='$rol' AND FASE=$fase");
+	$resultaat = sqlSel(6,"ROL='$rol' AND FASE=$fase AND THEMA=$thema");
 	if(sqlNum($resultaat) == 0) {
-		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel(6,
-			"ROL='$rol' AND FASE=$fase AND THEMA IN
-			(SELECT TID FROM Themas WHERE TNAAM='default')");
-		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
-			echo "Geen default, error.\n";
-			stuurError2(
-				"Geen default verhaal voor fase $fase van $rol.",$sid);
+		$resultaat = sqlSel(5,"TID=$thema");
+		$tuple = sqlFet($resultaat);
+		if($tuple['TNAAM'] == "default") {
+			stuurError2("Geen default verhaal voor fase $fase van $rol.",$sid);
 		}
-	}//if
+		echo "Geen verhalen, probeer default.\n";
+		$resultaat = sqlSel(5,"TNAAM='default'");
+		$tuple = sqlFet($resultaat);
+		$thema = $tuple['TID'];
+		return geefVerhaal($thema,$rol,$fase,$sid);
+	}
 	$tuples = array();
 	while($verhaal = sqlFet($resultaat)) {
 		array_push($tuples,$verhaal);
@@ -27,20 +27,24 @@ function geefVerhaal($thema,$rol,$fase,$sid) {
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder levende spelers gebruikt worden
 function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel(6,
-		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
-		LEVEND<=$levend AND DOOD=$dood");
-	if(sqlNum($resultaat) == 0) {
-		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel(6,
-			"ROL='$rol' AND FASE=$fase AND LEVEND<=$levend AND DOOD=$dood AND
-			THEMA IN (SELECT TID FROM Themas WHERE TNAAM='default')");
-		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
-			echo "Geen default, error.\n";
-			stuurError2(
-				"Geen default verhaal voor fase $fase van $rol, " .
-				"met $levend levende spelers en $dood slachtoffers",$sid);
-		}
+	$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+		LEVEND=$levend AND DOOD=$dood");
+	if(sqlNum($resultaat) == 0) {		
+		$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+			LEVEND<$levend AND DOOD=$dood");
+		if(sqlNum($resultaat) == 0) {
+			$resultaat = sqlSel(5,"TID=$thema");
+			$tuple = sqlFet($resultaat);
+			if($tuple['TNAAM'] == "default") {
+				stuurError2("Geen default verhaal voor fase $fase van $rol, " .
+					"met $levend levende spelers en $dood slachtoffers.",$sid);
+			}
+			echo "Geen verhalen, probeer default...\n";
+			$resultaat = sqlSel(5,"TNAAM='default'");
+			$tuple = sqlFet($resultaat);
+			$thema = $tuple['TID'];
+			return geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid);
+		}//if
 	}//if
 	$tuples = array();
 	while($verhaal = sqlFet($resultaat)) {
@@ -55,20 +59,24 @@ function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
 //eventueel mogen minder dode spelers gebruikt worden
 //(gebruikt voor Zondebok en Onschuldige Meisje)
 function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel(6,
-		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
-		LEVEND=$levend AND DOOD<=$dood");
-	if(sqlNum($resultaat) == 0) {
-		echo "Geen verhalen, probeer default...\n";
-		$resultaat = sqlSel(6,
-			"ROL='$rol' AND FASE=$fase AND LEVEND=$levend AND DOOD<=$dood AND
-			THEMA IN (SELECT TID FROM Themas WHERE TNAAM='default'");
-		if(sqlNum($resultaat) == 0) { //ook geen default verhaal...
-			echo "Geen default, error.\n";
-			stuurError2(
-				"Geen default verhaal voor fase $fase van $rol, " .
-				"met $levend levende spelers en $dood slachtoffers",$sid);
-		}
+	$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+		LEVEND=$levend AND DOOD=$dood");
+	if(sqlNum($resultaat) == 0) {		
+		$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+			LEVEND=$levend AND DOOD<$dood");
+		if(sqlNum($resultaat) == 0) {
+			$resultaat = sqlSel(5,"TID=$thema");
+			$tuple = sqlFet($resultaat);
+			if($tuple['TNAAM'] == "default") {
+				stuurError2("Geen default verhaal voor fase $fase van $rol, " .
+					"met $levend levende spelers en $dood slachtoffers.",$sid);
+			}
+			echo "Geen verhalen, probeer default...\n";
+			$resultaat = sqlSel(5,"TNAAM='default'");
+			$tuple = sqlFet($resultaat);
+			$thema = $tuple['TID'];
+			return geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid);
+		}//if
 	}//if
 	$tuples = array();
 	while($verhaal = sqlFet($resultaat)) {
@@ -361,10 +369,11 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 			array_push($doelwitten,$stem);
 		}
 		if($speler['GELIEFDE'] != "" && 
-			($speler['LEVEND'] & 512) == 0) {
+			($speler['SPELFLAGS'] & 512) == 0) {
 				$speciaalVerhaal = true;
 				$geliefde = $speler['GELIEFDE'];
 				$res = sqlSel(3,"ID=$geliefde");
+				echo "Geliefde gevonden: $geliefde.\n";
 				$target = sqlFet($res);
 				array_push($tuplesS,$target);
 		}
@@ -374,7 +383,7 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 	foreach($resArray as $speler) {
 		if(!in_array($speler,$tuplesS) && 
 			!($speler['ROL'] == "Jager" && ($speler['SPELFLAGS'] & 4) == 4) && 
-			!($speler['GELIEFDE'] != "" && ($speler['LEVEND'] & 512) == 0)) {
+			!($speler['GELIEFDE'] != "" && ($speler['SPELFLAGS'] & 512) == 0)) {
 			array_push($tuplesD,$speler);
 		}
 	}
@@ -419,9 +428,10 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	}
 	
 	//maak de boom van jagers/geliefden
-	sqlData($resultaat,0);	
 	$boom = array();
-	$boom = maakBoom(0,$tuplesS,$boom,0,$resArray);
+	var_dump($tuplesS);
+	$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
+	var_dump($boom);
 
 	//ontwaken/begin
 	$verhaal = geefVerhaalGroep($thema,"Algemeen",1,$levend,$dood,$sid);
@@ -469,11 +479,20 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 		foreach($resultaat as $speler) {
 			$key = array_search($speler,$specialeTuples);
 			if($key === false) {
+				echo "Key is false.\n";
 				if($speler['ROL'] == "Jager" && 
 					($speler['SPELFLAGS'] & 4) == 4) {
 						$id = $speler['NAAM'];
 						$boom[$id] = array();
 						array_push($boom[$id],$speler['EXTRA_STEM']);
+						$boom[$id] = maakBoom($id,$specialeTuples,$boom[$id],
+							$diepte+1,$resultaat);
+					}
+				if($speler['GELIEFDE'] != "" &&
+					($speler['SPELFLAGS'] & 512) == 0) {
+						$id = $speler['NAAM'];
+						$boom[$id] = array();
+						array_push($boom[$id],$speler['GELIEFDE']);
 						$boom[$id] = maakBoom($id,$specialeTuples,$boom[$id],
 							$diepte+1,$resultaat);
 					}
@@ -828,7 +847,7 @@ function spelerOverzicht($spel) {
 		if($speler['ID'] == $burg) {
 			$samenvatting .= "(Burgemeester)";
 		}
-		if($speler['SPELFLAGS'] & 2) == 2) {
+		if(($speler['SPELFLAGS'] & 2) == 2) {
 				$samenvatting .= "(Schuldgevoel)";
 		}
 		$samenvatting .= "</li>";
@@ -877,7 +896,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	$resultaat = sqlSel(3,
 		"SID=$sid AND LEVEND=1 AND ((SPELFLAGS & 1024) = 1024)");
 	if(sqlNum($resultaat) > 0) {
-		while($speler = sqlFet($resultaat) {
+		while($speler = sqlFet($resultaat)) {
 			$naam = $speler['NAAM'];
 			$key = array_search($speler,$tuplesL);
 			delArrayElement($tuplesL,$key);
@@ -896,7 +915,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	$resultaat = sqlSel(3,
 		"SID=$sid AND ((SPELFLAGS & 2048) = 2048)");
 	if(sqlNum($resultaat) > 0) {
-		while($speler = sqlFet($resultaat) {
+		while($speler = sqlFet($resultaat)) {
 			$naam = $speler['NAAM'];
 			$key = array_search($speler,$tuplesL);
 			delArrayElement($tuplesL,$key);
@@ -918,6 +937,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//brandstapelInleiding
 
+//TODO samenvatting maken/checken
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: brandstapelUitslag.\n";
 
@@ -927,7 +947,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	//maak een stem-overzicht
 	$overzichtTotaal = brandstapelOverzicht($sid);
 	
-	//verhaal maken TODO
+	//verhaal maken
 	$tuplesL = array(); //L voor levende spelers
 	$tuplesD = array(); //D voor dode spelers
 	$tuplesS = array(); //S voor Jagers/Geliefden (speciaal verhaal)
@@ -946,10 +966,10 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 			$naam = $speler['NAAM'];
 			$rol = $speler['ROL'];
 			$flags = $speler['FLAGS'];
-			if($rol == "Dorpsgek" && (($flags & 128) == 128) {
+			if($rol == "Dorpsgek" && (($flags & 128) == 128)) {
 				//ontdekte dorpsgek: TODO ander verhaaltje
 			}
-			else if($rol == "Zondebok" && (($flags & 256) == 256) {
+			else if($rol == "Zondebok" && (($flags & 256) == 256)) {
 				//dode zondebok: TODO ander verhaaltje
 			}
 			else if(($flags & 32768) == 32768) {
@@ -976,13 +996,41 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 			$samenvatting .= "Er is geen slachtoffer gevallen.<br />";
 		}
 	}//if
-	else {
+	else {//speciaal verhaal gewenst
 
-	}
+		//boom maken
+		$boom = array();
+		$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
+
+		//begin
+		$verhaal = geefVerhaalGroep($thema,"Brandstapel",2,$levend,$dood,$sid);
+		$text .= $verhaal['VERHAAL'];
+		$geswoorden = $verhaal['GESLACHT'];
+		array_push($auteur,$verhaal['AUTEUR']);
+		$text = vulInDood(array_merge($tuplesL,$tuplesS),
+			$tuplesD,"",$text,$geswoorden);
+
+		//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
+		//en samenvatting maken
+		foreach($boom as $id => $target) {
+			$resultaat = sqlSel(3,"NAAM='$id' AND SID=$sid");
+			$tuple = sqlFet($resultaat);
+			array_push($tuplesS,$tuple);
+			$naam = $tuple['NAAM'];
+			$rol = $tuple['ROL'];
+			$samenvatting .= "$naam ($rol) kreeg de meeste stemmen, ";
+			$samenvatting .= "en is op de Brandstapel verbrandt.<br />";
+		}
+
+		//nu dingen aanvullen met behulp van de boom van jagers/geliefden
+		foreach($boom as $id => $target) {
+			leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
+				$tuplesL,$tuplesS,$thema,"Algemeen",$sid);
+		}
+
+	}//else
 
 	//en maak een samenvatting
-	$samenvatting .= "$slachtoffer ($rol) kreeg de meeste stemmen, ";
-	$samenvatting .= "en is op de Brandstapel verbrandt.<br />";
 	$samenvatting .= "<br />";
 	$samenvatting .= stemmingOverzicht($overzichtTotaal);
 	
