@@ -1,20 +1,26 @@
 <?php
 
 //geeft een willekeurig verhaal volgens de criteria
-function geefVerhaal($thema,$rol,$fase,$sid) {
-	$resultaat = sqlSel(6,"ROL='$rol' AND FASE=$fase AND THEMA=$thema");
+function geefVerhaal($thema,$rol,$fase,$ronde,$sid) {
+	$resultaat = sqlSel(6,
+		"ROL='$rol' AND FASE=$fase AND THEMA=$thema AND RONDE=$ronde");
 	if(sqlNum($resultaat) == 0) {
-		$resultaat = sqlSel(5,"TID=$thema");
-		$tuple = sqlFet($resultaat);
-		if($tuple['TNAAM'] == "default") {
-			stuurError2("Geen default verhaal voor fase $fase van $rol.",$sid);
-		}
-		echo "Geen verhalen, probeer default.\n";
-		$resultaat = sqlSel(5,"TNAAM='default'");
-		$tuple = sqlFet($resultaat);
-		$thema = $tuple['TID'];
-		return geefVerhaal($thema,$rol,$fase,$sid);
-	}
+		$resultaat = sqlSel(6,
+			"ROL='$rol' AND FASE=$fase AND THEMA=$thema AND RONDE=NULL");
+		if(sqlNum($resultaat) == 0) {
+			$resultaat = sqlSel(5,"TID=$thema");
+			$tuple = sqlFet($resultaat);
+			if($tuple['TNAAM'] == "default") {
+				stuurError2("Geen default verhaal voor fase $fase van $rol.",
+					$sid);
+			}
+			echo "Geen verhalen, probeer default.\n";
+			$resultaat = sqlSel(5,"TNAAM='default'");
+			$tuple = sqlFet($resultaat);
+			$thema = $tuple['TID'];
+			return geefVerhaal($thema,$rol,$fase,$ronde,$sid);
+		}//if
+	}//if
 	$tuples = array();
 	while($verhaal = sqlFet($resultaat)) {
 		array_push($tuples,$verhaal);
@@ -26,24 +32,38 @@ function geefVerhaal($thema,$rol,$fase,$sid) {
 //geeft een willekeurig verhaal volgens de criteria met als extra: 
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder levende spelers gebruikt worden
-function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
+	$resultaat = sqlSel(6,
+		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 		LEVEND=$levend AND DOOD=$dood");
 	if(sqlNum($resultaat) == 0) {		
-		$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+		$resultaat = sqlSel(6,
+			"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 			LEVEND<$levend AND DOOD=$dood");
 		if(sqlNum($resultaat) == 0) {
-			$resultaat = sqlSel(5,"TID=$thema");
-			$tuple = sqlFet($resultaat);
-			if($tuple['TNAAM'] == "default") {
-				stuurError2("Geen default verhaal voor fase $fase van $rol, " .
-					"met $levend levende spelers en $dood slachtoffers.",$sid);
-			}
-			echo "Geen verhalen, probeer default...\n";
-			$resultaat = sqlSel(5,"TNAAM='default'");
-			$tuple = sqlFet($resultaat);
-			$thema = $tuple['TID'];
-			return geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid);
+			$resultaat = sqlSel(6,
+				"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=NULL AND 
+				LEVEND=$levend AND DOOD=$dood");
+			if(sqlNum($resultaat) == 0) {		
+				$resultaat = sqlSel(6,
+					"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+					RONDE=NULL AND LEVEND<$levend AND DOOD=$dood");
+				if(sqlNum($resultaat) == 0) {
+					$resultaat = sqlSel(5,"TID=$thema");
+					$tuple = sqlFet($resultaat);
+					if($tuple['TNAAM'] == "default") {
+						stuurError2("Geen default verhaal voor fase $fase " . 
+							"van $rol, met $levend levende spelers " .
+							"en $dood slachtoffers.",$sid);
+					}
+					echo "Geen verhalen, probeer default...\n";
+					$resultaat = sqlSel(5,"TNAAM='default'");
+					$tuple = sqlFet($resultaat);
+					$thema = $tuple['TID'];
+					return geefVerhaalGroep($thema,$rol,$fase,
+						$levend,$dood,$sid);
+				}//if
+			}//if
 		}//if
 	}//if
 	$tuples = array();
@@ -58,24 +78,38 @@ function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$sid) {
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder dode spelers gebruikt worden
 //(gebruikt voor Zondebok en Onschuldige Meisje)
-function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid) {
-	$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
+	$resultaat = sqlSel(6,
+		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 		LEVEND=$levend AND DOOD=$dood");
 	if(sqlNum($resultaat) == 0) {		
-		$resultaat = sqlSel(6,"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+		$resultaat = sqlSel(6,
+			"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 			LEVEND=$levend AND DOOD<$dood");
 		if(sqlNum($resultaat) == 0) {
-			$resultaat = sqlSel(5,"TID=$thema");
-			$tuple = sqlFet($resultaat);
-			if($tuple['TNAAM'] == "default") {
-				stuurError2("Geen default verhaal voor fase $fase van $rol, " .
-					"met $levend levende spelers en $dood slachtoffers.",$sid);
-			}
-			echo "Geen verhalen, probeer default...\n";
-			$resultaat = sqlSel(5,"TNAAM='default'");
-			$tuple = sqlFet($resultaat);
-			$thema = $tuple['TID'];
-			return geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$sid);
+			$resultaat = sqlSel(6,
+				"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=NULL AND 
+				LEVEND=$levend AND DOOD=$dood");
+			if(sqlNum($resultaat) == 0) {		
+				$resultaat = sqlSel(6,
+					"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
+					RONDE=NULL AND LEVEND=$levend AND DOOD<$dood");
+				if(sqlNum($resultaat) == 0) {
+					$resultaat = sqlSel(5,"TID=$thema");
+					$tuple = sqlFet($resultaat);
+					if($tuple['TNAAM'] == "default") {
+						stuurError2("Geen default verhaal voor fase $fase " . 
+							"van $rol, met $levend levende spelers " .
+							"en $dood slachtoffers.",$sid);
+					}
+					echo "Geen verhalen, probeer default...\n";
+					$resultaat = sqlSel(5,"TNAAM='default'");
+					$tuple = sqlFet($resultaat);
+					$thema = $tuple['TID'];
+					return geefVerhaalGroep($thema,$rol,$fase,
+						$levend,$dood,$sid);
+				}//if
+			}//if
 		}//if
 	}//if
 	$tuples = array();

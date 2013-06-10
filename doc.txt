@@ -36,6 +36,7 @@
   * Verhaal: vulInDood gebruiken waar nodig
   * Verhaal: shuffle() gebruiken/controleren
   * Verhaal: deadlines toevoegen
+  * Verhaal: ronde gebruiken
   
   * Regelen: Jager's EXTRA_STEM legen na algemene mail
   * Regelen: Raaf's stem afvangen als dit een ontdekte Dorpsgek is
@@ -43,6 +44,7 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
+  * Nodig:   ronde van spel ophogen wanneer nodig (als nacht begint)
 
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)
@@ -55,6 +57,7 @@
   * Extra:   lijst van keuzes aan speler mailen (handig)
   * Extra:   stemWaarde verbeteren: check op burgemeester kan beter
              (hetzelfde voor isDodeBurg)
+  * Extra:   log bijhouden voor elk spel
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER

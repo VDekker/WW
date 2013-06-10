@@ -76,7 +76,7 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
-						sqlUp(4,"INIT=0","SID=$sid");
+						sqlUp(4,"INIT=0,RONDE=RONDE+1","SID=$sid");
 						zetFase(3,$sid);
 					}
 					break;
@@ -90,7 +90,7 @@ function fases() {
 					}
 				case 8:
 					regelOpdracht($sid);
-					sqlUp(4,"INIT=0","SID=$sid");
+					sqlUp(4,"INIT=0,RONDE=RONDE+1","SID=$sid");
 					zetFase(3,$sid);
 			}//switch
 
@@ -397,6 +397,7 @@ function fases() {
 						mailAlgemeenInslapen($sid);
 						zetDood2($sid);
 						zetFase(0,$sid);
+						sqlUp(4,"RONDE=RONDE+1","SID=$sid");
 					}
 					break;
 			}//switch

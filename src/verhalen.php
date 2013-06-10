@@ -581,32 +581,38 @@ function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$sid) {
 	return;
 }//mailWWVPActie
 
-function mailOnschuldig($id,$targets,$stemmen,$fase,$sid) {
+function mailOnschuldig($id,$targets,$stemmen,$fase,$rol,$sid) {
 	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);
 	$onderwerp = $spel['SNAAM'] . ": Actie";
 	$thema = $spel['THEMA'];
 	$resultaat = sqlSel(3,"ID=$id");
-	$speler = sqlFet($resultaat);
-	$tuples = array($speler);
-	$adres = $speler['EMAIL'];
+	$onschuldig = sqlFet($resultaat);
+	$tuples = array();
+	$adres = $onschuldig['EMAIL'];
+
+	//maak alvast een overzicht en vul array met targets
+	$overzicht = "";
+	foreach($targets as $key => $target) {
+		$resultaat = sqlSel(3,"ID=$target");
+		$speler = sqlFet($resultaat);
+		array_push($tuples,$speler);
+		$naam = $speler['NAAM'];
+		$overzicht .= "$naam kreeg $stemmen[$key] stemmen.<br />";
+	}
 
 	echo (($rol & 1) == 1) ? "Weerwolf" : "Vampier" . 
 		": Onschuldige Meisje $id ziet de stemmen.\n";
 
-	$verhaal = geefVerhaal($thema,'Onschuldige Meisje',$fase,$sid);
+	$verhaal = geefVerhaalGroep2($thema,'Onschuldige Meisje',$fase,1,
+		count($targets),$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];
-	$text = vulIn($tuples,"",$text,$geswoorden);
+	$text = vulIn(array($onschuldig),"",$text,$geswoorden);
 
 	$text .= "<br /><br />";
-	foreach($targets as $key => $target) {
-		$resultaat = sqlSel(3,"ID=$id");
-		$speler = sqlFet($resultaat);
-		$naam = $speler['NAAM'];
-		$text .= "$naam kreeg $stemmen[$key] stemmen.<br />";
-	}
+	$text .= $overzicht;
 	$text = auteur($auteur,$text);
 
 	stuurMail($adres,$onderwerp,$text);

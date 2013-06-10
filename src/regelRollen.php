@@ -468,7 +468,7 @@ function regelWWVP($rol,$sid) {
 			if(!wordtWakker($id,$sid)) {
 				continue;
 			}
-			mailOnschuldig($id,$alleTargets,$stemmen,$vlag,$sid);
+			mailOnschuldig($id,$alleTargets,$stemmen,$vlag,$rol,$sid);
 		}//while
 	}//if
 	return;
