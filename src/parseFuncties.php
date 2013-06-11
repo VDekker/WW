@@ -100,6 +100,47 @@ function geldigeStem($bericht,$sid,$levend) {
 	return $id;
 }//geldigeStem
 
+//checkt of de stem van de Raaf geldig is: geldige stem en
+//niet een ontdekte dorpsgek
+function geldigeStemRaaf($bericht,$sid,$levend) {
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1)=$levend) AND 
+		ROL<>'Dorpsgek' AND ((SPELFLAGS & 128) = 0)");
+	$id = false;
+	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
+		$id = -1;
+	}
+	while($speler = sqlFet($resultaat)) {
+		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
+		if(preg_match("$zoek",$bericht)) {
+			if($naam != false) { // meerdere namen in bericht
+				return false;
+			}
+			$id = $speler['ID'];
+		}//if
+	}//while
+	return $id;
+}//geldigeStemRaaf
+
+//checkt of de burgemeesterstem geldig is: geldige stem en
+//niet nieuw-dood.
+function geldigeStemBurg($bericht,$sid) {
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
+	$id = false;
+	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
+		$id = -1;
+	}
+	while($speler = sqlFet($resultaat)) {
+		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
+		if(preg_match("$zoek",$bericht)) {
+			if($naam != false) { // meerdere namen in bericht
+				return false;
+			}
+			$id = $speler['ID'];
+		}//if
+	}//while
+	return $id;
+}//geldigeStemBurg
+
 //checkt of de stem van de Verleidster geldig is.
 //Hierbij worden stemmen geweigerd als een andere Verleidster
 //al op die speler heeft gestemd.
@@ -364,16 +405,13 @@ function geldigeStemZonde($bericht,$sid) {
 }//geldigeStemZonde
 
 //checkt of de speler een dode Burgemeester is
-function isDodeBurg($id,$sid) {
-	$resultaat = sqlSel(3,
-		"LEVEND=1 AND ID IN 
-		(SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
-	if(sqlNum($resultaat) == 0) { //geen dode burg
-		return false;
-	}
-	$burgemeester = sqlFet($resultaat);
-	return ($id == $burgemeester['ID']);
-}//dodeBurg
+function isDodeBurg($speler,$spel) {
+	if($speler['ID'] == $spel['BURGEMEESTER'] &&
+		$speler['LEVEND'] != 1) {
+			return true;
+		}
+	return false;
+}//isDodeBurg
 
 function zetStem($id,$stem,$sid,$plek) {
 	sqlUp(3,"$plek=$stem","ID=$id");

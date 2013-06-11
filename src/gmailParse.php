@@ -19,9 +19,16 @@ function gmailParse() {
 			}
 			$onderwerp = $header[0]->subject;
 			$afzender = $header[0]->from;
+			$matches = array();
+			preg_match("'<(.*?)>'si",$afzender,$matches);
+			if(!empty($matches)) {
+				$afzender = $matches[1];
+			}
 			if($afzender == $thuis) {
 				continue;
 			}
+
+			echo "$afzender\n";
 			$bericht = htmlentities($bericht1);
 			
 			echo "Mail van: '$afzender'\n";
@@ -57,14 +64,9 @@ function gmailParse() {
 						stuurFoutPauze($adres,$snaam);
 					}
 					else {
-						$init = $spel['INIT'];
-						$fase = $spel['FASE'];
-						$tweede = (($spel['FLAGS'] & 1) == 1);
-						$max = $spel['MAX_SPELERS'];
 						$id = spelerID($afzender,$sid);
 						if(!empty($naam) || ($init && $fase == 1)) {
-							parseStem($id,$afzender,$sid,
-								$bericht,$onderwerp,$init,$fase,$tweede,$max);
+							parseStem($id,$afzender,$spel,$bericht,$onderwerp);
 						}
 					}//else
 				}//if

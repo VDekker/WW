@@ -409,4 +409,18 @@ function stuurFoutStem($naam,$adres,$sid) {
 	return;
 }//stuurFoutStem
 
+//geeft heel de mail-lijst van een spel in een string
+function maillijst($sid) {
+	$adressen = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((SPELERFLAGS & 2) = 2)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($adressen,$speler['EMAIL']);
+	}
+	$adres = $adressen[0];
+	for($i = 1; $i < count($adres); $i++) {
+		$adres .= ", " . $adressen[$i];
+	}
+	return $adres;
+}
+
 ?>

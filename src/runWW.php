@@ -15,8 +15,8 @@ require("verhalenFuncties.php");
 
 date_default_timezone_set("Europe/Amsterdam");
 
-$admin = "Victor Dekker <eudyptes.crestatus@gmail.com>";
-$admin2 = "Jenneke Buwalda <ciel.celestis@gmail.com>";
+$admin = "eudyptes.crestatus@gmail.com";
+$admin2 = "ciel.celestis@gmail.com";
 $admins = array($admin,$admin2);
 $tabellen = array("Help","Mails","Rollen","Spelers",
 	"Spellen","Themas","Verhalen");

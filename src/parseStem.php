@@ -1,14 +1,18 @@
 <?php
 
 //regelt de stem van de speler, gebaseerd op fase, rol, etc.
-function parseStem($id,$adres,$sid,$bericht,$onderwerp,
-	$init,$fase,$tweede,$max) {
+function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 
 	global $thuis;
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
+	$sid = $spel['SID'];
+	$init = ($spel['RONDE'] == 0);
+	$fase = $spel['FASE'];
+	$tweede = ($spel['FLAGS'] & 1);
+	$max = $spel['MAX_SPELERS'];
 
 	if($init) {
 		switch($fase) {
@@ -298,14 +302,14 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 				}
 				break;
 			case 11:
-				if(isDodeBurg($id,$sid) &&
+				if(isDodeBurg($speler,$spel) &&
 					(preg_match("/burgemeester/i",$onderwerp) || 
 						preg_match("/burgemeester/i",$bericht) ||
 						preg_match("/testament/i",$onderwerp) ||
 						preg_match("/testament/i",$bericht) ||
 						preg_match("/opvolger/i",$onderwerp) ||
 						preg_match("/opvolger/i",$bericht))) {
-					$stem = geldigeStem($bericht,$sid,1);
+					$stem = geldigeStemBurg($bericht,$sid,1);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -317,7 +321,7 @@ function parseStem($id,$adres,$sid,$bericht,$onderwerp,
 					}
 				}//if
 				else if($rol == "Raaf") {
-					$stem = geldigeStem($bericht,$sid,1);
+					$stem = geldigeStemRaaf($bericht,$sid,1);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);

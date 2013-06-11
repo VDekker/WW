@@ -1,53 +1,24 @@
 <?php
 
-//geeft een willekeurig verhaal volgens de criteria
-function geefVerhaal($thema,$rol,$fase,$ronde,$sid) {
-	$resultaat = sqlSel(6,
-		"ROL='$rol' AND FASE=$fase AND THEMA=$thema AND RONDE=$ronde");
-	if(sqlNum($resultaat) == 0) {
-		$resultaat = sqlSel(6,
-			"ROL='$rol' AND FASE=$fase AND THEMA=$thema AND RONDE=NULL");
-		if(sqlNum($resultaat) == 0) {
-			$resultaat = sqlSel(5,"TID=$thema");
-			$tuple = sqlFet($resultaat);
-			if($tuple['TNAAM'] == "default") {
-				stuurError2("Geen default verhaal voor fase $fase van $rol.",
-					$sid);
-			}
-			echo "Geen verhalen, probeer default.\n";
-			$resultaat = sqlSel(5,"TNAAM='default'");
-			$tuple = sqlFet($resultaat);
-			$thema = $tuple['TID'];
-			return geefVerhaal($thema,$rol,$fase,$ronde,$sid);
-		}//if
-	}//if
-	$tuples = array();
-	while($verhaal = sqlFet($resultaat)) {
-		array_push($tuples,$verhaal);
-	}
-	$key = array_rand($tuples);
-	return $tuples[$key];
-}//geefVerhaal
-
 //geeft een willekeurig verhaal volgens de criteria met als extra: 
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder levende spelers gebruikt worden
-function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
+function geefVerhaalGroep($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
 	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
-		LEVEND=$levend AND DOOD=$dood");
+		NUM_A=$numA AND NUM_B=$numB");
 	if(sqlNum($resultaat) == 0) {		
 		$resultaat = sqlSel(6,
 			"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
-			LEVEND<$levend AND DOOD=$dood");
+			NUM_A<$numA AND NUM_B=$numB");
 		if(sqlNum($resultaat) == 0) {
 			$resultaat = sqlSel(6,
 				"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=NULL AND 
-				LEVEND=$levend AND DOOD=$dood");
+				NUM_A=$numA AND NUM_B=$numB");
 			if(sqlNum($resultaat) == 0) {		
 				$resultaat = sqlSel(6,
 					"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
-					RONDE=NULL AND LEVEND<$levend AND DOOD=$dood");
+					RONDE=NULL AND NUM_A<$numA AND NUM_B=$numB");
 				if(sqlNum($resultaat) == 0) {
 					$resultaat = sqlSel(5,"TID=$thema");
 					$tuple = sqlFet($resultaat);
@@ -81,19 +52,19 @@ function geefVerhaalGroep($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
-		LEVEND=$levend AND DOOD=$dood");
+		NUM_A=$numA AND NUM_B=$numB");
 	if(sqlNum($resultaat) == 0) {		
 		$resultaat = sqlSel(6,
 			"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
-			LEVEND=$levend AND DOOD<$dood");
+			NUM_A=$numA AND NUM_B<$numB");
 		if(sqlNum($resultaat) == 0) {
 			$resultaat = sqlSel(6,
 				"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=NULL AND 
-				LEVEND=$levend AND DOOD=$dood");
+				NUM_A=$numA AND NUM_B=$numB");
 			if(sqlNum($resultaat) == 0) {		
 				$resultaat = sqlSel(6,
 					"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND 
-					RONDE=NULL AND LEVEND=$levend AND DOOD<$dood");
+					RONDE=NULL AND NUM_A=$numA AND NUM_B<$numB");
 				if(sqlNum($resultaat) == 0) {
 					$resultaat = sqlSel(5,"TID=$thema");
 					$tuple = sqlFet($resultaat);
@@ -120,59 +91,76 @@ function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 	return $tuples[$key];
 }//geefVerhaalGroep2
 
-function vulIn($spelers,$deadline,$text,$geswoorden) {
-	$paren = explode('%',$geswoorden);
-	foreach($spelers as $i => $speler) {
-		$geslacht = $speler['SPELERFLAGS'] & 1;
-		$naam = $speler['NAAM'];
-		$rol = $speler['ROL'];
-		if($rol == "Dwaas") {
-			$rol = "Ziener";
-		}
-		if(!empty($geswoorden)) {
-			foreach($paren as $key => $paar) {
-				$alternatief = explode('&',$paar);
-				$text = str_replace("geslacht[$i][$key]",
-					$alternatief[$geslacht],$text);
+//geeft een verhaal voor de rolverdeling: eerst voor de specifieke rol
+//als deze niet bestaat: voor algemene rolverdeling
+//als deze niet bestaat: probeer hetzelfde met thema default
+function geefVerhaalRolverdeling($thema,$rol,$sid) {
+	$resultaat = sqlSel(6,
+		"THEMA=$thema AND ROL='$rol' AND FASE=-1");
+	if(sqlNum($resultaat) == 0) {
+		echo "Geen intro voor specifieke rol, probeer algemeen...\n";
+		$resultaat = sqlSel(6,
+			"THEMA=$thema AND ROL='Rolverdeling' AND FASE=-1");
+		if(sqlNum($resultaat) == 0) {
+			$resultaat = sqlSel(5,"TID=$thema");
+			$tuple = sqlFet($resultaat);
+			if($tuple['TNAAM'] == "default") {
+				stuurError2("Geen default verhaal rolverdeling.",$sid);
 			}
+			echo "Geen verhalen, probeer default.\n";
+			$resultaat = sqlSel(5,"TNAAM='default'");
+			$tuple = sqlFet($resultaat);
+			$thema = $tuple['TID'];
+			$verhaal = geefVerhaalRolverdeling($thema,$rol,$sid);
+			return $verhaal;
 		}//if
-		$text = str_replace("naam[$i]",$naam,$text);
-		$text = str_replace("rol[$i]",$rol,$text);
-	}//foreach
-	$text = str_replace("deadline[0]",$deadline,$text);
-	return $text;
-}//vulIn
+	}//if
+	$tuples = array();
+	while($verhaal = sqlFet($resultaat)) {
+		array_push($tuples,$verhaal);
+	}
+	$key = array_rand($tuples);
+	return $tuples[$key];
+}//geefVerhaalRolverdeling
 
 //aparte functie om de Dwaas een verkeerde rol te geven
-function vulInDwaas($spelers,$gezien,$text,$geswoorden) {
+//tupleA is de Dwaas en tupleB is zijn slachtoffer
+function vulInDwaas($tupleA,$tupleB,$gezien,$text,$geswoorden) {
 	$paren = explode('%',$geswoorden);
-	foreach($spelers as $i => $speler) {
-		$geslacht = $speler['SPELERFLAGS'] & 1;
-		$naam = $speler['NAAM'];
-		$rol = $speler['ROL'];
-		if($rol == "Dwaas") {
-			$rol = "Ziener";
+	$geslachtA = $tupleA['SPELERFLAGS'] & 1;
+	$naamA = $tupleA['NAAM'];
+	$rolA = "Ziener";
+	$geslachtB = $tupleB['SPELERFLAGS'] & 1;
+	$naamB = $tupleB['NAAM'];
+	$rolB = $gezien;
+	
+	if(!empty($geswoorden)) {
+		foreach($paren as $key => $paar) {
+			$alternatief = explode('&',$paar);
+			$text = str_replace("geslachtA[$i][$key]",
+				$alternatief[$geslachtA],$text);
 		}
-		if($i == 1) {
-			$rol = $gezien;
+	}//if
+	$text = str_replace("naamA[$i]",$naamA,$text);
+	$text = str_replace("rolA[$i]",$rolA,$text);
+	
+	if(!empty($geswoorden)) {
+		foreach($paren as $key => $paar) {
+			$alternatief = explode('&',$paar);
+			$text = str_replace("geslachtB[$i][$key]",
+				$alternatief[$geslachtB],$text);
 		}
-		if(!empty($geswoorden)) {
-			foreach($paren as $key => $paar) {
-				$alternatief = explode('&',$paar);
-				$text = str_replace("geslacht[$i][$key]",
-					$alternatief[$geslacht],$text);
-			}
-		}//if
-		$text = str_replace("naam[$i]",$naam,$text);
-		$text = str_replace("rol[$i]",$rol,$text);
-	}//foreach
+	}//if
+	$text = str_replace("naamB[$i]",$naamB,$text);
+	$text = str_replace("rolB[$i]",$rolB,$text);
+
 	return $text;
 }//vulInDwaas
 
 //aparte functie om de rol van de Witte WW te verbergen
-function vulInWW($spelers,$deadline,$text,$geswoorden) {
+function vulInWW($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 	$paren = explode('%',$geswoorden);
-	foreach($spelers as $i => $speler) {
+	foreach($tuplesA as $i => $speler) {
 		$geslacht = $speler['SPELERFLAGS'] & 1;
 		$naam = $speler['NAAM'];
 		$rol = $speler['ROL'];
@@ -182,20 +170,37 @@ function vulInWW($spelers,$deadline,$text,$geswoorden) {
 		if(!empty($geswoorden)) {
 			foreach($paren as $key => $paar) {
 				$alternatief = explode('&',$paar);
-				$text = str_replace("geslacht[$i][$key]",
+				$text = str_replace("geslachtA[$i][$key]",
 					$alternatief[$geslacht],$text);
 			}
 		}//if
-		$text = str_replace("naam[$i]",$naam,$text);
-		$text = str_replace("rol[$i]",$rol,$text);
+		$text = str_replace("naamA[$i]",$naam,$text);
+		$text = str_replace("rolA[$i]",$rol,$text);
 	}//foreach
+	
+	foreach($tuplesB as $i => $speler) {
+		$geslacht = $speler['SPELERFLAGS'] & 1;
+		$naam = $speler['NAAM'];
+		$rol = $speler['ROL'];
+		if(!empty($geswoorden)) {
+			foreach($paren as $key => $paar) {
+				$alternatief = explode('&',$paar);
+				$text = str_replace("geslachtB[$i][$key]",
+					$alternatief[$geslacht],$text);
+			}
+		}//if
+		$text = str_replace("naamB[$i]",$naam,$text);
+		$text = str_replace("rolB[$i]",$rol,$text);
+	}//foreach
+
 	$text = str_replace("deadline[0]",$deadline,$text);
 	return $text;
 }//vulInWW
 
-function vulInDood($tuplesL,$tuplesD,$deadline,$text,$geswoorden) {
+//vult een verhaaltje in met de juiste variabelen
+function vulInDood($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 	$paren = explode('%',$geswoorden);
-	foreach($tuplesL as $i => $speler) {
+	foreach($tuplesA as $i => $speler) {
 		$geslacht = $speler['SPELERFLAGS'] & 1;
 		$naam = $speler['NAAM'];
 		$rol = $speler['ROL'];
@@ -205,14 +210,18 @@ function vulInDood($tuplesL,$tuplesD,$deadline,$text,$geswoorden) {
 		if(!empty($geswoorden)) {
 			foreach($paren as $key => $paar) {
 				$alternatief = explode('&',$paar);
-				$text = str_replace("geslacht[$i][$key]",
+				$text = str_replace("geslachtA[$i][$key]",
 					$alternatief[$geslacht],$text);
 			}
 		}
-		$text = str_replace("naam[$i]",$naam,$text);
-		$text = str_replace("rol[$i]",$rol,$text);
+		$text = str_replace("naamA[$i]",$naam,$text);
+		$text = str_replace("rolA[$i]",$rol,$text);
 	}
-	foreach($tuplesD as $i => $speler) {
+	if(empty($tuplesB) {
+		$text = str_replace("deadline[0]",$deadline,$text);
+		return $text;
+	}
+	foreach($tuplesB as $i => $speler) {
 		$geslacht = $speler['SPELERFLAGS'] & 1;
 		$naam = $speler['NAAM'];
 		$rol = $speler['ROL'];
@@ -222,52 +231,18 @@ function vulInDood($tuplesL,$tuplesD,$deadline,$text,$geswoorden) {
 		if(!empty($geswoorden)) {
 			foreach($paren as $key => $paar) {
 				$alternatief = explode('&',$paar);
-				$text = str_replace("geslachtDood[$i][$key]",
+				$text = str_replace("geslachtB[$i][$key]",
 					$alternatief[$geslacht],$text);
 			}
 		}
-		$text = str_replace("naamDood[$i]",$naam,$text);
-		$text = str_replace("rolDood[$i]",$rol,$text);
+		$text = str_replace("naamB[$i]",$naam,$text);
+		$text = str_replace("rolB[$i]",$rol,$text);
 	}
 	$text = str_replace("deadline[0]",$deadline,$text);
 	return $text;
 }//vulInDood
 
-function geefVerhaalRolverdeling($thema,$rol,$sid) {
-	$resultaat = sqlSel(6,
-		"THEMA=$thema AND ROL='$rol' AND FASE=-1");
-	if(sqlNum($resultaat) == 0) {
-		echo "Geen intro voor specifieke rol, probeer algemeen...\n";
-		$resultaat = sqlSel(6,
-			"THEMA=$thema AND ROL='Rolverdeling' AND FASE=-1");
-		if(sqlNum($resultaat) == 0) {
-			echo "Geen algemene intro voor dit thema, ";
-			echo "probeer specifieke default...\n";
-			$resultaat = sqlSel(6,
-				"ROL='$rol' AND FASE=-1 AND THEMA IN
-				(SELECT TID FROM Themas WHERE TNAAM='default')");
-			if(sqlNum($resultaat) == 0) {
-				echo "Geen specifieke default, probeer algemene default...\n";
-				$resultaat = sqlSel(6,
-					"ROL='Rolverdeling' AND FASE=-1 AND THEMA IN
-					(SELECT TID FROM Themas WHERE TNAAM='default')");
-				if(sqlNum($resultaat) == 0) { //helemaal fucked
-					echo "Geen algemene default; error.\n";				
-					stuurError2(
-						"Geen default verhaal voor rolverdeling.",$sid);
-				}
-			}//if
-		}//if
-	}//if
-	$tuples = array();
-	while($verhaal = sqlFet($resultaat)) {
-		array_push($tuples,$verhaal);
-	}
-	$key = array_rand($tuples);
-	return $tuples[$key];
-
-}//geefVerhaalRolverdeling
-
+//geeft de mogelijke keuzes van de Heks in een lijst weer
 function keuzeHeks($text,$heks,$doden,$sid) {
 	if(count($doden) > 0) {
 		$text .= "<br /><br />";
@@ -317,6 +292,7 @@ function keuzeHeks($text,$heks,$doden,$sid) {
 	return $text;
 }//keuzeHeks
 
+//zet de mogelijke keuzes van de Jager in een lijst
 function keuzeJager($text,$jager,$sid) {
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	$levenden = sqlNum($resultaat);
@@ -352,6 +328,7 @@ function keuzeJager($text,$jager,$sid) {
 	return $text;
 }//keuzeJager
 
+//voegt een auteur achter de text
 function auteur($auteur,$text) {
 	$text .= "<br /><br />";
 	$text .= "<font size='1'>";
@@ -360,6 +337,7 @@ function auteur($auteur,$text) {
 	return $text;
 }//auteur
 
+//voegt meerdere auteurs in een regel achter de text
 function auteurMeerdere($auteurs,$text) {
 	$text .= "<br /><br />";
 	$text .= "<font size='1'>";
@@ -378,7 +356,6 @@ function auteurMeerdere($auteurs,$text) {
 		}
 	}
 	$text .= "</font>";
-
 	return $text;
 }//auteurMeerdere
 
@@ -496,6 +473,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//ontwaakVerhaal
 
+//plakt de samenvatting achter een text
 function plakSamenvatting($samenvatting,$text) {
 	$text .= "<br /><hr />";
 	$text .= "Samenvatting:<br />";

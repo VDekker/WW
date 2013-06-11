@@ -3,48 +3,35 @@
 ===============
 
   * Opmerking:  wat als de dode Burgemeester als opvolger een nieuw-dode speler 
-                kiest?--dan moet hij zijn keuze herzien
+                kiest?--dan wordt zijn keuze niet gepakt (documenteer)
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
                 Brandstapel eindigt? (fix dit!)
-  * Opmerking:  wat gebeurt er met vorige_stem als de stem NULL was? (fix dit)
   * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
                 opeten (documenteer dit)
-  * Opmerking:  wat als de Fluitspelers allemaal op 1 dezelfde speler stemmen?
-                (en als de WW/VP dit doen?)
-  * Opmerking:  wat als beide Geliefden worden vermoord (niet door hartebreuk)?
-                Dan gaat het ontwaakverhaal fout. Fix dit!
 
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
              Verleidster, Goochelaar en Klaas Vaak
   * Testen:  nieuwe regelDood2, samen met fase-loops (naar fase 10 en fase 17)
-  * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks, 
-             kloppen deze?
+  * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks en 
+             Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
-  * Testen:  werkt (anonieme) help?
 
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
-  * Mailen:  gewonnen en begin
+  * Mailen:  gewonnen
   
-  * Verhaal: bij rollen mailen; eerst specifieke rol checken en daarvoor mailen,
-             als geen verhaal voor die rol: algemene rol checken
-             als dan nog geen verhaal: default beide stappen
   * Verhaal: maak default verhalen
-  * Verhaal: geefVerhaal verbeteren/meerdere maken
-  * Verhaal: vulInDood gebruiken waar nodig
   * Verhaal: shuffle() gebruiken/controleren
   * Verhaal: deadlines toevoegen
-  * Verhaal: ronde gebruiken
-  
-  * Regelen: Jager's EXTRA_STEM legen na algemene mail
-  * Regelen: Raaf's stem afvangen als dit een ontdekte Dorpsgek is
+  * Verhaal: ronde gebruiken in samenvatting en onderwerp(?)
   
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
-  * Nodig:   ronde van spel ophogen wanneer nodig (als nacht begint)
+  * Nodig:   lijst van keuzes aan speler mailen (handig)
+  * Nodig:   log bijhouden voor elk spel (gebruik de echos)
 
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
              (anders terugzetten op ongelezen...?)
@@ -52,12 +39,9 @@
   * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf afmaken
+  * Extra:   manStory.pdf maken
   * Extra:   alle mails in Verzonden zetten
   * Extra:   spelernamen in echo's zetten
-  * Extra:   lijst van keuzes aan speler mailen (handig)
-  * Extra:   stemWaarde verbeteren: check op burgemeester kan beter
-             (hetzelfde voor isDodeBurg)
-  * Extra:   log bijhouden voor elk spel
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER

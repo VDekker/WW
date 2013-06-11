@@ -10,7 +10,7 @@ function fases() {
 		echo "Ongewonnen spel gevonden: $sid.\n";
 		$fase = $spel['FASE'];
 		echo "Fase: $fase.\n";
-		if($spel['INIT']) { // initialiseer-fase van het spel
+		if($spel['RONDE'] == 0) { // initialiseer-fase van het spel
 			
 			switch($fase) {
 				case 0: //TODO verwijderen
@@ -26,10 +26,10 @@ function fases() {
 					}
 				case 2:
 					verdeelRol($sid);
-					mailRolverdeling($sid);
-					//mail algemeen (iedereen gaat slapen...) TODO maak
+					mailRolverdeling($spel);
+					mailInleiding($spel);//mail algemeen (iedereen gaat slapen...)
 					if(inSpel("Dief",$sid)) {
-						mailWakker("Dief",$sid);
+						mailWakker("Dief",$spel);
 						zetFase(3,$sid);
 					}
 					else if(inSpel("Cupido",$sid)) {
@@ -49,10 +49,10 @@ function fases() {
 					}
 				case 4:
 					if(inSpel("Dief",$sid)) {
-						regelDief($sid);
+						regelDief($spel);
 					}
 					if(inSpel("Cupido",$sid)) {
-						mailWakker("Cupido",$sid);
+						mailWakker("Cupido",$spel);
 						zetFase(5,$sid);
 					}
 					else {
@@ -69,14 +69,14 @@ function fases() {
 					}
 				case 6:
 					if(inSpel("Cupido",$sid)) {
-						regelCupido($sid);
+						regelCupido($spel);
 					}
 					if(inSpel("Opdrachtgever",$sid)) {
-						mailWakker("Opdrachtgever",$sid);
+						mailWakker("Opdrachtgever",$spel);
 						zetFase(7,$sid);
 					}
 					else {
-						sqlUp(4,"INIT=0,RONDE=RONDE+1","SID=$sid");
+						sqlUp(4,"RONDE=RONDE+1","SID=$sid");
 						zetFase(3,$sid);
 					}
 					break;
@@ -89,8 +89,8 @@ function fases() {
 						break;
 					}
 				case 8:
-					regelOpdracht($sid);
-					sqlUp(4,"INIT=0,RONDE=RONDE+1","SID=$sid");
+					regelOpdracht($spel);
+					sqlUp(4,"RONDE=RONDE+1","SID=$sid");
 					zetFase(3,$sid);
 			}//switch
 
@@ -100,10 +100,10 @@ function fases() {
 			switch($fase) {
 				case 0:
 					if(inSpel("Welp",$sid)) {
-						regelWelp($sid);
+						regelWelp($spel);
 					}
 					if(inSpel("Grafrover",$sid)) {
-						mailWakker("Grafrover",$sid);
+						mailWakker("Grafrover",$spel);
 						zetFase(1,$sid);
 					}
 					else {
@@ -120,12 +120,12 @@ function fases() {
 					}
 				case 2:
 					if(inSpel("Grafrover",$sid)) {
-						regelGrafrover($sid);
+						regelGrafrover($spel);
 					}
 					zetFase(3,$sid);
 				case 3:
 					if(inSpel("Klaas Vaak",$sid)) {
-						mailWakker("Klaas Vaak",$sid);
+						mailWakker("Klaas Vaak",$spel);
 						zetFase(4,$sid);
 					}
 					else {
@@ -142,51 +142,51 @@ function fases() {
 					}
 				case 5:
 					if(inSpel("Klaas Vaak",$sid)) {
-						regelKlaasVaak($sid);
+						regelKlaasVaak($spel);
 					}
 					if(inSpel("Genezer",$sid)) {
-						mailWakker("Genezer",$sid);
+						mailWakker("Genezer",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Ziener",$sid)) {
-						mailWakker("Ziener",$sid);
+						mailWakker("Ziener",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Dwaas",$sid)) {
-						mailWakker("Dwaas",$sid);
+						mailWakker("Dwaas",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Priester",$sid)) {
-						mailWakker("Priester",$sid);
+						mailWakker("Priester",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Slet",$sid)) {
-						mailWakker("Slet",$sid);
+						mailWakker("Slet",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Verleidster",$sid)) {
-						mailWakker("Verleidster",$sid);
+						mailWakker("Verleidster",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Goochelaar",$sid)) {
-						mailWakker("Goochelaar",$sid);
+						mailWakker("Goochelaar",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Weerwolf",$sid)) {
-						mailGroepWakker("Weerwolf",$sid);
+						mailGroepWakker("Weerwolf",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Vampier",$sid)) {
-						mailGroepWakker("Vampier",$sid);
+						mailGroepWakker("Vampier",$spel);
 						zetFase(6,$sid);
 					}
 					if(inSpel("Psychopaat",$sid)) {
-						mailWakker("Psychopaat",$sid);
+						mailWakker("Psychopaat",$spel);
 						zetFase(6,$sid);
 					}
 					if((($spel['FLAGS'] & 1) == 1) && 
 						inSpel("Witte Weerwolf",$sid)) {
-						mailWakker("Witte Weerwolf",$sid);
+						mailWakker("Witte Weerwolf",$spel);
 						zetFase(6,$sid);
 					}
 					if(geefFase($sid) == 5) { //fase is nog onaangepast
@@ -203,44 +203,44 @@ function fases() {
 					}
 				case 7:
 					if(inSpel("Genezer",$sid)) {
-						regelGenezer($sid);
+						regelGenezer($spel);
 					}
 					if(inSpel("Ziener",$sid)) { 
-						regelZiener($sid);
+						regelZiener($spel);
 					}
 					if(inSpel("Dwaas",$sid)) {
-						regelDwaas($sid);
+						regelDwaas($spel);
 					}
 					if(inSpel("Priester",$sid)) {
-						regelPriester($sid);
+						regelPriester($spel);
 					}
 					if(inSpel("Slet",$sid)) {
-						regelSlet($sid);
+						regelSlet($spel);
 					}
 					if(inSpel("Verleidster",$sid)) {
-						regelVerleid($sid);
+						regelVerleid($spel);
 					}
 					if(inSpel("Goochelaar",$sid)) {
-						regelGoochel($sid);
+						regelGoochel($spel);
 					}
 					if(inSpel("Weerwolf",$sid)) {
-						regelWWVP("Weerwolf",$sid);
+						regelWWVP("Weerwolf",$spel);
 					}
 					if(inSpel("Vampier",$sid)) {
-						regelWWVP("Vampier",$sid);
+						regelWWVP("Vampier",$spel);
 					}
 					if(inSpel("Psychopaat",$sid)) {
-						regelPsycho($sid);
+						regelPsycho($spel);
 					}
 					if(inSpel("Witte Weerwolf",$sid)) {
-						regelWitteWW($sid);
+						regelWitteWW($spel);
 					}
 					if(inSpel("Heks",$sid)) {
-						mailHeksWakker($sid);
+						mailHeksWakker($spel);
 						zetFase(8,$sid);
 					}
 					if(inSpel("Fluitspeler",$sid)) {
-						mailGroepWakker("Fluitspeler",$sid);
+						mailGroepWakker("Fluitspeler",$spel);
 						zetFase(8,$sid);
 					}
 					if(geefFase($sid) == 7) {
@@ -257,30 +257,30 @@ function fases() {
 					}
 				case 9:
 					if(inSpel("Heks",$sid)) {
-						regelHeksActie($sid);
+						regelHeksActie($spel);
 					}
 					if(inSpel("Fluitspeler",$sid)) {
-						regelFluit($sid);
+						regelFluit($spel);
 					}
 					if(inSpel("Waarschuwer",$sid)) {
-						mailWakker("Waarschuwer",$sid);
+						mailWakker("Waarschuwer",$spel);
 						zetFase(11,$sid);
 					}
 					if(inSpel("Raaf",$sid)) {
-						mailWakker("Raaf",$sid);
+						mailWakker("Raaf",$spel);
 						zetFase(11,$sid);
 					}
 					if(inSpel("Schout",$sid)) {
-						mailWakker("Schout",$sid);
+						mailWakker("Schout",$spel);
 						zetFase(11,$sid);
 					}
 				case 10:
 					regelDood1($sid);
 					if(inSpel("Jager",$sid)) {
-						mailJagerWakker(0,$sid);
+						mailJagerWakker(0,$spel);
 						zetFase(11,$sid);
 					}
-					if(mailBurgWakker($sid)) {
+					if(mailBurgWakker($spel)) {
 						zetFase(11,$sid);
 					}
 					if(geefFase($sid) == 9 || geefFase($sid) == 10) {
@@ -297,18 +297,18 @@ function fases() {
 					}
 				case 12:
 					if(inSpel("Jager",$sid)) {
-						regelJager(2,$sid);
+						regelJager(2,$spel);
 					}
 					if(inSpel("Waarschuwer",$sid)) {
-						regelWaarschuw($sid);
+						regelWaarschuw($spel);
 					}
 					if(inSpel("Schout",$sid)) {
-						regelSchout($sid);
+						regelSchout($spel);
 					}
 					if(inSpel("Raaf",$sid)) {
-						regelRaaf($sid);
+						regelRaaf($spel);
 					}
-					regelBurgemeester($sid);
+					regelBurgemeester($spel);
 					if(geefFase($sid) == 12) {
 						regelDood2($sid,10);
 						regelZetNULL1($sid);
@@ -321,11 +321,13 @@ function fases() {
 							//stuur mails (ontwaken, 
 							//nieuwe burgemeesterverkiezing)
 							mailAlgemeenVerkiezing($sid);
+							//leeg jager EXTRA_STEM
 							zetDood2($sid);
 							zetFase(13,$sid);
 						}
 						else {
 							mailAlgemeenBrandstapel(0,array(),$sid);
+							//leeg jager EXTRA_STEM
 							zetDood2($sid);
 							zetFase(15,$sid);
 						}
@@ -352,15 +354,15 @@ function fases() {
 						break;
 					}
 				case 16:
-					regelBrand($sid);
+					regelBrand($spel);
 				case 17:
 					regelDood1($sid);
 					$vlag = false;
-					if(mailJagerWakker(1,$sid)) {
+					if(mailJagerWakker(1,$spel)) {
 						zetFase(18,$sid);
 						$vlag = true;	
 					}
-					if(mailZondeWakker(1,$sid)) {
+					if(mailZondeWakker(1,$spel)) {
 						zetFase(18,$sid);
 						$vlag = true;	
 					}
@@ -378,10 +380,10 @@ function fases() {
 					}
 				case 19:
 					if(inSpel("Jager",$sid)) {
-						regelJager(3,$sid);
+						regelJager(3,$spel);
 					}
 					if(inSpel("Zondebok",$sid)) {
-						regelZonde($sid);
+						regelZonde($spel);
 					}
 					if(geefFase($sid) == 19) {
 						zetFase(20,$sid);
@@ -395,6 +397,7 @@ function fases() {
 							//mail gewonnen TODO
 						}
 						mailAlgemeenInslapen($sid);
+						//leeg jager EXTRA_STEM
 						zetDood2($sid);
 						zetFase(0,$sid);
 						sqlUp(4,"RONDE=RONDE+1","SID=$sid");

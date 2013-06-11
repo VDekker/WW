@@ -163,8 +163,11 @@ function herleef($id,$sid) {
 }//herleef
 
 //neemt alle spelers die nieuwdood zijn, en maakt ze echt dood
+//leegt ook de EXTRA_STEM van overleden Jagers
+//(deze werd onthouden ivm. algemene mail)
 function zetDood2($sid) {
 	sqlUp(3,"LEVEND=0","SID=$sid AND ((LEVEND & 2) = 2)");
+	sqlUp(3,"EXTRA_STEM=NULL","SID=$sid AND ROL='Jager' AND LEVEND=2");
 	echo "Alle nieuw-dode spelers gedood.\n";
 	return;
 }//zetDood2
@@ -312,16 +315,16 @@ function regelZetNULL1($sid) {
 //(+1 als Burgemeester, +1 als Gewaarschuwd)
 //ontdekte Dorpsgek en spelers opgesloten door de Schout 
 //of aangewezen door de Zondebok moeten door de parser worden afgevangen.
-function stemWaarde($id,$sid) {
+function stemWaarde($speler,$spel) {
 	$waarde = 1;
-	if(isGewaarschuwd($id,$sid)) {
+
+	//check of speler gewaarschuwd is
+	if(($speler['SPELFLAGS'] & 4096) == 4096) {
 		$waarde++;
 	}
-	$resultaat = sqlSel(3,
-		"SID=$sid AND ID IN 
-		(SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
-	$burgemeester = sqlFet($resultaat);
-	if($id == $burgemeester['ID']) {
+
+	//check of speler burgemeester is
+	if($speler['ID'] == $spel['BURGEMEESTER']) {
 		$waarde++;
 	}
 	return $waarde;
