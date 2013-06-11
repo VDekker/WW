@@ -23,7 +23,6 @@
   * Mailen:  gewonnen
   
   * Verhaal: maak default verhalen
-  * Verhaal: shuffle() gebruiken/controleren
   * Verhaal: deadlines toevoegen
   * Verhaal: ronde gebruiken in samenvatting en onderwerp(?)
   
@@ -613,6 +612,9 @@ De verhalen hebben een rol en een fase, en met deze twee variabelen kan het
 juiste soort verhaaltje bepaald worden:
 
 Rolverdeling:       -1 = Speler rol mailen
+Burger:             -1 = Speler rol mailen
+Dorpsgek:           -1 = Speler rol mailen
+                     0 = Ontdekt op Brandstapel
 Dief:               -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Burger geworden, niet gestolen (Dief)
@@ -629,6 +631,7 @@ Cupido:             -1 = Rolverdeling mailen
 Opdrachtgever:      -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Lijfwacht aangesteld (Opdrachtgever en Lijfwacht)
+                     2 = Lijfwacht sterft op de Brandstapel
                      9 = Blanco gestemd
 Welp:               -1 = Rolverdeling mailen
                      0 = Weerwolf geworden
@@ -748,6 +751,7 @@ Brandstapel:         0 = Inleiding
 Zondebok:           -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Speler(s) gekozen (hoeveel?)
+                     2 = Zondebok op de Brandstapel
                      9 = Blanco gestemd
 Gewonnen:            0 = Burgers gewonnen
                      1 = Weerwolven gewonnen

@@ -3,7 +3,7 @@
 //geeft een willekeurig verhaal volgens de criteria met als extra: 
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder levende spelers gebruikt worden
-function geefVerhaalGroep($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
+function geefVerhaal($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
 	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 		NUM_A=$numA AND NUM_B=$numB");
@@ -31,7 +31,7 @@ function geefVerhaalGroep($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
 					$resultaat = sqlSel(5,"TNAAM='default'");
 					$tuple = sqlFet($resultaat);
 					$thema = $tuple['TID'];
-					return geefVerhaalGroep($thema,$rol,$fase,
+					return geefVerhaal($thema,$rol,$fase,
 						$levend,$dood,$sid);
 				}//if
 			}//if
@@ -43,13 +43,13 @@ function geefVerhaalGroep($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
 	}
 	$key = array_rand($tuples);
 	return $tuples[$key];
-}//geefVerhaalGroep
+}//geefVerhaal
 
 //geeft een willekeurig verhaal volgens de criteria met als extra: 
 //het aantal levende en overleden (in het verhaal) spelers
 //eventueel mogen minder dode spelers gebruikt worden
 //(gebruikt voor Zondebok en Onschuldige Meisje)
-function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
+function geefVerhaal2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 	$resultaat = sqlSel(6,
 		"THEMA=$thema AND ROL='$rol' AND FASE=$fase AND RONDE=$ronde AND 
 		NUM_A=$numA AND NUM_B=$numB");
@@ -77,7 +77,7 @@ function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 					$resultaat = sqlSel(5,"TNAAM='default'");
 					$tuple = sqlFet($resultaat);
 					$thema = $tuple['TID'];
-					return geefVerhaalGroep($thema,$rol,$fase,
+					return geefVerhaal($thema,$rol,$fase,
 						$levend,$dood,$sid);
 				}//if
 			}//if
@@ -89,7 +89,7 @@ function geefVerhaalGroep2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 	}
 	$key = array_rand($tuples);
 	return $tuples[$key];
-}//geefVerhaalGroep2
+}//geefVerhaal2
 
 //geeft een verhaal voor de rolverdeling: eerst voor de specifieke rol
 //als deze niet bestaat: voor algemene rolverdeling
@@ -198,7 +198,7 @@ function vulInWW($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 }//vulInWW
 
 //vult een verhaaltje in met de juiste variabelen
-function vulInDood($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
+function vulIn($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 	$paren = explode('%',$geswoorden);
 	foreach($tuplesA as $i => $speler) {
 		$geslacht = $speler['SPELERFLAGS'] & 1;
@@ -240,7 +240,7 @@ function vulInDood($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 	}
 	$text = str_replace("deadline[0]",$deadline,$text);
 	return $text;
-}//vulInDood
+}//vulIn
 
 //geeft de mogelijke keuzes van de Heks in een lijst weer
 function keuzeHeks($text,$heks,$doden,$sid) {
@@ -413,6 +413,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$resArray = array();
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
 
 	//vul de arrays en kijk of speciaal verhaal nodig is
 	geefGebeurd($tuplesL,$tuplesD,$tuplesS,$resArray,$spel);
@@ -422,11 +423,11 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	//bij normaal verhaal (geen jagers/geliefden dood)
 	if(count($tuplesS) == 0) {
 		echo "Normaal verhaal gewenst.\n";
-		$verhaal = geefVerhaalGroep($thema,"Algemeen",0,$levend,$dood,$sid);
+		$verhaal = geefVerhaal($thema,"Algemeen",0,$levend,$dood,$ronde,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
-		$text = vulInDood($tuplesL,$tuplesD,"",$text,$geswoorden);
+		$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
 
 		//samenvatting maken
 		foreach($tuplesD as $speler) {
@@ -445,11 +446,11 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	var_dump($boom);
 
 	//ontwaken/begin
-	$verhaal = geefVerhaalGroep($thema,"Algemeen",1,$levend,$dood,$sid);
+	$verhaal = geefVerhaal($thema,"Algemeen",1,$levend,$dood,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood(array_merge($tuplesL,$tuplesS),
+	$text = vulIn(array_merge($tuplesL,$tuplesS),
 		$tuplesD,"",$text,$geswoorden);
 
 	//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
@@ -466,7 +467,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	//nu dingen aanvullen met behulp van de boom van jagers/geliefden
 	foreach($boom as $id => $target) {
 		leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
-			$tuplesL,$tuplesS,$thema,"Algemeen",$sid);
+			$tuplesL,$tuplesS,$thema,"Algemeen",$spel);
 	}
 	$samenvatting .= "De Dag begint.<br />";
 
@@ -554,7 +555,11 @@ function maakBoom($id,$specialeTuples,$boom,$diepte,$resultaat) {
 //$levende zijn de levende spelers, en $speciale zijn de spelers in de boom,
 //elk van hen zijn tuple-arrays
 function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
-	$levende,&$speciale,$thema,$rol,$sid) {
+	$levende,&$speciale,$thema,$rol,$spel) {
+
+		$sid = $spel['SID'];
+		$ronde = $spel['RONDE'];
+
 		//vind de id
 		$index = array();
 		if(!array_search_recursive($id,$speciale,$index)) {
@@ -594,12 +599,12 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 		$speciale = delArrayElement($speciale,$index[0]);
 
 		//kondig id aan
-		$verhaal = geefVerhaalGroep($thema,$rol,4,
-			(count($levende)+count($speciale)),1,$sid);
+		$verhaal = geefVerhaal($thema,$rol,4,
+			(count($levende)+count($speciale)),1,$ronde,$sid);
 		$text .= $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
-		$text = vulInDood(array_merge($levende,$speciale),
+		$text = vulIn(array_merge($levende,$speciale),
 			array($tuple),"",$text,$geswoorden);
 
 		//als id == jager: leesBoom op zijn target
@@ -615,22 +620,22 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 				if(array_key_exists($naam2,$boom)) {
 					//doelwit is een knoop: recursief
 					leesBoom($boom[$naam2],$naam2,$text,$samenvatting,
-						$auteur,$levende,$speciale,$thema,"Jager",$sid);
+						$auteur,$levende,$speciale,$thema,"Jager",$spel);
 				}
 				else {
 					//doelwit is een blad
 					leesBlad($naam2,$text,$samenvatting,$auteur,
-						$levende,$speciale,$thema,"Jager",$sid);
+						$levende,$speciale,$thema,"Jager",$spel);
 				}
 		}//if
 
 		//maak id dood
-		$verhaal = geefVerhaalGroep($thema,$rol,5,
-			(count($levende)+count($speciale)),1,$sid);
+		$verhaal = geefVerhaal($thema,$rol,5,
+			(count($levende)+count($speciale)),1,$ronde,$sid);
 		$text .= $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
-		$text = vulInDood(array_merge($levende,$speciale),
+		$text = vulIn(array_merge($levende,$speciale),
 			array($tuple),"",$text,$geswoorden);
 
 		//als id == geliefde: kondig geliefde aan etc.
@@ -646,19 +651,22 @@ function leesBoom($boom,$id,&$text,&$samenvatting,&$auteur,
 				if(array_key_exists($naam2,$boom)) {
 					//doelwit is knoop: recursief
 					leesBoom($boom[$naam2],$naam2,$text,$samenvatting,
-						$auteur,$levende,$speciale,$thema,"Cupido",$sid);
+						$auteur,$levende,$speciale,$thema,"Cupido",$spel);
 				}
 				else {
 					//doelwit is een blad
 					leesBlad($naam2,$text,$samenvatting,$auteur,
-						$levende,$speciale,$thema,"Cupido",$sid);
+						$levende,$speciale,$thema,"Cupido",$spel);
 				}
 		}//if
-	}//leesBoom
+}//leesBoom
 
 //leest een blad van de boom (zie leesBoom()).
 function leesBlad($id,&$text,&$samenvatting,&$auteur,
-	$levende,&$speciale,$thema,$rol,$sid) {
+	$levende,&$speciale,$thema,$rol,$spel) {
+
+	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
 
 	//vind de id
 	$index = array();
@@ -667,21 +675,21 @@ function leesBlad($id,&$text,&$samenvatting,&$auteur,
 	$speciale = delArrayElement($speciale,$index[0]);
 
 	//kondig aan
-	$verhaal = geefVerhaalGroep($thema,$rol,4,
-		(count($levende)+count($speciale)),1,$sid);
+	$verhaal = geefVerhaal($thema,$rol,4,(count($levende)+count($speciale)),
+		1,$ronde,$sid);
 	$text .= $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood(array_merge($levende,$speciale),
+	$text = vulIn(array_merge($levende,$speciale),
 		array($tuple),"",$text,$geswoorden);
 
 	//en vermoord
-	$verhaal = geefVerhaalGroep($thema,$rol,5,
-		(count($levende)+count($speciale)),1,$sid);
+	$verhaal = geefVerhaal($thema,$rol,5,(count($levende)+count($speciale)),
+		1,$ronde,$sid);
 	$text .= $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood(array_merge($levende,$speciale),
+	$text = vulIn(array_merge($levende,$speciale),
 		array($tuple),"",$text,$geswoorden);
 
 	return;
@@ -729,18 +737,19 @@ function verkiezingInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	$tuplesL = array(); //L voor levende spelers
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1 AND ID<>$burgID");
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
 	}
 
 	//maak verhaal (met burg apart van alle andere levende spelers)
-	$verhaal = geefVerhaalGroep($thema,"Burgemeester",3,count($tuplesL),
-		count($burgArray),$sid);
+	$verhaal = geefVerhaal($thema,"Burgemeester",3,count($tuplesL),
+		count($burgArray),$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood($tuplesL,$burgArray,"",$text,$geswoorden);
+	$text = vulIn($tuplesL,$burgArray,"",$text,$geswoorden);
 
 	//samenvatting maken
 	if(!$vlag) {
@@ -773,18 +782,19 @@ function verkiezingUitslag(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
 	$tuplesL = array(); //L voor levende spelers
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1 AND ID<>$burgID");
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
 	}
 
 	//maak verhaal (met burg apart van alle andere levende spelers)
-	$verhaal = geefVerhaalGroep($thema,"Burgemeester",4,count($tuplesL),
-		count($burgArray),$sid);
+	$verhaal = geefVerhaal($thema,"Burgemeester",4,count($tuplesL),
+		count($burgArray),$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood($tuplesL,$burgArray,"",$text,$geswoorden);
+	$text = vulIn($tuplesL,$burgArray,"",$text,$geswoorden);
 
 	//samenvatting maken
 	$samenvatting .= "De Burgemeesterverkiezing is geweest.<br />";
@@ -887,6 +897,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	$tuplesD = array(); //D voor nieuwdode spelers
 	$thema = $spel['THEMA'];
 	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
@@ -897,12 +908,12 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	}
 
 	//maak verhaal
-	$verhaal = geefVerhaalGroep($thema,"Brandstapel",0,count($tuplesL),
-		count($tuplesD),$sid);
+	$verhaal = geefVerhaal($thema,"Brandstapel",0,count($tuplesL),
+		count($tuplesD),$ronde,$sid);
 	$text .= $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	array_push($auteur,$verhaal['AUTEUR']);
-	$text = vulInDood($tuplesL,$tuplesD,"",$text,$geswoorden);
+	$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
 
 	//Raaf verhaaltje achtervoegen
 	$resultaat = sqlSel(3,
@@ -912,12 +923,12 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 			$naam = $speler['NAAM'];
 			$key = array_search($speler,$tuplesL);
 			delArrayElement($tuplesL,$key);
-			$verhaal = geefVerhaalGroep($thema,"Raaf",3,count($tuplesL),
-				1,$sid);
+			$verhaal = geefVerhaal($thema,"Raaf",3,count($tuplesL),
+				1,$ronde,$sid);
 			$text .= $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			array_push($auteur,$verhaal['AUTEUR']);
-			$text = vulInDood($tuplesL,array($speler),"",$text,$geswoorden);
+			$text = vulIn($tuplesL,array($speler),"",$text,$geswoorden);
 			array_push($tuplesL,$speler);
 			$samenvatting .= "$naam krijgt het Teken van de Raaf.<br />";
 		}
@@ -931,12 +942,12 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 			$naam = $speler['NAAM'];
 			$key = array_search($speler,$tuplesL);
 			delArrayElement($tuplesL,$key);
-			$verhaal = geefVerhaalGroep($thema,"Schout",3,count($tuplesL),
-				1,$sid);
+			$verhaal = geefVerhaal($thema,"Schout",3,count($tuplesL),
+				1,$ronde,$sid);
 			$text .= $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			array_push($auteur,$verhaal['AUTEUR']);
-			$text = vulInDood($tuplesL,array($speler),"",$text,$geswoorden);
+			$text = vulIn($tuplesL,array($speler),"",$text,$geswoorden);
 			array_push($tuplesL,$speler);
 			$samenvatting .= "$naam is opgesloten ";
 			$samenvatting .= "en doet niet mee met de stemming.<br />";
@@ -949,11 +960,12 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//brandstapelInleiding
 
-//TODO samenvatting maken/checken
+//TODO bij gelijkspel->Burgemeesterstem doorslaggevend ander verhaal
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: brandstapelUitslag.\n";
 
 	$sid = $spel['SID'];
+	$ronde  = $spel['RONDE'];
 	$burgemeester = $spel['BURGEMEESTER'];
 
 	//maak een stem-overzicht
@@ -979,32 +991,57 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 			$rol = $speler['ROL'];
 			$flags = $speler['FLAGS'];
 			if($rol == "Dorpsgek" && (($flags & 128) == 128)) {
-				//ontdekte dorpsgek: TODO ander verhaaltje
-			}
-			else if($rol == "Zondebok" && (($flags & 256) == 256)) {
-				//dode zondebok: TODO ander verhaaltje
-			}
-			else if(($flags & 32768) == 32768) {
-				$resultaat = sqlSel(3,"ROL='Opdrachtgever' AND LIJFWACHT=$id");
-				$opdrachtgever = sqlFet($resultaat);
-				//dode lijfwacht: TODO ander verhaaltje, met opdrachtgever
-			}
-			else {
-				//normaal verhaal
-				$verhaal = geefVerhaalGroep($thema,"Brandstapel",1,$levend,$dood,$sid);
+				//ontdekte dorpsgek:
+				$verhaal = geefVerhaal($thema,"Dorpsgek",0,$levend,
+					$dood,$ronde,$sid);
 				$text .= $verhaal['VERHAAL'];
 				$geswoorden = $verhaal['GESLACHT'];
 				array_push($auteur,$verhaal['AUTEUR']);
-				$text = vulInDood($tuplesL,$tuplesD,"",$text,$geswoorden);
+				$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
 
+			}
+			else if($rol == "Zondebok" && (($flags & 256) == 256)) {
+				//dode zondebok:
+				$verhaal = geefVerhaal($thema,"Zondebok",2,$levend,
+					$dood,$ronde,$sid);
+				$text .= $verhaal['VERHAAL'];
+				$geswoorden = $verhaal['GESLACHT'];
+				array_push($auteur,$verhaal['AUTEUR']);
+				$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
+				//TODO: de keuzes van de zondebok toevoegen
+			}
+			else if(($flags & 32768) == 32768) {
+				//dode lijfwacht:
+				$resultaat = sqlSel(3,"ROL='Opdrachtgever' AND LIJFWACHT=$id");
+				$opdrachtgever = sqlFet($resultaat);
+
+				$verhaal = geefVerhaal($thema,"Opdrachtgever",2,$levend,
+					$dood,$ronde,$sid);
+				$text .= $verhaal['VERHAAL'];
+				$geswoorden = $verhaal['GESLACHT'];
+				array_push($auteur,$verhaal['AUTEUR']);
+				$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
+				//TODO: opdrachtgever bereikbaar maken in verhaaltje (in tuplesD[1])
+			}
+			else {
+				//normaal verhaal
+				$verhaal = geefVerhaal($thema,"Brandstapel",1,$levend,
+					$dood,$ronde,$sid);
+				$text .= $verhaal['VERHAAL'];
+				$geswoorden = $verhaal['GESLACHT'];
+				array_push($auteur,$verhaal['AUTEUR']);
+				$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
+				$samenvatting .= "$naam ($rol) kreeg de meeste stemmen en ";
+				$samenvatting .= "is op de Brandstapel verbrandt.<br />";
 			}
 		}//if
 		else {
-			$verhaal = geefVerhaalGroep($thema,"Brandstapel",1,$levend,0,$sid);
+			$verhaal = geefVerhaal($thema,"Brandstapel",1,
+				$levend,0,$ronde,$sid);
 			$text .= $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			array_push($auteur,$verhaal['AUTEUR']);
-			$text = vulInDood($tuplesL,array(),"",$text,$geswoorden);
+			$text = vulIn($tuplesL,array(),"",$text,$geswoorden);
 			$samenvatting .= "Er is geen slachtoffer gevallen.<br />";
 		}
 	}//if
@@ -1015,11 +1052,12 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 		$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
 
 		//begin
-		$verhaal = geefVerhaalGroep($thema,"Brandstapel",2,$levend,$dood,$sid);
+		$verhaal = geefVerhaal($thema,"Brandstapel",2,$levend,
+			$dood,$ronde,$sid);
 		$text .= $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
-		$text = vulInDood(array_merge($tuplesL,$tuplesS),
+		$text = vulIn(array_merge($tuplesL,$tuplesS),
 			$tuplesD,"",$text,$geswoorden);
 
 		//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
@@ -1037,9 +1075,8 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 		//nu dingen aanvullen met behulp van de boom van jagers/geliefden
 		foreach($boom as $id => $target) {
 			leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
-				$tuplesL,$tuplesS,$thema,"Algemeen",$sid);
+				$tuplesL,$tuplesS,$thema,"Algemeen",$spel);
 		}
-
 	}//else
 
 	//en maak een samenvatting
