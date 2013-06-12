@@ -39,7 +39,6 @@
   * Extra:   alle mails in Verzonden zetten
   * Extra:   spelernamen in log ipv. spelerID zetten
   * Extra:   meer log bijhouden
-  * Extra:   datum en tijd in de log bijhouden
   * Extra:   config functie maken om de algemene log te legen (van spel -1)
   * Extra:   config functie om log te zien
   * Extra:   schrijfLog optimaliseren (niet met elke aanroep laten updaten)

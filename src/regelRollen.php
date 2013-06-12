@@ -939,11 +939,29 @@ function regelDood2($sid,$fase) {
 			"SID=$sid AND ROL='Dorpsgek' AND LEVEND=1 AND 
 			((SPELFLAGS & 128) = 128) AND ((SPELFLAGS & 65536) = 0)");
 		sqlUp(3,"ROL='Burger',LIJFWACHT=NULL",
-			"SID=$sid AND LEVEND=1 AND ROL IN
-			('Cupido','Genezer','Ziener','Slet','Verleidster','Heks','Jager',
-			'Klaas Vaak','Priester','Goochelaar','Onschuldige Meisje',
-			'Grafrover','Waarschuwer','Raaf','Schout','Dorpsoudste','Zondebok',
-			'Opdrachtgever','Dorpsgek')");
+			"SID=$sid AND LEVEND=1 AND ROL IN (
+			'Cupido',
+			'Dief',
+			'Dorpsgek',
+			'Dorpsoudste',
+			'Dwaas',
+			'Genezer',
+			'Goochelaar',
+			'Grafrover',
+			'Heks',
+			'Jager',
+			'Klaas Vaak',
+			'Onschuldige Meisje',
+			'Opdrachtgever',
+			'Priester',
+			'Raaf',
+			'Schout',
+			'Slet',
+			'Verleidster',
+			'Waarschuwer',
+			'Ziener',
+			'Zondebok'
+			)");
 		schrijfLog($sid,"Dorpsoudste is dood, " . 
 			"en iedereen verliest zijn gaven.\n");
 		zetFase($fase,$sid); // opnieuw checken of een geliefde dood moet: loop

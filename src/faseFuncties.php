@@ -7,7 +7,7 @@ function schrijfLog($sid,$bericht) {
 	$log = date_format($datum,'Y-m-d H:i:s');
 	$log .= " - ";
 	$log .= sqlEscape($bericht);
-	//sqlUp(4,"LOG=CONCAT(LOG,'$log')","SID=$sid");
+	sqlUp(4,"LOG=CONCAT(LOG,'$log')","SID=$sid");
 	return;
 }
 
