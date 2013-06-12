@@ -53,6 +53,10 @@ function mailWakker($rol,$spel) {
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
+
+		$text .= "<br /><hr />";
+		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
+		$text = keuzeVeel($text,$speler,$rol,$sid)
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -106,6 +110,10 @@ function mailGroepWakker($rol,$spel) {
 	$auteur = $verhaal['AUTEUR'];
 	shuffle($tuples);
 	$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
+
+	$text .= "<br /><hr />";
+	$text .= "Jullie hebben tot $deadline om je keuze te maken.<br />";
+	$text = keuzeGroep($text,$rol,$sid);
 	$text = auteur($auteur,$text);
 
 	stuurMail($adres,$onderwerp,$text);
@@ -147,6 +155,9 @@ function mailHeksWakker($spel) {
 		if(!(($speler['LEVEND'] & 2) == 2)) {
 			delArrayElement($tuples,0);
 		}
+
+		$text .= "<br /><hr />";
+		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeHeks($text,$speler['NAAM'],$tuples,$sid);
 		$text = auteur($auteur,$text);
 
@@ -180,11 +191,14 @@ function mailJagerWakker($fase,$spel) {
 		$vlag = true;
 		$tuples = array($speler);
 		$adres = $speler['EMAIL'];
-		$verhaal = geefVerhaal($thema,"Jager",$fase,$1,0,$ronde,$sid);
+		$verhaal = geefVerhaal($thema,"Jager",$fase,1,0,$ronde,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
+
+		$text .= "<br /><hr />";
+		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeJager($text,$speler['NAAM'],$sid);
 		$text = auteur($auteur,$text);
 
@@ -219,6 +233,10 @@ function mailBurgWakker($spel) {
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];
 	$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
+
+	$text .= "<br /><hr />";
+	$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
+	$text = keuzeTestament($text,$sid);
 	$text = auteur($auteur,$text);
 
 	stuurMail($adres,$onderwerp,$text);
@@ -252,6 +270,10 @@ function mailZondeWakker($spel) {
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
+	
+		$text .= "<br /><hr />";
+		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
+		$text = keuzeZonde($text,$speler['NAAM'],$sid);
 		$text = auteur($auteur,$text);
 
 		stuurMail($adres,$onderwerp,$text);
@@ -259,7 +281,6 @@ function mailZondeWakker($spel) {
 	}//while
 	return true;
 }//mailZondeWakker
-
 
 //standaard functie voor mailen van een speler-actie 
 //(met slachtoffer opgeslagen in 'plek')
@@ -955,6 +976,7 @@ function mailAlgemeenBrandstapel($vlag,$overzicht,$spel) {
 function mailAlgemeenInslapen($spel) {
 	$sid = $spel['SID'];
 	$ronde = $spel['RONDE'];
+	$nieuweRonde = $ronde + 1;
 	$sid = $spel['SID'];
 	$snaam = $spel['SNAAM'];
 	$thema = $spel['THEMA'];
@@ -979,7 +1001,7 @@ function mailAlgemeenInslapen($spel) {
 	$auteur = $verhaal['AUTEUR'];
 	shuffle($tuplesL);
 	$text = vulIn($tuplesL,"","",$text,$geswoorden);
-	$samenvatting .= "De Nacht begint.<br />";
+	$samenvatting .= "Nacht $nieuweRonde begint.<br />";
 	
 	//en voeg samenvatting samen met text
 	$text = plakSamenvatting($samenvatting,$text);

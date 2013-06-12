@@ -5,9 +5,12 @@
   * Opmerking:  wat als de dode Burgemeester als opvolger een nieuw-dode speler 
                 kiest?--dan wordt zijn keuze niet gepakt (documenteer)
   * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
-                Brandstapel eindigt? (fix dit!)
+                Brandstapel eindigt?--dan wordt dit 's nachts geregeld 
+                (documenteer)
   * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
                 opeten (documenteer dit)
+  * Opmerking:  voor FS wordt bijgehouden wie ze hebben betoverd (documenteer 
+                dit, ook in de Let-Op voor Grafrovers)
 
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
@@ -17,19 +20,19 @@
   * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks en 
              Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
+  
+  * Parsen:  'via'-mails afvangen/niet parsen
 
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen
   
   * Verhaal: maak default verhalen
-  * Verhaal: deadlines toevoegen
-  * Verhaal: ronde gebruiken in samenvatting en onderwerp(?)
+  * Verhaal: ronde gebruiken in onderwerp(?)
   
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
-  * Nodig:   lijst van keuzes aan speler mailen (handig)
   * Nodig:   log bijhouden voor elk spel (gebruik de echos)
 
   * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
@@ -165,7 +168,8 @@ SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel
                    512 = als Geliefde gestorven, 1024 = Teken van de Raaf, 
                    2048 = opgesloten door Schout, 4096 = gewaarschuwd door 
                    Waarschuwer, 8192 = beschermd door Genezer, 16384 = in slaap 
-                   gesust door Klaas Vaak, 32768 = als Lijfwacht gestorven).
+                   gesust door Klaas Vaak, 32768 = als Lijfwacht gestorven, 
+                   65536 = als Dorpsgek gelynched na overlijden Dorpsoudste).
 GELIEFDE:          Is de speler een Geliefde? (Hierin staat de ID van zijn 
                    Geliefde, of NULL.)
 LIJFWACHT:         Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
@@ -613,8 +617,12 @@ juiste soort verhaaltje bepaald worden:
 
 Rolverdeling:       -1 = Speler rol mailen
 Burger:             -1 = Speler rol mailen
+Dorpsoudste:        -1 = Speler rol mailen
+                     0 = Dorpsoudste dood (iedereen verliest rol), nacht
+                     1 = Dorpsoudste dood, dag
 Dorpsgek:           -1 = Speler rol mailen
                      0 = Ontdekt op Brandstapel
+                     1 = Gelynched na overlijden Dorpsoudste
 Dief:               -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Burger geworden, niet gestolen (Dief)
@@ -631,7 +639,8 @@ Cupido:             -1 = Rolverdeling mailen
 Opdrachtgever:      -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Lijfwacht aangesteld (Opdrachtgever en Lijfwacht)
-                     2 = Lijfwacht sterft op de Brandstapel
+                     2 = Lijfwacht sterft op de Brandstapel (Opdrachtgever in 
+                         B[1])
                      9 = Blanco gestemd
 Welp:               -1 = Rolverdeling mailen
                      0 = Weerwolf geworden

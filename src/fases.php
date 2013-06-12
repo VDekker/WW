@@ -13,83 +13,78 @@ function fases() {
 		if($spel['RONDE'] == 0) { // initialiseer-fase van het spel
 			
 			switch($fase) {
-				case 0: //TODO verwijderen
-					zetFase(1,$sid);
-					break;
-				case 1:
+				case 0: //wacht op inschrijvingen
 					if(genoegGewacht($sid)) {
-						zetFase(2,$sid);
+						zetFase(1,$sid);
 					}
 					else {
 						echo "Blijf wachten.\n";
 						break;
 					}
-				case 2:
+				case 1: //verdeel rollen, initialiseer alles
 					verdeelRol($sid);
 					mailRolverdeling($spel);
 					mailInleiding($spel);//mail algemeen (iedereen gaat slapen...)
 					if(inSpel("Dief",$sid)) {
 						mailWakker("Dief",$spel);
-						zetFase(3,$sid);
-					}
-					else if(inSpel("Cupido",$sid)) {
-						zetFase(4,$sid);
+						zetFase(2,$sid);
 					}
 					else {
-						zetFase(6,$sid);
+						zetFase(3,$sid);
 					}
 					break;
-				case 3:
+				case 2: //wacht op Dief
 					if(genoegGewacht($sid)) {
-						zetFase(4,$sid);
+						zetFase(3,$sid);
 					}
 					else {
 						echo "Blijf wachten.\n";
 						break;
 					}
-				case 4:
+				case 3:
 					if(inSpel("Dief",$sid)) {
 						regelDief($spel);
 					}
 					if(inSpel("Cupido",$sid)) {
 						mailWakker("Cupido",$spel);
-						zetFase(5,$sid);
+						zetFase(4,$sid);
 					}
 					else {
-						zetFase(6,$sid);
+						zetFase(5,$sid);
 					}
 					break;
-				case 5:
+				case 4: //wacht op Cupido
 					if(genoegGewacht($sid)) {
-						zetFase(6,$sid);
+						zetFase(5,$sid);
 					}
 					else {
 						echo "Blijf wachten.\n";
 						break;
 					}
-				case 6:
+				case 5:
 					if(inSpel("Cupido",$sid)) {
 						regelCupido($spel);
 					}
 					if(inSpel("Opdrachtgever",$sid)) {
 						mailWakker("Opdrachtgever",$spel);
-						zetFase(7,$sid);
+						zetFase(6,$sid);
 					}
 					else {
-						sqlUp(4,"RONDE=RONDE+1","SID=$sid");
-						zetFase(3,$sid);
+						zetFase(7,$sid);
 					}
 					break;
-				case 7:
+				case 6: //wacht op Opdrachtgever
 					if(genoegGewacht($sid)) {
-						zetFase(8,$sid);
+						zetFase(7,$sid);
 					}
 					else {
 						echo "Blijf wachten.\n";
 						break;
 					}
-				case 8:
-					regelOpdracht($spel);
+				case 7:
+					if(inSpel("Opdrachtgever",$sid)) {
+						regelOpdracht($spel);
+					}
 					sqlUp(4,"RONDE=RONDE+1","SID=$sid");
 					zetFase(3,$sid);
 			}//switch
@@ -318,16 +313,12 @@ function fases() {
 							//kan dit in algemene mail?
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
-							//stuur mails (ontwaken, 
-							//nieuwe burgemeesterverkiezing)
 							mailAlgemeenVerkiezing($sid);
-							//leeg jager EXTRA_STEM
 							zetDood2($sid);
 							zetFase(13,$sid);
 						}
 						else {
 							mailAlgemeenBrandstapel(0,array(),$sid);
-							//leeg jager EXTRA_STEM
 							zetDood2($sid);
 							zetFase(15,$sid);
 						}
@@ -397,7 +388,6 @@ function fases() {
 							//mail gewonnen TODO
 						}
 						mailAlgemeenInslapen($sid);
-						//leeg jager EXTRA_STEM
 						zetDood2($sid);
 						zetFase(0,$sid);
 						sqlUp(4,"RONDE=RONDE+1","SID=$sid");

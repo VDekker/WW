@@ -91,7 +91,7 @@ function geldigeStem($bericht,$sid,$levend) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { // meerdere namen in bericht
+			if($naam !== false) { // meerdere namen in bericht
 				return false;
 			}
 			$id = $speler['ID'];
@@ -112,7 +112,7 @@ function geldigeStemRaaf($bericht,$sid,$levend) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { // meerdere namen in bericht
+			if($naam !== false) { // meerdere namen in bericht
 				return false;
 			}
 			$id = $speler['ID'];
@@ -132,7 +132,7 @@ function geldigeStemBurg($bericht,$sid) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam != false) { // meerdere namen in bericht
+			if($naam !== false) { // meerdere namen in bericht
 				return false;
 			}
 			$id = $speler['ID'];
@@ -177,7 +177,7 @@ function geldigeStemHeks($bericht,$sid,$levend) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($id != false) { //meerdere namen in bericht
+			if($id !== false) { //meerdere namen in bericht
 				return false;
 			}
 			$id = $speler['ID'];
@@ -260,8 +260,12 @@ function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($id1 != false) { //meerdere namen in bericht
-				if($id2 != false) { //te veel namen!
+			if($id1 == -1) { //blanco en naam in bericht: fout
+				$id1 = false;
+				return;
+			}
+			if($id1 !== false) { //meerdere namen in bericht
+				if($id2 !== false) { //te veel namen!
 					$id1 = false;
 					$id2 = false;
 					return;
@@ -285,13 +289,17 @@ function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
 	$teller = 0;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
 		$id1 = -1;
-		return;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($id1 != false) { //meerdere namen in bericht
-				if($id2 != false) { //te veel namen!
+			if($id1 == -1) {
+				//blanco en naam in bericht: return false
+				$id1 = false;
+				return;
+			}
+			if($id1 !== false) { //meerdere namen in bericht
+				if($id2 !== false) { //te veel namen!
 					$id1 = false;
 					$id2 = false;
 					return;
@@ -337,13 +345,16 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 	$teller = 0;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
 		$id1 = -1;
-		return;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($id1 != false) { //meerdere namen in bericht
-				if($id2 != false) { //te veel namen!
+			if($id1 == -1) { //blanco en naam in bericht: fout
+				$id1 = false;
+				return;
+			}
+			if($id1 !== false) { //meerdere namen in bericht
+				if($id2 !== false) { //te veel namen!
 					$id1 = false;
 					$id2 = false;
 					return;
@@ -390,10 +401,10 @@ function geldigeStemZonde($bericht,$sid) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($stem == false) {
+			if($stem === false) {
 				$stem = $speler['ID'];
 			}
-			else if($stem == -1) {
+			else if($stem == -1) { //blanco en naam in bericht
 				return false;
 			}
 			else{

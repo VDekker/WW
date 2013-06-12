@@ -849,7 +849,7 @@ function regelBurgemeester($spel) {
 		return;
 	}
 	$resultaat = sqlSel(3,
-		"ID=$id AND ((LEVEND & 2) = 2)");
+		"ID=$id AND LEVEND<>1");
 	if(sqlNum($resultaat) == 0) { //geen dode Burgemeester
 		return;
 	}
@@ -935,9 +935,9 @@ function regelDood2($sid,$fase) {
 	$resultaat = sqlSel(3,
 		"SID=$sid AND ((LEVEND & 2) = 2) AND ROL='Dorpsoudste'");
 	if(sqlNum($resultaat) > 0) {
-		sqlUp(3,"LEVEND=3",
+		sqlUp(3,"LEVEND=3,SPELFLAGS=SPELFLAGS+65536",
 			"SID=$sid AND ROL='Dorpsgek' AND LEVEND=1 AND 
-			((SPELFLAGS & 128) = 128)");
+			((SPELFLAGS & 128) = 128) AND ((SPELFLAGS & 65536) = 0)");
 		sqlUp(3,"ROL='Burger',LIJFWACHT=NULL",
 			"SID=$sid AND LEVEND=1 AND ROL IN
 			('Cupido','Genezer','Ziener','Slet','Verleidster','Heks','Jager',

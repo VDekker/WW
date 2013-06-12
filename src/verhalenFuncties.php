@@ -217,7 +217,7 @@ function vulIn($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 		$text = str_replace("naamA[$i]",$naam,$text);
 		$text = str_replace("rolA[$i]",$rol,$text);
 	}
-	if(empty($tuplesB) {
+	if(empty($tuplesB)) {
 		$text = str_replace("deadline[0]",$deadline,$text);
 		return $text;
 	}
@@ -244,93 +244,243 @@ function vulIn($tuplesA,$tuplesB,$deadline,$text,$geswoorden) {
 
 //geeft de mogelijke keuzes van de Heks in een lijst weer
 function keuzeHeks($text,$heks,$doden,$sid) {
-	if(count($doden) > 0) {
-		$text .= "<br /><br />";
-		if(count($doden) == 1) {
-			$text .= "Je kunt deze speler tot leven wekken:<br />";
-		}
-		else {
-			$text .= "Je kunt een van deze spelers tot leven wekken:<br />";
-		}
-		$text .= "<ul>";
-		foreach($doden as $speler) {
-			$text .= "<li>" . $speler['NAAM'] . "</li>";
-		}
-		$text .= "</ul>";
+	$keuzes = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 2) = 2)");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			array_push($keuzes,$speler['NAAM'];
+		}//while
 	}//if
-	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
-	$levenden = sqlNum($resultaat);
-	if($levenden == 0) {
-		return $text;
-	}
-	$vlag = false;
-	while($speler = sqlFet($resultaat)) {
-		if($speler['NAAM'] == $heks) {
-			$vlag = true;
-			break;
-		}
-	}//while
-	if($levenden == 1 && $vlag) { //enige doel is ikzelf
-		return $text;
-	}
-	$text .= "<br /><br />";
-	if($levenden == 1) {
-		$text .= "Je kunt deze speler vergiftigen:<br />";
-	}
-	else {
-		$text .= "Je kunt een van deze spelers vergiftigen:<br />";
-	}
-	$text .= "<ul>";
-	while($speler = sqlFet($resultaat)) {
-		$naam = $speler['NAAM'];
-		if($naam == $heks) {
-			continue;
-		}
-		$text .= "<li>$naam</li>";
-	}//while
-	$text .= "</ul>";
+	$text .= "Voor het redden van een speler:<br />";
+	$text = keuze($keuzes,false,$text);
+	$text .= "<br />";
+
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			if($speler['NAAM'] == $heks) { //niet zichzelf vergiftigen
+				continue;
+			}
+			array_push($keuzes,$speler['NAAM'];
+		}//while
+	}//if
+	$text .= "Voor het vergiftigen van een speler:<br />";
+	$text = keuze($keuzes,false,$text);
+	$text .= "Alleen als er helemaal niks wordt gekozen ";
+	$text .= "moet 'blanco' worden gestemd; ";
+	$text .= "anders de naam (of namen) van de gekozen speler(s).<br />";
 	return $text;
 }//keuzeHeks
 
-//zet de mogelijke keuzes van de Jager in een lijst
+//zet de mogelijke keuzes van de Jager in een lijst:
+//alle niet-dode spelers
 function keuzeJager($text,$jager,$sid) {
+	$keuzes = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
-	$levenden = sqlNum($resultaat);
-	if($levenden == 0) {
-		return $text;
-	}
-	$vlag = false;
-	while($speler = sqlFet($resultaat)) {
-		if($speler['NAAM'] == $jager) {
-			$vlag = true;
-			break;
-		}
-	}//while
-	if($levenden == 1 && $vlag) { //enige doel is ikzelf
-		return $text;
-	}
-	$text .= "<br /><br />";
-	if($levenden == 1) {
-		$text .= "Je kunt deze speler neerschieten:<br />";
-	}
-	else {
-		$text .= "Je kunt een van deze spelers neerschieten:<br />";
-	}
-	$text .= "<ul>";
-	while($speler = sqlFet($resultaat)) {
-		$naam = $speler['NAAM'];
-		if($naam == $jager) {
-			continue;
-		}
-		$text .= "<li>$naam</li>";
-	}//while
-	$text .= "</ul>";
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			if($speler['NAAM'] == $jager) { //niet op zichzelf schieten
+				continue;
+			}
+			array_push($keuzes,$speler['NAAM'];
+		}//while
+	}//if
+	$text = keuze($keuzes,true,$text);
 	return $text;
 }//keuzeJager
 
+//de mogelijke keuze van de oude burgemeester:
+//hij kan enkel levende (niet nieuw-dode) spelers kiezen
+function keuzeTestament($text,$sid) {
+	$keuzes = array();
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			array_push($keuzes,$speler['NAAM'];
+		}
+	}//if
+	$text = keuze($keuzes,true,$text);
+	return $text;
+}//keuzeTestament
+
+//de keuze van de zondebok:
+//hij kan alle niet-dode spelers kiezen, muv. zichzelf
+function keuzeZonde($text,$zonde,$sid) {
+	$keuzes = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			if($speler['NAAM'] == $zonde) { //niet zichzelf kiezen
+				continue;
+			}
+			array_push($keuzes,$speler['NAAM'];
+		}//while
+	}//if
+	$text = keuze($keuzes,true,$text);
+	return $text;
+}//keuzeZonde
+
+function keuzeGroep($text,$rol,$sid) {
+	$keuzes = array();
+	$resultaat = "";
+	switch($rol) {
+		case "Weerwolf":
+			//pak alle niet-dode spelers, muv. niet-slapende WW/Witte WW
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				((ROL<>'Weerwolf' AND ROL<>'Witte Weerwolf') OR 
+				((SPELFLAGS & 16384) = 16384))");
+			break;
+		case "Vampier":
+			//pak alle niet-dode spelers, muv. niet-slapende VP
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				(ROL<>'Vampier' OR ((SPELFLAGS & 16384) = 16384))");
+			break;
+		default: // Fluitspeler
+			//pak alle niet-dode, niet-betoverde spelers, muv. niet-slapende FS
+			$resultaat = sqlSel(3,
+				"SID=$sid AND ((LEVEND & 1) = 1) AND ((SPELFLAGS & 1) = 0) AND 
+				(ROL<>'Fluitspeler' OR ((SPELFLAGS & 16384) = 16384))");
+			break;
+	}
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			array_push($keuzes,$speler['NAAM'];
+		}
+	}//if
+	$text = keuze($keuzes,true,$text);
+	return $text;
+}//keuzeGroep
+
+//aangeroepen door mailWakker; regelt de keuzes van veel verschillende rollen
+function keuzeVeel($text,$speler,$rol,$sid) {
+	$twee = false;
+	$blanco = true;
+	switch($rol) {
+		case "Cupido":
+			$resultaat = sqlSel(3,"SID=$sid");
+			$text .= "Je moet twee spelers kiezen.<br />";
+			$twee = true;
+			break;
+		case "Grafrover":
+			$resultaat = sqlSel(3,"SID=$sid AND LEVEND=0");
+			break;
+		case "Goochelaar": //wat bij blanco-vorige stem? TODO
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+			$id1 = $speler['VORIGE_STEM'];
+			$res = sqlSel(3,"ID=$id");
+			$stem = sqlFet($res);
+			$naam1 = $stem['NAAM'];
+			$id2 = $speler['VORIGE_STEM_EXTRA'];
+			$res = sqlSel(3,"ID=$id");
+			$stem = sqlFet($res);
+			$naam2 = $stem['NAAM'];
+			$text .= "Je moet twee spelers kiezen, ";
+			if($id1 == -1) {
+				$text .= "je kunt niet 'blanco' stemmen, ";
+				$blanco = false;
+			}
+			else {
+				$text .= "maar dit koppel mag niet $naam1 en $naam2 zijn, ";
+			}
+			$text .= "om herhaling te voorkomen.<br />";
+			break;
+		case "Raaf":
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				(ROL<>'Dorpsgek' OR ((SPELFLAGS & 128) = 0))");
+			break;
+		case "Klaas Vaak":
+		case "Slet":
+		case "Verleidster": //wat bij blanco-vorige stem? TODO
+			$id = $speler['ID'];
+			$stem = $speler['VORIGE_STEM'];
+			if($stem == -1) {
+				$blanco = false;
+			}
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				ID<>$id AND ID<>$stem");
+			break;
+		case "Genezer":
+		case "Schout": //wat bij blanco-vorige stem? TODO
+			$stem = $speler['VORIGE_STEM'];
+			if($stem == -1) {
+				$blanco = false;
+			}
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				ID<>$stem");
+			break;
+		default:
+			//Dief, Dwaas, Opdrachtgever, Priester, Psychopaat, Witte WW, 
+			//Waarschuwer en Ziener
+			$id = $speler['ID'];
+			$resultaat - sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+				ID<>$id");
+			break;
+	}//switch
+	if(sqlNum($resultaat) > 0) {
+		while($speler = sqlFet($resultaat)) {
+			array_push($keuzes,$speler['NAAM'];
+		}
+	}//if
+	if($vlag) {
+		$text = keuzeTwee($keuzes,$blanco,$text);
+	}
+	else {
+		$text = keuze($keuzes,$blanco,$text);
+	}
+	return $text;
+}//keuzeVeel
+
+//als een rol twee spelers moet kiezen ipv. een
+function keuzeTwee($keuzes,$blanco,$text) {
+	if(count($keuzes) < 2) {
+		if($blanco) {
+			$text .= "Je kunt enkel 'blanco' kiezen.<br />";
+			return $text;
+		}
+		else {
+			$text .= "Je hebt geen opties om uit te kiezen.<br />";
+			return $text;
+		}
+	}
+
+	if($blanco) {
+		array_push($keuzes,"Blanco");
+	}
+	$text .= "Je hebt de volgende opties:<br />";
+	$text .= "<ul>";
+	foreach($keuzes as $naam) {
+		$text .= "<li>$naam</li>";
+	}
+	$text .= "</ul><br />";
+	return $text;
+}//keuze
+
+function keuze($keuzes,$blanco,$text) {
+	if($blanco) {
+		array_push($keuzes,"Blanco");
+	}
+	switch (count($keuzes)) {
+		case 0:
+			$text .= "Je hebt geen opties om uit te kiezen.<br />";
+			return $text;
+		case 1:
+			$text .= "Je kunt enkel deze keuze maken:<br />";
+			break;
+		default:
+			$text .= "Je kunt een van deze keuzes maken:<br />";
+			break;
+	}
+	$text .= "<ul>";
+	foreach($keuzes as $naam) {
+		$text .= "<li>$naam</li>";
+	}
+	$text .= "</ul><br />";
+	return $text;
+}//keuze
+
 //voegt een auteur achter de text
 function auteur($auteur,$text) {
-	$text .= "<br /><br />";
+	$text .= "<br />";
 	$text .= "<font size='1'>";
 	$text .= "Verhaaltje geschreven door $auteur.";
 	$text .= "</font>";
@@ -362,8 +512,10 @@ function auteurMeerdere($auteurs,$text) {
 //vult tuplesL,D,S en resArray met goede waarden,
 //en geeft aan of een speciaal verhaal nodig is 
 //(wanneer Jager/Geliefde dood is)
+//ook: returned of een Dorpsoudste dood is (true of false)
 function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 	$sid = $spel['SID'];
+	$vlag = false;
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1");
 	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
@@ -387,6 +539,9 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 				echo "Geliefde gevonden: $geliefde.\n";
 				$target = sqlFet($res);
 				array_push($tuplesS,$target);
+			}
+		if($speler['ROL'] == "Dorpsoudste") {
+			$vlag = true;
 		}
 		array_push($resArray,$speler);
 	}//while
@@ -399,11 +554,10 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 		}
 	}
 
-	return;
+	return $vlag;
 }//geefGebeurd
 
 //maakt het ontwaak-deel van een algemene mail
-//TODO dorpsoudste afvangen
 //TODO dode burgemeester (plus opvolger) afvangen
 function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: ontwaakVerhaal.\n";
@@ -416,7 +570,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$ronde = $spel['RONDE'];
 
 	//vul de arrays en kijk of speciaal verhaal nodig is
-	geefGebeurd($tuplesL,$tuplesD,$tuplesS,$resArray,$spel);
+	$vlag = geefGebeurd($tuplesL,$tuplesD,$tuplesS,$resArray,$spel);
 	$dood = count($tuplesD);
 	$levend = count($tuplesL) + count($tuplesS);
 
@@ -435,7 +589,14 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 			$rol = $speler['ROL'];
 			$samenvatting .= "$naam ($rol) is dood.<br />";
 		}
-		$samenvatting .= "De Dag begint.<br />";
+
+		//dorpsoudste dood... voeg extra verhaal achter!
+		if($vlag) {
+			echo "Dorpsoudste dood.\n";
+			dodeDorpsoudste($text,$samenvatting);
+		}//if
+
+		$samenvatting .= "Dag $ronde begint.<br />";
 		return;
 	}
 	
@@ -469,8 +630,13 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		leesBoom($boom[$id],$id,$text,$samenvatting,$auteur,
 			$tuplesL,$tuplesS,$thema,"Algemeen",$spel);
 	}
-	$samenvatting .= "De Dag begint.<br />";
 
+	if($vlag) {
+		//dorpsoudste dood
+		dodeDorpsoudste($text,$samenvatting);
+	}
+
+	$samenvatting .= "Dag $ronde begint.<br />";
 	return;
 }//ontwaakVerhaal
 
@@ -481,7 +647,26 @@ function plakSamenvatting($samenvatting,$text) {
 	$text .= "<br />";
 	$text .= $samenvatting;
 	return $text;
-}
+}//plakSamenvatting
+
+//TODO verhaal dat alle ontdekte Dorpsgekken dood
+function dodeDorpsoudste(&$text,&$samenvatting) {
+	$oud = array();
+	$res = sqlSel(3,"ROL='Dorpsoudste' AND ((LEVEND & 2) = 2)");
+	while($oudste = sqlFet($res)) {
+		array_push($oud,$oudste);
+	}
+	$verhaal = geefVerhaal($thema,"Dorpsoudste",0,$levend,
+		count($oud),$ronde,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulIn($tuplesL,$oud,"",$text,$geswoorden);
+
+	$samenvatting .= "De Dorpsoudste is dood ";
+	$samenvatting .= "en iedereen verliest zijn rol.<br />";
+	return;
+}//dodeDorpsoudste
 
 //maakt een 'boom' van de jagers en hun doelwitten, evenals de geliefden.
 //Dit komt allemaal in een array terecht, met veel sub-arrays.
@@ -961,6 +1146,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 }//brandstapelInleiding
 
 //TODO bij gelijkspel->Burgemeesterstem doorslaggevend ander verhaal
+//TODO bij dode Burgemeester: verhaaltje bijvoegen?
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	echo "Aangeroepen: brandstapelUitslag.\n";
 
@@ -976,9 +1162,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$tuplesD = array(); //D voor dode spelers
 	$tuplesS = array(); //S voor Jagers/Geliefden (speciaal verhaal)
 	$resArray = array();
-	geefGebeurd($tuplesL,$tuplesD,$tuplesS,$resArray,$spel);
-	$dood = count($tuplesD);
-	$levend = count($tuplesL) + count($tuplesS);
+	$vlag = geefGebeurd($tuplesL,$tuplesD,$tuplesS,$resArray,$spel);
 
 	//bij normaal verhaal (geen jagers/geliefden dood)
 	if(count($tuplesS) == 0) {
@@ -992,8 +1176,8 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 			$flags = $speler['FLAGS'];
 			if($rol == "Dorpsgek" && (($flags & 128) == 128)) {
 				//ontdekte dorpsgek:
-				$verhaal = geefVerhaal($thema,"Dorpsgek",0,$levend,
-					$dood,$ronde,$sid);
+				$verhaal = geefVerhaal($thema,"Dorpsgek",0,count($tuplesL),
+					count($tuplesD),$ronde,$sid);
 				$text .= $verhaal['VERHAAL'];
 				$geswoorden = $verhaal['GESLACHT'];
 				array_push($auteur,$verhaal['AUTEUR']);
@@ -1002,8 +1186,8 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 			}
 			else if($rol == "Zondebok" && (($flags & 256) == 256)) {
 				//dode zondebok:
-				$verhaal = geefVerhaal($thema,"Zondebok",2,$levend,
-					$dood,$ronde,$sid);
+				$verhaal = geefVerhaal($thema,"Zondebok",2,count($tuplesL),
+					count($tuplesD),$ronde,$sid);
 				$text .= $verhaal['VERHAAL'];
 				$geswoorden = $verhaal['GESLACHT'];
 				array_push($auteur,$verhaal['AUTEUR']);
@@ -1011,22 +1195,32 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 				//TODO: de keuzes van de zondebok toevoegen
 			}
 			else if(($flags & 32768) == 32768) {
-				//dode lijfwacht:
+				//dode lijfwacht (met diens Opdrachtgever in tuplesD[1]):
 				$resultaat = sqlSel(3,"ROL='Opdrachtgever' AND LIJFWACHT=$id");
 				$opdrachtgever = sqlFet($resultaat);
+				while(($opdrachtgever['SPELFLAGS'] & 32768) == 32768) {
+					$opdrachtID = $opdrachtgever['ID'];
+					$resultaat = sqlSel(3,
+						"ROL='Opdrachtgever' AND LIJFWACHT=$opdrachtID");
+					$opdrachtgever = sqlFet($resultaat);
+				}
+				$key = array_search($opdrachtgever,$tuplesL);
+				if($key !== false) {
+					delArrayElement($tuplesL,$key);
+				}
+				array_push($tuplesD,$opdrachtgever);
 
-				$verhaal = geefVerhaal($thema,"Opdrachtgever",2,$levend,
-					$dood,$ronde,$sid);
+				$verhaal = geefVerhaal($thema,"Opdrachtgever",2,count($tuplesL),
+					$count($tuplesD),$ronde,$sid);
 				$text .= $verhaal['VERHAAL'];
 				$geswoorden = $verhaal['GESLACHT'];
 				array_push($auteur,$verhaal['AUTEUR']);
 				$text = vulIn($tuplesL,$tuplesD,"",$text,$geswoorden);
-				//TODO: opdrachtgever bereikbaar maken in verhaaltje (in tuplesD[1])
 			}
 			else {
 				//normaal verhaal
-				$verhaal = geefVerhaal($thema,"Brandstapel",1,$levend,
-					$dood,$ronde,$sid);
+				$verhaal = geefVerhaal($thema,"Brandstapel",1,count($tuplesL),
+					count($tuplesD),$ronde,$sid);
 				$text .= $verhaal['VERHAAL'];
 				$geswoorden = $verhaal['GESLACHT'];
 				array_push($auteur,$verhaal['AUTEUR']);
@@ -1037,7 +1231,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 		}//if
 		else {
 			$verhaal = geefVerhaal($thema,"Brandstapel",1,
-				$levend,0,$ronde,$sid);
+				count($tuplesL),0,$ronde,$sid);
 			$text .= $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			array_push($auteur,$verhaal['AUTEUR']);
@@ -1052,8 +1246,9 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 		$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
 
 		//begin
+		$levend = count($tuplesL) + count($tuplesS);
 		$verhaal = geefVerhaal($thema,"Brandstapel",2,$levend,
-			$dood,$ronde,$sid);
+			count($tuplesD),$ronde,$sid);
 		$text .= $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		array_push($auteur,$verhaal['AUTEUR']);
@@ -1078,6 +1273,10 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 				$tuplesL,$tuplesS,$thema,"Algemeen",$spel);
 		}
 	}//else
+
+	if($vlag) {
+		dodeDorpsoudste($text,$samenvatting);
+	}
 
 	//en maak een samenvatting
 	$samenvatting .= "<br />";
