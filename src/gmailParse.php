@@ -6,7 +6,7 @@ function gmailParse() {
 	$berichtstatus = "UNSEEN";
 	$emails = imap_search($gmconnect,$berichtstatus);
 	$totaal = imap_num_msg($gmconnect);
-	echo "Totaal aantal emails: $totaal \n\n";
+	schrijfLog(-1,"Totaal aantal emails: $totaal.\n");
 
 	if($emails) {
 		// sorteer de emails (nieuwste eerst)
@@ -28,15 +28,14 @@ function gmailParse() {
 				continue;
 			}
 
-			echo "$afzender\n";
 			$bericht = htmlentities($bericht1);
 			
-			echo "Mail van: '$afzender'\n";
+			schrijflog(-1,"Mail van: '$afzender'\n");
 
 			if(preg_match("/config/i",$onderwerp)) {
-				echo "Config mail gevonden!\n";
+				schrijfLog(-1,"Config mail gevonden.\n");
 				if(!in_array($afzender,$admins)) {
-					echo "Afzender is geen admin; doe niets.\n";
+					schrijfLog(-1,"Afzender is geen admin; doe niets.\n");
 					continue;
 				}
 				config($afzender,$onderwerp,$bericht);
@@ -57,7 +56,7 @@ function gmailParse() {
 				if($gevonden) { // als een speltitel in het onderwerp staat
 					$sid = $spel['SID'];
 					if($spel['STATUS'] > 1) { // voor gewonnen en gestopte spellen
-												//TODO deze twee aparte mails geven
+//TODO betere fout-handling
 						stuurFoutStop($adres,$snaam);
 					}
 					else if ($spel['STATUS'] == 1) {
@@ -71,8 +70,9 @@ function gmailParse() {
 					}//else
 				}//if
 				else {
-					echo "Verkeerd onderwerp (geen spelnaam herkend), ";
-					echo "of verkeerd email-adres (geen afzender herkend).\n";
+					schrijfLog(-1,"Verkeerd onderwerp (geen spelnaam " . 
+						"herkend), of verkeerd email-adres (geen afzender " . 
+						"herkend).\n");
 					// je komt hier als:
 					// - email adres niet bekend in het spel
 					// - of de invoer was gewoon fucked (onderwerp verkeerd)
@@ -82,7 +82,6 @@ function gmailParse() {
 					stuurFoutAdres($afzender);
 				}
 			}//else
-			echo "\n";
 		}//foreach
 	}//if
 
@@ -136,7 +135,7 @@ function verwijderMails() {
 //maakt verbinding met gmail
 function gmailConnect () {
 	global $thuis;
-	$wachtwoord = 'W@kkerd@m';
+	$wachtwoord = mailPass();
 
 	$map = "INBOX";
 	$imapadres = "{imap.gmail.com:993/imap/ssl}";

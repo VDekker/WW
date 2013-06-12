@@ -38,7 +38,7 @@ function verdeelRol($sid) {
 	$aantal = count($alleSpelers);
 	$resultaat = sqlSel(2,"AANTAL=$aantal");
 	if(sqlNum($resultaat) == 0) {
-		echo "Geen rolverdeling voor speleraantal $aantal.\n";
+		schrijfLog($sid,"Geen rolverdeling voor speleraantal $aantal.\n");
 		stuurError2("Geen rolverdeling voor speleraantal $aantal " . 
 			"van spel $sid.\n",$sid);
 		return;
@@ -49,16 +49,16 @@ function verdeelRol($sid) {
 	$key = array_rand($rolTuples);
 	$rolverdeling = $rolTuples[$key];
 	$rid = $rolverdeling['RID'];
-	echo "Gekozen rolverdeling: $rid.\n";
+	schrijfLog($sid,"Gekozen rolverdeling: $rid.\n");
 	$rollen = explode(",",$rolverdeling['ROLLEN']);
 	shuffle($alleSpelers);
 	if($rolverdeling['BURGEMEESTER']) {
 		$burgemeester = "NULL";
-		echo "Met Burgemeester.\n";
+		schrijfLog($sid,"Met Burgemeester.\n");
 	}
 	else {
 		$burgemeester = -1;
-		echo "Zonder Burgemeester.\n";
+		schrijfLog($sid,"Zonder Burgemeester.\n");
 	}
 	sqlUp(4,"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",
 		"SID=$sid");
@@ -76,7 +76,7 @@ function verdeelRol($sid) {
 			}
 			sqlUp(3,"ROL='$rol',SPELFLAGS=$spelflags",
 				"ID=$dezeSpeler");
-			echo "$dezeSpeler is nu een $rol.\n";
+			schrijfLog($sid,"$dezeSpeler is nu een $rol.\n");
 			$teller++;
 			$rollen[$i]--;
 		}

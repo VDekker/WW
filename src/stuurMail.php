@@ -80,15 +80,15 @@ function stuurError2($error,$sid) {
 	stuurMail($alleAdmins,$onderwerp,$error);
 
 	sqlUp(4,"STATUS=1","SID=$sid");
-	echo "Spel gepauzeerd.\n";
+	schrijfLog($sid,"Spel gepauzeerd.\n");
 	die($error);
 }//stuurError2
 
-function stuurResultaatHTML($adres,$resultaat) {
+function stuurResultaatHTML($adres,$bericht,$resultaat) {
 	global $thuis,$footnote;
 	$onderwerp = "Query";
 	
-	$bericht = "<table border='1'><tr>";
+	$bericht .= "<table border='1'><tr>";
 	$tuple = sqlFet($resultaat);
 	foreach($tuple as $key => $value) {
 		if(is_int($key)) {
@@ -127,7 +127,7 @@ function stuurStop($sid) {
 		array_push($adressen,$speler['EMAIL']);
 	}
 	if(empty($adressen)) {
-		echo "Niemand om te mailen.\n";
+		schrijfLog($sid,"Niemand om te mailen.\n");
 		return;
 	}
 
@@ -155,7 +155,7 @@ function stuurPauze($sid) {
 		array_push($adressen,$speler['EMAIL']);
 	}
 	if(empty($adressen)) {
-		echo "Niemand om te mailen.\n";
+		schrijfLog($sid,"Niemand om te mailen.\n");
 		return;
 	}
 
@@ -184,7 +184,7 @@ function stuurHervat($sid) {
 		array_push($adressen,$speler['EMAIL']);
 	}
 	if(empty($adressen)) {
-		echo "Niemand om te mailen.\n";
+		schrijfLog($sid,"Niemand om te mailen.\n");
 		return;
 	}
 

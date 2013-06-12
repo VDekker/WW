@@ -21,29 +21,31 @@
              Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
   
-  * Parsen:  'via'-mails afvangen/niet parsen
-
   * Mailen:  stuurFoutStem maken voor specifieke rollen
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen
   
   * Verhaal: maak default verhalen
-  * Verhaal: ronde gebruiken in onderwerp(?)
   
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
-  * Nodig:   log bijhouden voor elk spel (gebruik de echos)
 
-  * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
-             (anders terugzetten op ongelezen...?)
   * Extra:   optimaliseer gewonnenSpelers()
   * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf afmaken
   * Extra:   manStory.pdf maken
   * Extra:   alle mails in Verzonden zetten
-  * Extra:   spelernamen in echo's zetten
+  * Extra:   spelernamen in log ipv. spelerID zetten
+  * Extra:   meer log bijhouden
+  * Extra:   datum en tijd in de log bijhouden
+  * Extra:   config functie maken om de algemene log te legen (van spel -1)
+  * Extra:   config functie om log te zien
+  * Extra:   schrijfLog optimaliseren (niet met elke aanroep laten updaten)
+  * Extra:   'via'-mails afvangen/niet parsen
+  * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
+             (anders terugzetten op ongelezen...?)
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER

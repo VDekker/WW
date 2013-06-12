@@ -4,11 +4,12 @@
 //naar mysqli, of zodat er eenvoudig andere dingen mee kunnen gebeuren.
 
 function dbConnect() {
-	$server='mysql.liacs.nl';
-	$username='vdekker';
-	$password='p1nquin';
-	$database='vdekker';
-	return mysqli_connect($server,$username,$password,'vdekker'); 
+	$dbparam = dbParameters();
+	$server = $dbparam['server'];
+	$username = $dbparam['username'];
+	$password = $dbparam['password'];
+	$database = $dbparam['database'];
+	return mysqli_connect($server,$username,$password,$database); 
 }//dbConnect
 
 function dbSluit() {

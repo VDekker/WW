@@ -1,5 +1,16 @@
 <?php
 
+function schrijfLog($sid,$bericht) {
+	global $tabellen;
+	echo $bericht;
+	$datum = new DateTime();
+	$log = date_format($datum,'Y-m-d H:i:s');
+	$log .= " - ";
+	$log .= sqlEscape($bericht);
+	//sqlUp(4,"LOG=CONCAT(LOG,'$log')","SID=$sid");
+	return;
+}
+
 function delArrayElement($array,$key) {
 	unset($array[$key]);
 	$array = array_values($array);
@@ -103,7 +114,7 @@ function zetFase($waarde,$sid) {
 	$datum = date_create(date('Y-m-d'));
 	$sqlDatum = date_format($datum, 'Y-m-d');
 	sqlUp(4,"FASE=$waarde,DUUR='$sqlDatum'","SID=$sid");
-	echo "Fase op $waarde gezet.\n";
+	schrijfLog($sid,"Fase op $waarde gezet.\n");
 	return;
 }//zetFase
 
@@ -168,7 +179,7 @@ function herleef($id,$sid) {
 function zetDood2($sid) {
 	sqlUp(3,"LEVEND=0","SID=$sid AND ((LEVEND & 2) = 2)");
 	sqlUp(3,"EXTRA_STEM=NULL","SID=$sid AND ROL='Jager' AND LEVEND=2");
-	echo "Alle nieuw-dode spelers gedood.\n";
+	schrijfLog($sid,"Alle nieuw-dode spelers gedood.\n");
 	return;
 }//zetDood2
 
@@ -186,12 +197,14 @@ function vermoord($id,$sid) {
 			$stem = $goochelaar['STEM'];
 			$stem2 = $goochelaar['EXTRA_STEM'];
 			if($stem == $id) {
-				echo "De Goochelaar heeft $id met $stem2 verwisseld.\n";
+				schrijfLog($sid,"De Goochelaar heeft $id met $stem2 " . 
+					"verwisseld.\n");
 				array_push($targets,$stem2);
 				$targets = delArrayElement($targets,0); //verwissel
 			}
 			else if($stem2 == $id) {
-				echo "De Goochelaar heeft $id met $stem verwisseld.\n";
+				schrijfLog($sid,"De Goochelaar heeft $id met $stem " . 
+					"verwisseld.\n");
 				array_push($targets,$stem);
 				$targets = delArrayElement($targets,0); //verwissel
 			}
@@ -205,7 +218,7 @@ function vermoord($id,$sid) {
 		$sletInSpel = true;
 		while($slet = sqlFet($resultaat)) {
 			if($slet['STEM'] == $id) { //de slet slaapt bij het echte target
-				echo $slet['ID'] . " slaapt bij $id.\n";
+				schrijfLog($sid,$slet['ID'] . " slaapt bij $id.\n");
 				array_push($targets,$slet['ID']);
 			}
 		}//while
@@ -217,7 +230,7 @@ function vermoord($id,$sid) {
 		$speler = sqlFet($resultaat);
 		$stem = $speler['STEM'];
 		if($stem != "" && $stem != 0 && $stem != $id) {
-			echo "$id heeft $stem verleidt.\n";
+			schrijfLog($sid,"$id heeft $stem verleidt.\n");
 			array_push($targets,$stem);
 		}
 	}//if
@@ -226,7 +239,7 @@ function vermoord($id,$sid) {
 	//of misschien niet aanwezig...
 	foreach($targets as $key => $target) {
 		if(beschermd($target,$sid)) {
-			echo "$target is beschermd.\n";
+			schrijfLog($sid,"$target is beschermd.\n");
 			$targets = delArrayElement($targets,$key);
 			continue; //vermoord hem dan niet
 		}
@@ -234,7 +247,7 @@ function vermoord($id,$sid) {
 			$resultaat = sqlSel(3,"ID=$target");
 			$speler = sqlFet($resultaat);
 			if(($speler['SPELFLAGS'] & 64) == 64) {
-				echo "Dorpsoudste $target overleeft de aanval.\n";
+				schrijfLog($sid,"Dorpsoudste $target overleeft de aanval.\n");
 				sqlUp(3,"SPELFLAGS=SPELFLAGS-64",
 					"ID=$id");
 				$targets = delArrayElement($targets,$key);
@@ -246,7 +259,7 @@ function vermoord($id,$sid) {
 			$speler = sqlFet($resultaat);
 			$stem = $speler['STEM'];
 			if($stem != "" && $stem != 0 && $stem != $id) {
-				echo "$target slaapt niet hier, maar bij $stem";
+				schrijfLog($sid,"$target slaapt niet hier, maar bij $stem");
 				$targets = delArrayElement($targets,$key);
 				continue; //vermoord hem dan niet
 			}
@@ -255,7 +268,8 @@ function vermoord($id,$sid) {
 			$resultaat = sqlSel(3,"SID=$sid AND ROL='Verleidster'");
 			while($speler = sqlFet($resultaat)) {
 				if($speler['STEM'] == $target && $speler['ID'] != $id) {
-					echo "$target is verleid door " . $speler['ID'] . ".\n";
+					schrijfLog($sid,"$target is verleid door " . 
+						$speler['ID'] . ".\n");
 					$targets = delArrayElement($targets,$key);
 					continue(2); //vermoord hem dan niet
 				}
@@ -263,7 +277,7 @@ function vermoord($id,$sid) {
 		}//if
 		
 		//vermoord...
-		echo "$target wordt vermoord...\n";
+		schrijfLog($sid,"$target wordt vermoord...\n");
 		zetDood($target,$sid);
 	}//foreach
 	return;
@@ -458,8 +472,7 @@ function gewonnen($sid) {
 	$gewonnenSpelers = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(sqlNum($resultaat) == 0) {
-		echo "Alle spelers dood; gelijkspel...\n";
-		//TODO maak verhaaltje
+		schrijfLog($sid,"Alle spelers dood; gelijkspel...\n");
 		return;
 	}
 	while($speler = sqlFet($resultaat)) {
@@ -468,15 +481,14 @@ function gewonnen($sid) {
 		$geliefde = $speler['GELIEFDE'];
 		$lijfwacht = $speler['LIJFWACHT'];
 		if(gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,false)) {
-			echo "$id heeft gewonnen!\n";
+			schrijfLog($sid,"$id heeft gewonnen!\n");
 			array_push($gewonnenSpelers,$naam);
 		}
 	}
 	if(empty($gewonnenSpelers)) { //niemand gewonnen
-		echo "Niemand heeft nog gewonnen.\n";
+		schrijfLog($sid,"Niemand heeft nog gewonnen.\n");
 		return false;
 	}
-	//TODO mail enzo
 	return true;
 }//gewonnen
 

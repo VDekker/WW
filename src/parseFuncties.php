@@ -9,37 +9,37 @@ function inschrijving($adres,$bericht,$sid) {
 	$vlag = false;
 	$resultaat = sqlSel(3,"SID=$sid AND EMAIL='$adres'");
 	if(sqlNum($resultaat) != 0) {
-		echo "Herinschrijving.\n";
+		schrijfLog($sid,"Herinschrijving.\n");
 		$vlag = true;
 	}
 	else {
-		echo "Nieuwe speler gevonden.\n";
+		schrijfLog($sid,"Nieuwe speler gevonden.\n");
 	}
 	$text = explode(",",$bericht);
 	$naam = sqlEscape($text[0]);
 	if(empty($naam)) {
-		echo "Geen naam gevonden.\n";
+		schrijfLog($sid,"Geen naam gevonden.\n");
 		return false;
 	}
 	if(!preg_match('/[^A-Za-z]/',$naam)) { //andere tekens dan gewone letters
-		echo "Naam bevatte andere tekens dan letters.\n";
+		schrijfLog($sid,"Naam bevatte andere tekens dan letters.\n");
 		return false;
 	}
 	$naam = strtolower($naam);
 	$naam = ucfirst($naam);
-	echo "Naam: $naam\n";
+	schrijfLog($sid,"Naam: $naam\n");
 	$text = delArrayElement($text,0);
 	$bericht = implode(",",$text);
 	if(stristr($bericht,"m") != false) { // mannelijke speler
 		$geslacht = 1;
-		echo "Geslacht: Man\n";
+		schrijfLog($sid,"Geslacht: Man\n");
 	}
 	else if(stristr($bericht,"v") != false) { // vrouwelijke speler
 		$geslacht = 0;
-		echo "Geslacht: Vrouw\n";
+		schrijfLog($sid,"Geslacht: Vrouw\n");
 	}
 	else {
-		echo "Geen geslacht gevonden.\n";
+		schrijfLog($sid,"Geen geslacht gevonden.\n");
 		return false;
 	}
 	if($vlag) {
@@ -147,7 +147,7 @@ function geldigeStemBurg($bericht,$sid) {
 function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 	$id = geldigeStem($bericht,$sid,1);
 	if(!$id) {
-		echo "Geen speler gevonden...\n";
+		schrijfLog($sid,"Geen speler gevonden...\n");
 		return;
 	}
 	if($id == -1) {
@@ -157,7 +157,7 @@ function geldigeStemVerleidOpdracht($bericht,$rol,$sid) {
 	while($speler = sqlFet($resultaat)) {
 		if($speler['ROL'] == $rol) {
 			if($id == $speler['STEM']) {
-				echo "$id is al eerder gekozen.\n";
+				schrijfLog($sid,"$id is al eerder gekozen.\n");
 				return false;
 			}
 		}//if
@@ -195,15 +195,15 @@ function geldigeStemBrand($id,$bericht,$sid) {
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
 	if($speler['ROL'] == "Dorpsgek" && ($speler['SPELFLAGS'] & 128) == 128) {
-		echo "Dorpsgek $id mag niet stemmen.\n";
+		schrijfLog($sid,"Dorpsgek $id mag niet stemmen.\n");
 		return -1;
 	}
 	if(($speler['SPELFLAGS'] & 2) == 2) {
-		echo "$id voelt zich schuldig en mag niet stemmen.\n";
+		schrijfLog($sid,"$id voelt zich schuldig en mag niet stemmen.\n");
 		return -1;
 	}
 	if(($speler['SPELFLAGS'] & 2048) == 2048) {
-		echo "$id is opgesloten en mag niet stemmen.\n";
+		schrijfLog($sid,"$id is opgesloten en mag niet stemmen.\n");
 		return -1;
 	}
 	$stem = geldigeStem($bericht,$sid,1);
@@ -212,11 +212,11 @@ function geldigeStemBrand($id,$bericht,$sid) {
 		$speler = sqlFet($resultaat);
 		if($speler['ROL'] == "Dorpsgek" && 
 			($speler['SPELFLAGS'] & 128) == 128) {
-			echo "$id mag niet op Dorpsgek $stem stemmen.\n";
+			schrijfLog($sid,"$id mag niet op Dorpsgek $stem stemmen.\n");
 			return -1;
 		}
 		if(($speler['SPELFLAGS'] & 2048) == 2048) {
-			echo "$id mag niet op opgesloten $stem stemmen.\n";
+			schrijfLog($sid,"$id mag niet op opgesloten $stem stemmen.\n");
 			return -1;
 		}
 	}
@@ -320,12 +320,12 @@ function geldigeStemGoochel($bericht,$afzender,$sid,&$id1,&$id2) {
 				$speler['ID'] != $afzender) { //check zijn stemmen
 				if($id1 != false && ($id1 == $speler['STEM'] || 
 					$id1 == $speler['EXTRA_STEM'])) {
-					echo "$id1 was al eerder gewisseld.\n";
+					schrijfLog($sid,"$id1 was al eerder gewisseld.\n");
 					$id1 = false;
 				}//if
 				if($id2 != false && ($id2 == $speler['STEM'] || 
 					$id2 == $speler['EXTRA_STEM'])) {
-					echo "$id2 was al eerder gewisseld.\n";
+					schrijfLog($sid,"$id2 was al eerder gewisseld.\n");
 					$id2 = false;
 				}//if
 			}//if
@@ -374,12 +374,12 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 			if($speler['ROL'] == "Cupido" && $speler['ID'] != $afzender) {
 				if($id1 != false && ($id1 == $speler['STEM'] || 
 					$id1 == $speler['EXTRA_STEM'])) {
-					echo "$id1 is al verliefd op iemand.\n";
+					schrijfLog($sid,"$id1 is al verliefd op iemand.\n");
 					$id1 = false;
 				}//if
 				if($id2 != false && ($id2 == $speler['STEM'] || 
 					$id2 == $speler['EXTRA_STEM'])) {
-					echo "$id2 is al verliefd op iemand.\n";
+					schrijfLog($sid,"$id2 is al verliefd op iemand.\n");
 					$id2 = false;
 				}//if
 			}//if

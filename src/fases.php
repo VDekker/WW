@@ -1,15 +1,12 @@
 <?php
 
 function fases() {
-	$resultaat = sqlSel(4,"");
+	$resultaat = sqlSel(4,"STATUS=0");
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
-		if($spel['STATUS'] != 0) { // dit werkt niet in query (??) TODO check
-			continue;
-		}
 		$sid = $spel['SID'];
-		echo "Ongewonnen spel gevonden: $sid.\n";
+		schrijfLog($sid,"Ongewonnen spel gevonden: $sid.\n");
 		$fase = $spel['FASE'];
-		echo "Fase: $fase.\n";
+		schrijfLog($sid,"Fase: $fase.\n");
 		if($spel['RONDE'] == 0) { // initialiseer-fase van het spel
 			
 			switch($fase) {
@@ -18,7 +15,7 @@ function fases() {
 						zetFase(1,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 1: //verdeel rollen, initialiseer alles
@@ -38,7 +35,7 @@ function fases() {
 						zetFase(3,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 3:
@@ -58,7 +55,7 @@ function fases() {
 						zetFase(5,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 5:
@@ -78,7 +75,7 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 7:
@@ -110,7 +107,7 @@ function fases() {
 						zetFase(2,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 2:
@@ -132,7 +129,7 @@ function fases() {
 						zetFase(5,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 5:
@@ -193,7 +190,7 @@ function fases() {
 						zetFase(7,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 7:
@@ -247,7 +244,7 @@ function fases() {
 						zetFase(9,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 9:
@@ -287,7 +284,7 @@ function fases() {
 						zetFase(12,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 12:
@@ -309,8 +306,8 @@ function fases() {
 						regelZetNULL1($sid);
 						if(gewonnen($sid)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
-							//stuur mails TODO
-							//kan dit in algemene mail?
+//TODO stuur gewonnen mails
+//kan dit in algemene mail?
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
 							mailAlgemeenVerkiezing($sid);
@@ -329,7 +326,7 @@ function fases() {
 						zetFase(14,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 14:
@@ -341,7 +338,7 @@ function fases() {
 						zetFase(16,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 16:
@@ -366,7 +363,7 @@ function fases() {
 						zetFase(19,$sid);
 					}
 					else {
-						echo "Blijf wachten.\n";
+						schrijfLog($sid,"Blijf wachten.\n");
 						break;
 					}
 				case 19:
@@ -385,7 +382,7 @@ function fases() {
 					if(geefFase($sid) == 20) {
 						if(gewonnen($sid)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
-							//mail gewonnen TODO
+//TODO stuur gewonnen mails
 						}
 						mailAlgemeenInslapen($sid);
 						zetDood2($sid);
