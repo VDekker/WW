@@ -1,0 +1,1698 @@
+\documentclass[12pt]{article}
+
+\frenchspacing
+
+\usepackage[english,dutch]{babel}
+\usepackage{multirow}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{fancybox}
+\usepackage{longtable}
+\usepackage{hyperref} %moet als laatste package staan!
+
+\setcounter{tocdepth}{2}
+
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{lem}{}
+\titleformat{\subsection}[hang]{\large\bfseries}{}{1em}{}
+\titleformat{\subsubsection}[hang]{\small\bfseries}{}{1em}{}
+\setcounter{secnumdepth}{0}
+
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1.325in}
+\addtolength{\topmargin}{-.875in}
+\addtolength{\textheight}{1.75in}
+
+\author{Victor Dekker}
+\title{Automatische Verteller:\\Verhalen}
+\makeindex
+
+\begin{document}
+
+\selectlanguage{dutch}
+\titlespacing{\subsubsection}{0in}{0.2in}{0in}
+
+\maketitle
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Welp2.png}
+\end{figure}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Inleiding}
+
+  Voor de Automatische Verteller zijn verhalen van vitaal belang; hiermee wordt alles gedaan en zonder de verhaaltjes wordt er niks gemaild, en kunnen de spellen niet goed lopen. De verhalen die de Automatische Verteller mailt zijn niet door het systeem gemaakt; zoiets zou een ongelofelijke prestatie zijn wat betreft programmeerwerk, omdat het vereist dat het programma onder andere een actieve kennis heeft van de Nederlandse taal, en ook een mate van creativiteit bezit. Aangezien het eerste moeilijk is om te programmeren, en het tweede (vrijwel) onmogelijk, is dit niet gedaan. In de plaats daarvan, is het mogelijk gemaakt voor het programma om voorgemaakte verhaaltjes te pakken en op de juiste manier in te vullen, waardoor aan zijn functie (het maken van verhaaltjes die de spelers de stand van zaken duidelijk maakt en wellicht ook nog vermaakt) alsnog voldaan is.
+  
+  In dit document wordt beschreven wat er gedaan moet worden om verhaaltjes te schrijven voor het systeem, zodat spelers die zoiets ambiti\"eren dit kunnen doen, en wellicht met hun eigen verhaal kunnen spelen.
+  
+  Wanneer in dit document ``verhalen'' worden genoemd, dan wordt daarmee elk soort verhaaltje bedoeld; elke verhalende tekst die het systeem kan gebruiken om spelers berichten van een spel mee te sturen. Soms bestaan mails zelfs uit meerdere verhaaltjes die samen de mail vormen (algemene mails kunnen zelfs uit honderden verhaaltjes bestaan, onder de juiste omstandigheden, al is dit zeer onwaarschijnlijk).
+  
+  Voor haar hulp wat betreft het maken van deze handleiding, en ook het maken van verschillende verhaaltjes en testen van het verhaal-systeem van de Automatische Verteller wordt Jenneke Buwalda bedankt; dankzij haar is het mogelijk om goede, geavanceerde verhalen te maken in plaats van enkel het eenvoudigste mogelijk.
+
+\section{Thema}
+
+  Elk spel heeft een thema; aan de hand van dit thema worden de verhaaltjes gekozen die naar de spelers worden gemaild. Het standaard thema is ``default'', waar eenvoudige, kleine verhaaltjes van bestaan, maar andere thema's zoals bijvoorbeeld ``Wakkerdam'', ``Disney'' of ``Middeleeuwen'' zijn ook denkbaar.
+  
+  Vanzelfsprekend heeft elk verhaaltje ook een thema.
+  
+  Als een spel een verhaalje nodig heeft om te mailen, volgens bepaalde criteria (deze worden later besproken), dan probeert het systeem eerst een verhaaltje te vinden met hetzelfde thema als het spel. Als deze niet beschikbaar is, dan wordt een verhaaltje gezocht met het ``default'' thema.
+
+\section{Verhalen}
+
+  In de volgende secties staan de verschillende verhaaltjes van het systeem die ge\"implementeerd kunnen worden; deze worden hier uitgelegd, waar ze voor dienen, en wat voor variabelen ze kunnen gebruiken (zie Implementatie, op pagina~\pageref{subsec:Variabelen} ). 
+  
+  Niet alle verschillende verhalen worden uitgelegd; een hoop verhalen lijken op elkaar, hebben een soortgelijke structuur en doel. Hierom staan alle verhalen ook vermeld in een overzicht, op pagina~\pageref{sec:Overzicht}.
+  
+  Dit is een groot aantal, gezien het groot aantal verschillende rollen dat het systeem ondersteund, en een aantal uitzonderingsgevallen. Het totaal aantal verschillende verhaaltjes is rond de 150 (waarvan er velen vaker kunnen worden gemaakt met verschillende speler-aantallen). 
+  
+  Laat dit grote aantal je echter niet afschrikken; niet alles \emph{moet} worden geschreven. Het systeem kan altijd ovverstappen op het ``default'' thema als er een verhaaltje ontbreekt. Daarom wordt bij het schrijven van een hele set verhaaltjes aangeraden om eerst te kijken welke verhaaltjes het meest gebruikt gaan worden, en deze eerst te maken, en pas later (als er al veel zijn geschreven) de minder gebruikte, minder belangrijke verhaaltjes te maken.
+  
+  Aangeraden is ook om voor sommige belangrijke koppen (bijvoorbeeld het wakker worden van de Weerwolven) meerdere verhaaltjes te schrijven; het systeem kan dan een willekeurig verhaaltje kiezen van deze groep verhalen, en dit zorgt ervoor dat constante herhaling wordt voorkomen.
+  
+  Overigens moet gemeld worden dat, vanzelfsprekend, de maker van een verhaal hier de eer voor krijgt wanneer het verhaal wordt gebruikt; zijn of haar naam wordt dan duidelijk weergegeven in de mail. Dat is wel zo eerlijk.
+  
+  Dan nu de verschillende verhaaltjes die het spel gebruikt, verdeeld in drie secties: Rolverdeling, Speler-mails en Algemene mails. 
+  
+\section{Rolverdeling}
+
+  Als aan het begin van het spel de rollen worden verdeeld, en iedere speler zijn rol krijgt, dan moeten deze natuurlijk ook naar de spelers worden gemaild. Dit moet elk afzonderlijk, want alleen de speler mag zijn rol weten. 
+  
+  \subsection{Opbouw}
+  
+    Wat betreft de opbouw van de mail is deze het makkelijkst: de mail bestaat uit twee delen, het verhaal en een footer. De footer is standaard, en komt voor onderaan alle mails. Het verhaal, dat is wat er nog geschreven moet worden...
+  
+  \subsection{Verhaal}
+  
+    Voor de rolverdeling zijn twee soorten verhalen: die van de specifieke rol en de algemene rol. Per speler zoekt het systeem naar een rolverdeling-verhaaltje voor zijn rol. Als hij deze vindt, gebruikt hij deze (vindt hij er meerdere, dan neemt hij een willekeurige). Als hij geen rolverdeling-verhaal kan vinden voor de specifieke rol van de speler, dan zoekt hij naar een algemene, die hij vervolgens gebruikt.
+    
+    In beide soorten verhaaltjes (specifieke rol en algemeen) kunnen dezelfde variabelen worden gebruikt: de speler's naam, zijn rol en zijn geslacht. Deze staan allemaal te vinden in A[0] (zie Implementatie op pagina~\pageref{subsec:Variabelen} ).
+    
+    Een voorbeeld voor de rolverdeling van een specifieke rol:
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+            
+          De rollen zijn verdeeld, en jouw rol is die van \textbf{Burger}.\\
+          
+          Burgers stemmen overdag op degene die ze op de Brandstapel willen zien, in de hoop dat deze persoon een weerwolf is.\\
+            
+          Hopelijk ben je tevreden met deze rol. Het systeem zal je een email sturen als je 's nachts wakker wordt, of als het op een ander moment tijd is om een keuze te maken.\\
+            
+          Het spel zal spoedig beginnen.
+        \end{minipage}
+      }
+    \end{center}
+      
+    Voor de algemene rolverdeling is het aangeraden om het verhaaltje algemener te houden (iets dat waarschijnlijk vanzelfsprekend lijkt). Elke rol kan hier namelijk gebruik van maken. 
+    
+    Een voorbeeld:
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+            
+          De rollen zijn verdeeld, en jouw rol is:\\
+            
+          Ziener\\
+            
+          Hopelijk ben je tevreden met deze rol. Het systeem zal je een email sturen als je 's nachts wakker wordt, of als het op een ander moment tijd is om een keuze te maken.\\
+            
+          Het spel zal spoedig beginnen.
+        \end{minipage}
+      }
+    \end{center}
+    
+    Hoewel deze verhaaltjes belangrijk zijn voor het spel (immers, als spelers hun rol niet weten, kunnen ze niet goed spelen), zijn ze niet de echte inleiding; deze wordt naar de gehele groep spelers gestuurd vlak na het versturen van de rolverdelingen (zie Algemene mails, op pagina~\pageref{sec:Algemene} ).
+    
+    Je zou het echter wel kunnen zien als een kans om spelers alvast een proefje te geven van het thema van het verhaal.
+    
+\section{Speler-mails}
+
+\section{Algemene mails}\label{sec:Algemene}
+
+  \subsection{Algemeen}
+  
+    Algemeen
+  
+    \subsubsection{Inleiding}
+    
+      Inleiding
+    
+    \subsubsection{Wakker worden, normaal}
+    
+      Als de dag aanbreekt, dan worden alle spelers gemaild met dit verhaaltje. Het aantal dode spelers dat wordt genoemd is hierbij belangrijk; dit moet precies gelijk zijn aan het aantal dode spelers van de afgelopen nacht. Het aantal levende spelers is minder belangrijk; dit hoeft niet precies gelijk te zijn. Toch moet het worden aangegeven.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo allemaal,\\
+            
+            De dag breekt aan, en er zijn geen doden gevallen!
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Wakker worden, speciaal}
+    
+      blah
+    
+    \subsubsection{Speler dood, aankondiging}
+    
+      blah
+    
+    \subsubsection{Speler dood}
+    
+      blah
+    
+    \subsubsection{Gaan slapen}
+    
+      blah
+  
+  \subsection{Brandstapel}
+    
+      blah
+  
+    \subsubsection{Inleiding}
+    
+      blah
+    
+    \subsubsection{Uitslag, normaal}
+    
+      blah
+    
+    \subsubsection{Uitslag, speciaal}
+    
+      blah
+    
+    \subsubsection{Speler dood, aankondiging}
+    
+      blah
+    
+    \subsubsection{Speler dood}
+    
+      blah
+  
+  \subsection{Burgemeester}
+    
+      blah
+  
+    \subsubsection{Wakker worden}
+    
+      blah
+    
+    \subsubsection{Speler gekozen}
+    
+      blah
+    
+    \subsubsection{Opvolger}
+    
+      blah
+    
+    \subsubsection{Stemming, inleiding}
+    
+      blah
+    
+    \subsubsection{Stemming, uitslag}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+      
+  \subsection{Burger}
+  
+    blah
+  
+    \subsubsection{Rolverdeling}
+    
+    blah
+  
+  \subsection{Cupido}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Cupido wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Cupido kies je twee spelers, die door je pijlen ongelofelijk verliefd op elkaar worden, en dan niet meer zonder elkaar door het leven kunnen. Op wie wil je je pijlen afschieten?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. Het is mogelijk om jezelf een van de Geliefden te maken. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Geliefden gemaakt}
+    
+      Als de Cupido zijn keuze heeft gemaakt, dan wordt hij hiermee van zijn keuze bericht.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt je pijlen op Karin en Joop gericht en van hen Geliefden gemaakt. Nu kan je weer gaan slapen.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Geliefde geworden}
+    
+      Als de Cupido twee Geliefden heeft gemaakt, dan worden zij met dit verhaaltje hiervan verteld.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Karin en Joop,\\
+            
+            Jullie zijn door Cupido aangewezen, en geraakt door zijn liefdespijlen; vanaf nu zijn jullie Geliefden, en kunnen jullie niet zonder elkaar leven.\\
+            
+            Jullie mogen weer gaan slapen tot het tijd wordt om wakker te worden.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Geliefde dood, aankondiging}
+    
+      blah
+    
+    \subsubsection{Geliefde dood}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Cupido `blanco' heeft gestend, dan krijgt hij dit verhaaltje.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt blanco gestemd, en dus schiet je je pijlen niet af; niemand wordt verliefd.\\
+            
+            Nu mag je gaan slapen tot het weer tijd is om wakker te worden.
+          \end{minipage}
+        }
+      \end{center}
+
+  \subsection{Dief}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Dief wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Dief krijg je eenmaal de mogelijkheid om van iemand de rol te stelen. Bij wil je deze nacht langs gaan om zijn of haar gave stelen?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Burger geworden, Dief}
+    
+      Als de Dief een speler heeft gekozen, maar die speler een Burger of een andere Dief is, dan wordt de Dief een Burger. Dit verhaaltje wordt dan naar hem gestuurd.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt de rol van Karin gestolen; vanaf nu is je rol:\\
+            
+            Burger\\
+            
+            Hopelijk ben je tevreden met deze rol. Nu kan je weer gaan slapen.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Rol gestolen}
+    
+      Als de Dief een speler heeft gekozen, en hij dus diens rol overneemt, wordt dit verhaaltje naar hem gestuurd.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt de rol van Karin gestolen; vanaf nu is je rol:\\
+            
+            Ziener\\
+            
+            Beroofd van haar rol is Karin een Burger geworden.
+            
+            Hopelijk ben je hier tevreden mee. Nu kan je weer gaan slapen.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Burger geworden, slachtoffer}
+    
+      Als de Dief een speler heeft gekozen, en hij dus diens rol overneemt, dan krijgt het slachtoffer de rol `Burger'. Met dit verhaaltje wordt de speler hiervan bericht.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Karin,\\
+            
+            Je bent bestolen! Je rol is weggenomen, en vanaf nu is jouw rol:\\
+            
+            Burger\\
+            
+            Hier is niets aan te doen, helaas. Je mag rustig doorslapen tot het tijd is voor jou om wakker te worden.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Dief `blanco' heeft gestemd, wordt dit verhaaltje naar hem gestuurd.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt blanco gestemd en zal dus geen rol stelen; je nieuwe rol is:\\
+            
+            Burger\\
+            
+            Hopelijk ben je hier tevreden mee. Je mag weer gaan slapen tot het tijd is om weer wakker te worden.
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Fluitspeler}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      blah
+    
+    \subsubsection{Enkele speler betoverd}
+    
+      blah
+    
+    \subsubsection{Twee spelers betoverd}
+    
+      blah
+    
+    \subsubsection{Enkele Betoverde mailen}
+    
+      blah
+    
+    \subsubsection{Twee Betoverden mailen}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Genezer}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Genezer wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Genezer mag je elke avond een speler beschermen tegen monsterlijke invloeden, mochten deze het vannacht op jouw keuze gemunt hebben. Wie wil je deze nacht beschermen?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. Ook mag je niet tweemaal achter elkaar dezelfde keuze maken.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Speler beschermd}
+    
+      Als de Genezer een speler heeft gekozen om te beschermen krijgt hij dit verhaaltje gemaild.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Deze nacht bescherm je Karin van onheil; haar kan niets worden aangedaan door monsters.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Genezer `blanco' heeft gestemd krijgt hij dit verhaaltje gemaild.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt blanco gestemd, en beschermt deze nacht dus niemand.
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Gewonnen}
+    
+      blah
+  
+    \subsubsection{Burgers gewonnen}
+    
+      blah
+    
+    \subsubsection{Weerwolven gewonnen}
+    
+      blah
+    
+    \subsubsection{Vampiers gewonnen}
+    
+      blah
+    
+    \subsubsection{Psychopaat gewonnen}
+    
+      blah
+    
+    \subsubsection{Witte Weerwolf gewonnen}
+    
+      blah
+    
+    \subsubsection{Fluitspeler gewonnen}
+    
+      blah
+    
+    \subsubsection{Overig}
+    
+      blah
+  
+  \subsection{Goochelaar}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Goochelaar wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Goochelaar mag je 's nachts twee verschillende spelers van plaats verwisselen. Wie worden deze nacht je lieftallige assistentes?\\
+            
+            Je mag enkel levendespelers kiezen en niet tweemaal achter elkaar hetzelfde koppel kiezen. Je mag ook jezelf met iemand verwisselen of `blanco' stemmen als je niks wilt doen.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Zichzelf met speler verwisseld}
+    
+      blah
+    
+    \subsubsection{Twee spelers verwisseld}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Grafrover}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Grafrover wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Grafrover kan je 's nachts de speciale gaven van een dode overnemen. Ga je dit ook doen deze nacht en zo ja, van wie wil je het graf bezoeken?\\
+            
+            Je mag enkel dode spelers kiezen, of `blanco' als je niets kiest. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Rol geroofd}
+    
+      Als de Grafrover een speler heeft gekozen, en diens rol heeft geroofd, dan krijgt hij dit verhaaltje te zien.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt met succes de rol van Karin geroofd; vanaf nu is jouw rol:\\
+            
+            Ziener\\
+            
+            Hopelijk ben je hier tevreden mee. Nu mag je weer gaan slapen tot het tijd is dat je wakker wordt.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Grafrover `blanco' heeft gestemd, dan krijgt hij dit verhaaltje te zien.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt blanco gestemd en zal deze nacht geen rol roven; je blijft een Grafrover. Nu mag je weer gaan slapen.
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Heks}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      blah
+    
+    \subsubsection{Zichzelf gered}
+    
+      blah
+    
+    \subsubsection{Speler gered}
+    
+      blah
+    
+    \subsubsection{Speler gedood}
+    
+      blah
+    
+    \subsubsection{Zichzelf gered en speler gedood}
+    
+      blah
+    
+    \subsubsection{Speler gered en speler gedood}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Jager}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden, nacht}
+    
+      Dit is het verhaaltje waarmee de Jager wakker wordt gemaakt, als hij in de nacht wordt gedood.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Jager draag je ten alle tijden een pistool met een enkele kogel erin bij je. Mocht er een einde komen aan je leven, dan kan je met je laatste adem nog wraak nemen. Die tijd is nu gekomen.\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niemand dood wilt schieten. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Wakker worden, dag}
+    
+      Dit is het verhaaltje waarmee de Jager wakker wordt gemaakt, als hij overdag wordt gedood.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Jager draag je ten alle tijden een pistool met een enkele kogel erin bij je. Mocht er een einde komen aan je leven, dan kan je met je laatste adem nog wraak nemen. Die tijd is nu gekomen.\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niemand dood wilt schieten. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Speler neergeschoten, nacht}
+    
+      blah
+    
+    \subsubsection{Speler neergeschoten, dag}
+    
+      blah
+    
+    \subsubsection{Jager doelwit dood, aankondiging}
+    
+      blah
+    
+    \subsubsection{Jager doelwit dood}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Klaas Vaak}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Dit is het verhaaltje waarmee de Klaas Vaak wakker wordt gemaakt.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+    
+          Als Klaas Vaak wordt je wakker om zand in een speler's ogen te strooien. Wie kies je om deze nacht te laten slapen en niet wakker te laten worden?\\
+    
+          Je mag enkel levende spelers doen slapen, of `blanco' kiezen als je g\'e\'en speler wil laten slapen. Ook mag je niet tweemaal achter elkaar dezelfde keuze maken. 
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Speler laten slapen}
+    
+    Dit is het verhaaltje voor de Klaas Vaak wanneer hij een speler laat slapen.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Je strooit zand in de ogen van Karin en laat haar zakken in een diepe slaap. Zij wordt niet wakker tot het ochtend wordt.\\
+          
+          Nu mag ook jij gaan slapen tot het tijd wordt om weer wakker te worden.
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Blijf slapen}
+    
+    Als Klaas Vaak een speler laat slapen, dan wordt deze speler met dit verhaaltje hiervan bericht.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Klaas Vaak heeft zand in je ogen gestrooid, en dus zink je in een diepe slaap, waar niets dan de ochtendzon je van kan wekken. Je wordt dus niet wakker voor eventuele acties deze nacht.
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+    Dit is het verhaaltje voor de Klaas Vaak wanneer hij `blanco' heeft gestemd.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Je hebt blanco gestemd, en dus zal je vannacht niemand in een diepe slaap doen zinken; nu mag jij weer rustig gaan slapen tot het tijd is dat je weer wakker wordt.
+        \end{minipage}
+      }
+    \end{center}
+  
+  \subsection{Onschuldige Meisje}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Weerwolven bespied}
+    
+      blah
+    
+    \subsubsection{Vampiers bespied}
+    
+      blah
+    
+    \subsubsection{Weerwolven bespied, geen slachtoffer}
+    
+      blah
+    
+    \subsubsection{Vampiers bespied, geen slachtoffer}
+    
+      blah
+  
+  \subsection{Opdrachtgever}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Opdrachtgever wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Opdrachtgever kies je een speler uit en schuift diegene wat geld toe, zodat deze jou Lijfwacht wordt. Wie wil je het contract laten ondertekenen?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Lijfwacht aangesteld}
+    
+      Als de Opdrachtgever een speler heeft gekozen, dan worden hij en zijn keuze samen gemaild met dit verhaaltje.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob en Karin,\\
+            
+            Bezorgd door naderend onheil heeft Bob besloten zichzelf te beschermen door een bewaker aan te stellen. Karin is vanaf nu de Lijfwacht van Opdrachtgever Bob en zal haar leven geven voor hem.\\
+            
+            Nu mogen jullie weer slapen tot tijd wordt dat jullie weer wakker worden.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Opdrachtgever `blanco' heeft gestemd, krijgt hij dit verhaaltje te zien.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je hebt blanco gestemd, en dus geen speler aangesteld tot jouw Lijfwacht. Nu kun je rustig gaan slapen tot het weer tijd wordt om wakker te worden.
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Priester}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Priester wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Priester mag je elke nacht wijwater over een speler sprenkelen en er zo achter komen of het geweten van deze persoon goed is. Van wie wil je dat deze nacht te weten komen?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Wijwater brandt}
+    
+      Als het wijwater van de Priester brandt door zijn keuze, dan wordt dit verhaaltje gebruikt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je sprenkelt voorzichtig wat van het wijwater over Karin en ziet hoe de druppels zacht sissen op haar huid. Zij heeft duidelijk geen zuiver geweten.\\
+            
+            En nu je daar achter bent gekomen mag je weer gaan slapen en wachten tot de ochtend. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Wijwater brandt niet}
+    
+      Als het wijwater van de Priester niet brandt door zijn keuze, dan wordt dit verhaaltje gebruikt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Zo stil mogelijk sluip je de kamer van Karin in en sprenkelt wat wijwater over haar heen, maar er gebeurd niets. Karin heeft een goed geweten.\\
+            
+            Nu je dit weet mag je weer gaan slapen en wachten tot het weer ochtend is. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Priester `blanco' stemt, dan wordt het volgende verhaaltje gebruikt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je bent deze nacht lekker binnen gebleven. Buiten lopen er kwaadaardige wezens rond en je wilde het niet te makkelijk maken voor hen.\\
+            
+            Je hebt niet je wijwater kunnen gebruiken en mag gaan slapen tot het weer ochtend is. 
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Psychopaat}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Psychopaat wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Psychopaat ga je er elke avond op uit om goed gebruik te maken van je messen-collectie. Wie zal er deze nacht je slachtoffer worden?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niemand kiest. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Speler vermoord}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Raaf}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Dit is het verhaaltje waarmee de Raaf wakker wordt gemaakt.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Als Raaf mag je iedere nacht een teken bij iemand achterlaten, wat aan zal geven dat jij deze speler niet vertrouwd. Degene die het teken ontvangt, heeft twee extra stemmen tegen zich. Wie zal deze nacht het Teken van de Raaf krijgen?\\
+          
+          Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. Het is mogelijk om meerdere malen achter elkaar dezelfde speler te kiezen. 
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Zichzelf beschuldigd}
+    
+      blah
+    
+    \subsubsection{Speler beschuldigd}
+    
+      blah
+    
+    \subsubsection{Teken van de Raaf}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Rolverdeling}
+    
+      blah
+  
+    \subsubsection{Speler rol bepaald}
+    
+      Met dit verhaaltje worden spelers van hun rol bericht nadat de rollen zijn verdeeld. Dit verhaaltje wordt enkel gebruikt wanneer er geen rolverdeling-verhaaltje is voor een specifieke rol.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            De rollen zijn verdeeld, en jouw rol is:\\
+            
+            Burger\\
+            
+            Hopelijk ben je tevreden met deze rol. Het systeem zal je een email sturen als je 's nachts wakker wordt, of als het op een ander moment tijd is om een keuze te maken.\\
+            
+            Het spel zal spoedig beginnen.
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Schout}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Schout wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Schout kan je een van de spelers opsluiten, waardoor deze niet beschuldigd kan worden en ook niet kan stemmen. Wie gaat er achter slot en grendel deze dag?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. Je mag jezelf kiezen, maar niet tweemaal achter elkaar dezelfde keuze maken. 
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Zelf opgesloten}
+    
+      blah
+    
+    \subsubsection{Speler opgesloten, Schout}
+    
+      blah
+    
+    \subsubsection{Speler opgesloten, algemeen}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Slet}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Slet wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+          
+            Als Slet wordt je wakker om bij een andere speler te slapen. Welke speler kies je, bij wie wil jij de nacht verblijven?\\
+          
+            Je mag enkel levende spelers kiezen, of `blanco' stemmen om bij jezelf te slapen. Tweemaal achter elkaar dezelfde keuze maken mag niet.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Slaapt bij speler}
+    
+      Als de Slet bij een andere speler slaapt, dan wordt dit verhaal gebruikt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Je ligt niet graag alleen in bed en ook deze nacht ben je er op uit gegaan en bij iemand anders gaan liggen. Voorzichtig kruip je bij Karin onder de warme dekens.\\
+            
+            Weltrusten en vergeet niet naar huis te gaan voordat zij weer wakker wordt.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Slet ervoor kiest niet bij een andere speler te slapen, maar `blanco' stemt, dan wordt dit verhaal gebruikt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Hoewel je er vaak 's nachts op uit gaat om bij anderen te slapen ben je deze nacht thuis gebleven. Een bed voor jou alleen is ook wel eens fijn.\\
+            
+            Dan mag je nu gaan slapen tot het weer ochtend is. 
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Vampier}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      blah
+    
+    \subsubsection{Speler vermoord}
+    
+      blah
+    
+    \subsubsection{Niemand vermoord}
+    
+      blah
+  
+  \subsection{Verleidster}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      Dit is het verhaaltje waarmee de Verleidster wakker wordt gemaakt.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Als Verleidster wordt je wakker om een speler te verleiden en naar jouw bed te lokken. Welke speler kies je om deze nacht mee door te brengen?\\
+            
+            Je mag enkel levende spelers kiezen, of `blanco' als je niemand kiest. Ook mag je niet tweemaal dezelfde keuze achter elkaar maken.
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Speler verleidt}
+    
+      Met dit verhaaltje wordt een speler gemeld dat een speler verleidt is aan de Verleidster.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Niemand kan jou weerstaan en deze nacht heb je Karin kunnen verleiden om bij je te komen slapen.\\
+            
+            Dan kun je nu gaan slapen tot het weer ochtend is.  
+          \end{minipage}
+        }
+      \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+      Als de Verleidster `blanco' heeft gestemd wordt dit verhaaltje naar haar gemaild.
+    
+      \begin{center}
+        \shadowbox{
+          \begin{minipage}[c]{5in}
+            \sf
+            Hallo Bob,\\
+            
+            Het is je deze nacht niet gelukt om iemand te verleiden en dus lig je nu alleen in je bed. Het is wat koud, maar je hebt wel alle dekens voor jezelf.\\
+            
+            Slaap lekker en tot de volgende ochtend. 
+          \end{minipage}
+        }
+      \end{center}
+  
+  \subsection{Waarschuwer}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Dit is het verhaaltje waarmee de Waarschuwer wakker wordt gemaakt.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Als Waarschuwer mag je elke nacht iemand waarschuwen, waardoor deze een extra stem krijgt. Een gewaarschuwd man telt immers voor twee! Wie wil je deze nacht waarschuwen?\\
+          
+          Je mag enkel levende spelers kiezen, of `blanco' als je niets kiest. Je mag meerdere malen achter elkaar dezelfde speler kiezen, maar niet jezelf. 
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Speler gewaarschuwd}
+    
+      blah
+    
+    \subsubsection{Wordt gewaarschuwd}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Weerwolf}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Alle levende Weerwolven worden met dit verhaaltje samen wakker gemaakt. Hierbij kunnen de Weerwolven ook bij naam worden genoemd; het aantal Weerwolven dat specifiek wordt gebruikt moet worden onthouden en aangegeven.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Weerwolven,\\
+          
+          Jullie worden wakker om met z'n allen een speler op te eten. Wie gaat dit worden?
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Speler vermoord}
+    
+    Dit verhaal wordt gebruikt als de Weerwolven een speler hebben vermoord. Hierbij kunnen de Weerwolven ook bij naam worden genoemd; het aantal Weerwolven dat specifiek wordt gebruikt moet worden onthouden en aangegeven.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Weerwolven,\\
+          
+          Jullie hebben Karin vermoord, goed gedaan! Zij zal niet meer wakker worden.\\
+          
+          Nu kunnen jullie weer slapen tot het tijd wordt om wakker te worden...
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Niemand vermoord}
+    
+    Dit verhaal wordt gebruikt als de Weerwolven geen speler hebben vermoord. Hierbij kunnen de Weerwolven ook bij naam worden genoemd; het aantal Weerwolven dat specifiek wordt gebruikt moet worden onthouden en aangegeven.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Weerwolven,\\
+          
+          Helaas hebben jullie ditmaal geen slachtoffer gemaakt. Kans gemist...\\
+          
+          Nu kunnen jullie gaan slapen tot het weer tijd is om wakker te worden.
+        \end{minipage}
+      }
+    \end{center}
+  
+  \subsection{Welp}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Weerwolf geworden}
+    
+    Dit is het verhaaltje waarmee de Welp wordt verteld dat hij vanaf nu een Weerwolf is.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Als Welp moet je wachten tot er plek is in de roedel om een volledige Weerwolf te worden. Nu er eentje is overleden mag je eindelijk ook meedoen met de grote wolven.
+        \end{minipage}
+      }
+    \end{center}
+  
+  \subsection{Witte Weerwolf}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Dit is het verhaaltje waarmee de Witte Weerwolf wakker wordt gemaakt.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Als Witte Weerwolf mag je elke nacht nog een extra slachtoffer maken, buiten de normale Weerwolven fase om. Wie zal dat deze nacht worden?\\
+          
+          Je mag enkel levende spelers kiezen, ook een mede Weerwolf, of `blanco' als je niets kiest. 
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Speler vermoord}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+  
+  \subsection{Ziener (en Dwaas)}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+    Dit is het verhaaltje waarmee de Ziener (of Dwaas) wakker wordt gemaakt.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Als Ziener wordt je wakker om de rol van een speler te bekijken. Wie kies je om deze nacht te bekijken?\\
+          
+          Je kunt enkel levende spelers kiezen, of `blanco' als je niets kiest.
+        \end{minipage}
+      }
+    \end{center}
+        
+    \subsubsection{Rol gezien}
+    
+    Dit is het verhaaltje dat de Ziener (of Dwaas) te zien krijgt als hij een speler's rol bekijkt. Als het om de Dwaas gaat, dan is deze rol fout.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Deze nacht bekijk je Karin in je kristallen bol. Aan haar aura blijkt dat zij een Ziener is.\\
+          
+          Hopelijk kun je iets met deze informatie. Nu mag je weer gaan slapen.
+        \end{minipage}
+      }
+    \end{center}
+    
+    \subsubsection{Blanco gestemd}
+    
+    Dit is het verhaaltje dat de Ziener (of Dwaas) te zien krijgt als hij `blanco' heeft gestemd.
+    
+    \begin{center}
+      \shadowbox{
+        \begin{minipage}[c]{5in}
+          \sf
+          Hallo Bob,\\
+          
+          Je hebt blanco gestemd, en zal dus van niemand de rol zien. Nu mag je weer gaan slapen.
+        \end{minipage}
+      }
+    \end{center}
+  
+  \subsection{Zondebok}
+    
+      blah
+  
+    \subsubsection{Rolverdeling}
+    
+      blah
+    
+    \subsubsection{Wakker worden}
+    
+      blah
+    
+    \subsubsection{Schuldgevoel opgewerkt}
+    
+      blah
+    
+    \subsubsection{Blanco gestemd}
+    
+      blah
+      
+\newpage
+  
+\section{Implementatie}
+
+  \subsection{Variabelen}\label{subsec:Variabelen}
+
+  \subsection{HTML}
+  
+  De mails van de Automatische Verteller worden allemaal in HTML-code weergegeven. Dit geldt ook voor de verhaaltjes; deze worden in HTML-code geschreven. Voor het maken van de verhaaltjes is nauwelijks kennis van HTML vereist (heb je hier geen/weinig kennis van, of wil je het even opfrissen, lees dan door, want hieronder worden alle commando's uitgelegd die nodig zijn om een mooi verhaaltje te maken), maar meer kennis zou de schrijver wel van pas komen. Zo is het in theorie mogelijk om plaatjes in de verhalen te stoppen, evenals andere HTML-commando's (deze commando's testen is wel aangeraden, al zullen de eenvoudige commando's zeker geen fouten opleveren mits goed opgeschreven).
+  
+  Nu, een minimaal overzichtje HTML-commando's met hun betekenis:
+  
+    \begin{center}
+      \begin{tabular}{r|l}
+        HTML & Betekenis \\
+        \hline
+        $<$br /$>$ & Een [Enter] in de tekst \\
+        $<$br /$><$br /$>$ & Een witregel (twee keer een [Enter]) \\
+        $<$i$>$tekst$<$/i$>$ & Schuine \emph{tekst} \\
+        $<$b$>$tekst$<$/b$>$ & Dikgedrukte \textbf{tekst} \\
+        $<$hr$>$ & Horizontale lijn over de volledige \\
+         & breedte van de tekst \\ 
+      \end{tabular}
+    \end{center}
+  
+  \subsection{Trucs}
+    
+      blah
+
+\section{Overzicht}
+
+  \begin{center}
+    \begin{longtable}{c|c|c|c|l}
+      Rol & Nummer & A & B &Verhaalsoort \\
+      \hline
+      \hline
+      \multirow{6}{*}{Algemeen} & -1 & Alle & - & Inleiding \\
+       & 0 & Levenden & Doden & Wakker worden, normaal \\
+       & 1 & Levenden & Doden & Wakker worden, speciaal \\
+       & 4 & Levenden & Specifiek (1) & Speler dood, aankondiging \\
+       & 5 & Levenden & Specifiek (1) & Speler dood \\
+       & 6 & Levenden & - & Gaan slapen \\
+      \hline
+      \multirow{5}{*}{Brandstapel} & 0 & & & Inleiding \\
+       & 1 & Levenden & Doden & Uitslag, normaal \\
+       & 2 & Levenden & Specifiek & Uitslag, speciaal \\
+       & 3 & Levenden & Specifiek & Speler dood, aankondiging \\
+       & 4 & Levenden & Specifiek & Speler dood \\
+      \hline
+      \multirow{6}{*}{Burgemeester} & 0 & Burgemeester & - & Wakker worden \\
+       & 1 & Burgemeester & Opvolger & Speler gekozen \\
+       & 2 & & & Opvolger \\
+       & 3 & & & Stemming, inleiding \\
+       & 4 & & & Stemming, uitslag \\
+       & 9 & Burgemeester & - & Blanco gestemd \\
+      \hline
+      \multirow{1}{*}{Burger} & -1 & Burger & - & Rolverdeling \\
+      \hline
+      \multirow{8}{*}{Cupido} & -1 & Cupido & - & Rolverdeling \\
+       & 0 & Cupido & - & Wakker worden \\
+       & 1 & Cupido & Geliefden & Geliefden gemaakt \\
+       & 2 & Cupido & Geliefde & Zichzelf Geliefde gemaakt \\
+       & 3 & Geliefden & - & Geliefde geworden \\
+       & 4 & Levende & Specifiek (2) & Geliefde dood, aankondiging \\
+       & 5 & Levende & Specifiek (2) & Geliefde dood \\
+       & 9 & Cupido & - & Blanco gestemd \\
+      \hline
+      \multirow{6}{*}{Dief} & -1 & Dief & - & Rolverdeling \\
+       & 0 & Dief & - & Wakker worden \\
+       & 1 & Dief & Doelwit & Burger geworden, Dief \\
+       & 2 & Dief & Doelwit & Rol gestolen \\
+       & 3 & Doelwit & - & Burger geworden, slachtoffer \\
+       & 9 & Dief & - & Blanco gestemd \\
+      \hline
+      \multirow{3}{*}{Dorpsgek} & -1 & Dorpsgek & - & Rolverdeling \\
+       & 0 & Levenden & Dorpsgek & Ontdekt op Brandstapel \\
+       & 1 & & & Toch gelynched \\
+      \hline
+      \multirow{3}{*}{Dorpsoudste} & -1 & Dorpsoudste & - & Rolverdeling \\
+       & 0 & Levenden & Dorpsoudsten & Dorpsoudste dood, nacht \\
+       & 1 & Levenden & Dorpsoudsten & Dorpsoudste dood, dag \\
+      \hline
+      \multirow{7}{*}{Fluitspeler} & -1 & Fluitspeler & - & Rolverdeling \\
+       & 0 & Fluitspelers & - & Wakker worden \\
+       & 1 & Fluitspelers & Doelwit & Enkele speler betoverd \\
+       & 2 & Fluitspelers & Doelwitten & Twee spelers betoverd \\
+       & 3 & Doelwit & - & Enkele Betoverde mailen \\
+       & 4 & Doelwitten & - & Twee Betoverden mailen \\
+       & 9 & Fluitspelers & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Genezer} & -1 & Genezer & - & Rolverdeling \\
+       & 0 & Genezer & - & Wakker worden \\
+       & 1 & Genezer & Doelwit & Speler beschermd \\
+       & 9 & Genezer & - & Blanco gestemd \\
+      \hline
+      \multirow{7}{*}{Gewonnen} & 0 & & & Burgers gewonnen \\
+       & 1 & & & Weerwolven gewonnen \\
+       & 2 & & & Vampiers gewonnen \\
+       & 3 & & & Psychopaat gewonnen \\
+       & 4 & & & Witte Weerwolf gewonnen \\
+       & 5 & & & Fluitspelers gewonnen \\
+       & 6 & & & Overig \\
+      \hline
+      \multirow{5}{*}{Goochelaar} & -1 & Goochelaar & - & Rolverdeling \\
+       & 0 & Goochelaar & - & Wakker worden \\
+       & 1 & Goochelaar & Doelwit & Zelf met speler verwisseld \\
+       & 2 & Goochelaar & Doelwitten & Twee spelers verwisseld \\
+       & 9 & Goochelaar & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Grafrover} & -1 & Grafrover & - & Rolverdeling \\
+       & 0 & Grafrover & - & Wakker worden \\
+       & 1 & Grafrover & Doelwit & Rol geroofd \\
+       & 9 & Grafrover & - & Blanco gestemd \\
+      \hline
+      \multirow{8}{*}{Heks} & -1 & Heks & - & Rolverdeling \\
+       & 0 & Heks & - & Wakker worden \\
+       & 1 & Heks & - & Zelf gered \\
+       & 2 & Heks & Doelwit & Speler gered \\
+       & 4 & Heks & Doelwit & Speler gedood \\
+       & 5 & Heks & Doelwit & Zelf gered, speler gedood \\
+       & 6 & Heks & Doelwitten & Speler gered, speler gedood \\
+       & 9 & Heks & - & Blanco gestemd \\
+      \hline
+      \multirow{8}{*}{Jager} & -1 & Jager & - & Rolverdeling \\
+       & 0 & Jager & - & Wakker worden, nacht \\
+       & 1 & Jager & - & Wakker worden, dag \\
+       & 2 & Jager & Doelwit & Speler neergeschoten, nacht \\
+       & 3 & Jager & Doelwit & Speler neergeschoten, dag \\
+       & 4 & Levenden & Specifiek (2) & Jager doelwit, aankondiging \\
+       & 5 & Levenden & Specifiek (2) & Jager doelwit, dood \\
+       & 9 & Jager & - & Blanco gestemd \\
+      \hline
+      \multirow{5}{*}{Klaas Vaak} & -1 & Klaas Vaak & - & Rolverdeling \\
+       & 0 & Klaas Vaak & - & Wakker worden \\
+       & 1 & Klaas Vaak & Doelwit & Speler laten slapen \\
+       & 2 & Doelwit & - & Blijf slapen \\
+       & 9 & Klaas Vaak & - & Blanco gestemd \\
+      \hline
+       & -1 & Meisje & - & Rolverdeling \\
+      Onschuldige & 0 & Meisje & WW-doelwitten & Weerwolven bespied \\
+      Meisje & 1 & Meisje & VP-doelwitten & Vampiers bespied \\
+       & 2 & Meisje & - & WW, geen slachtoffer \\
+       & 3 & Meisje & - & VP, geen slachtoffer \\
+      \hline
+      \multirow{4}{*}{Opdrachtgever} & -1 & Opdrachtgever & - & Rolverdeling \\
+       & 0 & Opdrachtgever & - & Wakker worden \\
+       & 1 & Opdrachtgever & Lijfwacht & Lijfwacht aangesteld \\
+       & 9 & Opdrachtgever & - & Blanco gestemd \\
+      \hline
+      \multirow{5}{*}{Priester} & -1 & Priester & - & Rolverdeling \\
+       & 0 & Priester & - & Wakker worden \\
+       & 1 & Priester & Doelwit & Wijwater brandt \\
+       & 2 & Priester & Doelwit & Wijwater brandt niet \\
+       & 9 & Priester & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Psychopaat} & -1 & Psychopaat & - & Rolverdeling \\
+       & 0 & Psychopaat & - & Wakker worden \\
+       & 1 & Psychopaat & Doelwit & Speler vermoord \\
+       & 9 & Psychopaat & - & Blanco gestemd \\
+      \hline
+      \multirow{6}{*}{Raaf} & -1 & Raaf & - & Rolverdeling \\
+       & 0 & Raaf & - & Wakker worden \\
+       & 1 & Raaf & Raaf & Zichzelf beschuldigd \\
+       & 2 & Raaf & Doelwit & Speler beschuldigd \\
+       & 3 & & & Teken van de Raaf \\
+       & 9 & Raaf & - & Blanco gestemd \\
+      \hline
+      \multirow{1}{*}{Rolverdeling} & -1 & Speler & - & Speler rol bepaald \\
+      \hline
+      \multirow{6}{*}{Schout} & -1 & Schout & - & Rolverdeling \\
+       & 0 & Schout & - & Wakker worden \\
+       & 1 & Schout & Schout & Zelf opgesloten \\
+       & 2 & Schout & Doelwit & Speler opgesloten, Schout \\
+       & 3 & & & Speler opgesloten, algemeen \\
+       & 9 & Schout & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Slet} & -1 & Slet & - & Rolverdeling \\
+       & 0 & Slet & - & Wakker worden \\
+       & 1 & Slet & Doelwit & Slaapt bij speler \\
+       & 9 & Slet & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Vampier} & -1 & Vampier & - & Rolverdeling \\
+       & 0 & Vampiers & - & Wakker worden \\
+       & 1 & Vampiers & Doelwit & Speler vermoord \\
+       & 9 & Vampiers & - & Niemand vermoord \\
+      \hline
+      \multirow{4}{*}{Verleidster} & -1 & Verleidster & - & Rolverdeling \\
+       & 0 & Verleidster & - & Wakker worden \\
+       & 1 & Verleidster & Doelwit & Speler verleidt \\
+       & 9 & Verleidster & - & Blanco gestemd \\
+      \hline
+      \multirow{5}{*}{Waarschuwer} & -1 & Waarschuwer & - & Rolverdeling \\
+       & 0 & Waarschuwer & - & Wakker worden \\
+       & 1 & Waarschuwer & Doelwit & Speler gewaarschuwd \\
+       & 2 & Waarschuwer & - & Wordt gewaarschuwd \\
+       & 9 & Waarschuwer & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Weerwolf} & -1 & Weerwolf & - & Rolverdeling \\
+       & 0 & Weerwolven & - & Wakker worden \\
+       & 1 & Weerwolven & Doelwit & Speler vermoord \\
+       & 9 & Weerwolven & - & Niemand vermoord \\
+      \hline
+      \multirow{2}{*}{Welp} & -1 & Welp & - & Rolverdeling \\
+       & 0 & Welp & - & Weerwolf geworden \\
+      \hline
+      \multirow{4}{*}{Witte Weerwolf} & -1 & Witte Weerwolf & - & Rolverdeling \\
+       & 0 & Witte Weerwolf & - & Wakker worden \\
+       & 1 & Witte Weerwolf & Doelwit & Speler vermoord \\
+       & 9 & Witte Weerwolf & - & Blanco gestemd \\
+      \hline
+       & -1 & Ziener & - & Rolverdeling \\
+      Ziener & 0 & Ziener & - & Wakker worden \\
+      (en Dwaas) & 1 & Ziener & Doelwit & Rol gezien \\
+       & 9 & Ziener & - & Blanco gestemd \\
+      \hline
+      \multirow{4}{*}{Zondebok} & -1 & Zondebok & - & Rolverdeling \\
+       & 0 & Zondebok & - & Wakker worden \\
+       & 1 & Zondebok & Doelwitten & Schuldgevoel opgewekt \\
+       & 2 & & Zondebok & Op de Brandstapel \\
+       & 9 & Zondebok & - & Blanco gestemd \\
+    \end{longtable}
+  \end{center}
+
+
+\end{document}

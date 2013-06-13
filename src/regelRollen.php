@@ -82,7 +82,7 @@ function regelOpdracht($spel) {
 			continue;
 		}//if
 		heeftGestemd($id);
-		if($stem == -1) {
+		if($stem == -1 || $stem == $id) {
 			mailActie($id,9,$spel,"STEM");
 			continue;
 		}//if
@@ -759,7 +759,12 @@ function regelSchout($spel) {
 		sqlUp(3,"SPELFLAGS=SPELFLAGS+8",
 			"ID=$stem AND ((SPELFLAGS & 8) = 0)");
 		sqlUp(3,"VORIGE_STEM=$stem","ID=$id"); //tegen herhaling
-		mailActie($id,1,$spel,"EXTRA_STEM");
+		if($stem == $id) {
+			mailActie($id,1,$spel,"EXTRA_STEM");
+		}
+		else {
+			mailActie($id,2,$spel,"EXTRA_STEM");
+		}
 		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	return;
@@ -788,7 +793,12 @@ function regelRaaf($spel) {
 		}
 		sqlUp(3,"SPELFLAGS=SPELFLAGS+4",
 			"ID=$stem AND ((SPELFLAGS & 4) = 0)");
-		mailActie($id,1,$spel,"EXTRA_STEM");
+		if($stem == $id) {
+			mailActie($id,1,$spel,"EXTRA_STEM");
+		}
+		else {
+			mailActie($id,2,$spel,"EXTRA_STEM");
+		}
 		verwijderStem($id,"EXTRA_STEM");
 	}//while
 	return;

@@ -595,7 +595,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		//dorpsoudste dood... voeg extra verhaal achter!
 		if($vlag) {
 			schrijfLog($sid,"Dorpsoudste dood.\n");
-			dodeDorpsoudste($text,$samenvatting);
+			dodeDorpsoudste(0,$text,$samenvatting);
 		}//if
 
 		$samenvatting .= "Dag $ronde begint.<br />";
@@ -635,7 +635,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 
 	if($vlag) {
 		//dorpsoudste dood
-		dodeDorpsoudste($text,$samenvatting);
+		dodeDorpsoudste(0,$text,$samenvatting);
 	}
 
 	$samenvatting .= "Dag $ronde begint.<br />";
@@ -652,13 +652,13 @@ function plakSamenvatting($samenvatting,$text) {
 }//plakSamenvatting
 
 //TODO verhaal dat alle ontdekte Dorpsgekken dood zijn toevoegen
-function dodeDorpsoudste(&$text,&$samenvatting) {
+function dodeDorpsoudste($fase,&$text,&$samenvatting) {
 	$oud = array();
 	$res = sqlSel(3,"ROL='Dorpsoudste' AND ((LEVEND & 2) = 2)");
 	while($oudste = sqlFet($res)) {
 		array_push($oud,$oudste);
 	}
-	$verhaal = geefVerhaal($thema,"Dorpsoudste",0,$levend,
+	$verhaal = geefVerhaal($thema,"Dorpsoudste",$fase,$levend,
 		count($oud),$ronde,$sid);
 	$text .= $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -1291,7 +1291,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	}//else
 
 	if($vlag) {
-		dodeDorpsoudste($text,$samenvatting);
+		dodeDorpsoudste(1,$text,$samenvatting);
 	}
 
 	//en maak een samenvatting
@@ -1299,7 +1299,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$samenvatting .= stemmingOverzicht($overzichtTotaal);
 	
 	return;
-}//verkiezingUitslag
+}//brandstapelUitslag
 
 function brandstapelOverzicht($sid) {
 	$overzicht1 = array();
