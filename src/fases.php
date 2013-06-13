@@ -6,7 +6,8 @@ function fases() {
 		$sid = $spel['SID'];
 		schrijfLog($sid,"Ongewonnen spel gevonden: $sid.\n");
 		$fase = $spel['FASE'];
-		schrijfLog($sid,"Fase: $fase.\n");
+		$duur = $spel['DUUR'];
+		schrijfLog($sid,"Fase: $fase, sinds $duur.\n");
 		if($spel['RONDE'] == 0) { // initialiseer-fase van het spel
 			
 			switch($fase) {

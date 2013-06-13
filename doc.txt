@@ -31,6 +31,7 @@
 
   * Nodig:   alle TODO's afhandelen
 
+  * Extra:   SPELFLAGS van spelers logischer/kleiner maken
   * Extra:   optimaliseer gewonnenSpelers()
   * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
   * Extra:   scores implementeren
@@ -98,8 +99,11 @@ spellen tegelijkertijd leiden.
 
 SID:          Een ID om de spellen uit elkaar te houden.
 SNAAM:        De werkelijke naam van het spel (bijv. WW5 of iets dergelijks).
-STATUS:       De status van het spel (0 = bezig, 1 = gepauzeerd, 2 = gestopt,
-              3 = gewonnen).
+STATUS:       De status van het spel:
+              0 = bezig
+              1 = gepauzeerd
+              2 = gestopt
+              3 = gewonnen
 MAX_SPELERS:  Het maximaal aantal spelers dat mee mag doen aan dit spel.
 ROLLEN:       De RID van de gebruikte rolverdeling (zie tabel Rollen).
 LEVEND:       Hoeveel levende spelers zitten er in het spel?
@@ -123,7 +127,9 @@ THEMA:        De TID van het thema van het spel, bijv. Wild-West of Sci-Fi;
               "Verhalen" (tenzij een goed verhaal van dit thema onvindbaar is:
               dan wordt een default verhaal genomen).
 BURGEMEESTER: Hier staat de ID van de speler die Burgemeester is.
-FLAGS:        Bitvlaggen voor het spel (1 = tweede nacht, voor Witte WW).
+FLAGS:        Bitvlaggen voor het spel:
+              1 = tweede nacht
+              2 = Burgemeester bepaalde het Brandstapelslachtoffer
 
 Spelers:
 --------
@@ -132,8 +138,9 @@ Hierin staan alle spelers van alle spellen die worden gespeeld.
 
 ID:                De ID van de speler, om alle spelers van elkaar te scheiden.
 NAAM:              De naam van de speler (deze is uniek per spel).
-SPELERFLAGS:       Vlaggen voor de speler (1 = geslacht van de speler, 
-                   2 = staat de speler op de mail-lijst?).
+SPELERFLAGS:       Vlaggen voor de speler:
+                   1 = geslacht (man, vrouw)
+                   2 = in maillijst (ja, nee)
 SID:               Aan welk spel de speler toebehoord. Gelijk aan de SID van een
                    spel.
 EMAIL:             Het email-adres van de speler. Hiermee wordt hij door het 
@@ -141,11 +148,13 @@ EMAIL:             Het email-adres van de speler. Hiermee wordt hij door het
 GEMIST:            Hoeveel stem-rondes heeft de speler achter elkaar gemist? 
                    Hiermee wordt inactiviteit bepaald; elke stemronde die de 
                    speler meemaakt vanwege zijn rol wordt meegeteld.
-LEVEND:            Bitflags voor de staat van de speler (1 = levend, 
-                   2 = nieuw-dood). Nieuw-dood kan worden gebruikt om 
-                   onderscheid te maken tussen echte dode spelers, en spelers 
-                   die nog gered kunnen worden/waar nog iets mee moet worden 
-                   gedaan wat betreft hun overlijden.
+LEVEND:            Bitflags voor de staat van de speler:
+                   1 = levend
+                   2 = nieuw-dood
+                   Nieuw-dood kan worden gebruikt om onderscheid te maken tussen
+                   echte dode spelers, en spelers die nog gered kunnen worden, 
+                   of waar nog iets mee moet worden gedaan wat betreft hun 
+                   overlijden.
 ROL:               De rol van een speler (deze kan in geval van de Dief, de Welp
                    of de Grafrover nog veranderen na het verdelen van de 
                    rollen).
@@ -160,17 +169,35 @@ VORIGE_STEM:       Om herhaling te voorkomen wordt voor sommige rollen de vorige
                    stem bijgehouden.
 VORIGE_STEM_EXTRA: Zie VORIGE_STEM, ditmaal specifiek gebruikt voor de 
                    Goochelaar.
-SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel 
+SPECIALE_STEM:     Voor de Zondebok (die op veel spelers kan stemmen): dit is 
+                   een VARCHAR, waar verschillende getallen in passen ipv. de ID
+                   van een enkele speler.
+SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel:
+                   1   = betoverd
+                   2   = schuldgevoel
+                   4   = Teken van de Raaf
+                   8   = opgesloten
+                   16  = gewaarschuwd
+                   32  = slaapt
+                   64  = beschermd
+                   128 = geteld (Weerwolf, Jager, Zondebok), ontdekt (Dorpsgek),
+                         elixer (Heks), extra leven (Dorpsoudste)
+                   256 = gelynched (Dorpsgek, Zondebok), gif (Heks)
+                   512 = hartebreuk (Geliefde)
+                   1024 = opgeofferd (Lijfwacht)
+
+
                    (1 = betoverd, 2 = schuldgevoel vanwege Zondebok, 4 = als 
                    Jager iemand neergeschoten, 8 = als Weerwolf geteld voor de 
-                   Welp, 16 = bezit levenselixer van Heks, 32 = bezit gif van 
-                   Heks, 64 = bezit extra leven van Dorpsoudste, 128 = als 
-                   Dorpsgek ontdekt, 256 = als Zondebok op Brandstapel gekomen
-                   512 = als Geliefde gestorven, 1024 = Teken van de Raaf, 
-                   2048 = opgesloten door Schout, 4096 = gewaarschuwd door 
-                   Waarschuwer, 8192 = beschermd door Genezer, 16384 = in slaap 
-                   gesust door Klaas Vaak, 32768 = als Lijfwacht gestorven, 
-                   65536 = als Dorpsgek gelynched na overlijden Dorpsoudste).
+                   Welp (of als Zondebok geteld), 16 = bezit levenselixer van 
+                   Heks, 32 = bezit gif van Heks, 64 = bezit extra leven van 
+                   Dorpsoudste, 128 = als Dorpsgek ontdekt, 256 = als Zondebok 
+                   op Brandstapel gekomen, 512 = als Geliefde gestorven, 1024 = 
+                   Teken van de Raaf, 2048 = opgesloten door Schout, 4096 = 
+                   gewaarschuwd door Waarschuwer, 8192 = beschermd door Genezer,
+                   16384 = in slaap gesust door Klaas Vaak, 32768 = als 
+                   Lijfwacht gestorven, 65536 = als Dorpsgek gelynched na 
+                   overlijden Dorpsoudste).
 GELIEFDE:          Is de speler een Geliefde? (Hierin staat de ID van zijn 
                    Geliefde, of NULL.)
 LIJFWACHT:         Wie is de Lijfwacht van deze speler? (NULL als de speler geen 
@@ -633,7 +660,8 @@ Dief:               -1 = Rolverdeling mailen
 Cupido:             -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Geliefden gemaakt (Cupido)
-                     2 = Geliefde geworden (Geliefden)
+                     2 = Zichzelf met speler Geliefden gemaakt (Cupido)
+                     3 = Geliefde geworden (Geliefden)
                      4 = Geliefde dood, aankondiging (algemeen)
                      5 = Geliefde dood (algemeen)
                      9 = Blanco gestemd
@@ -746,6 +774,8 @@ Burgemeester:        0 = Wakker worden
                      2 = Opvolger (algemeen)
                      3 = Stemming, inleiding
                      4 = Stemming, uitslag
+                     5 = Brandstapelstemming, Burgemeester bepaalt slachtoffer
+                     6 = Brandstapelstemming, Burgemeester bepaalt (speciaal)
                      9 = Blanco gestemd
 Algemeen:           -1 = Inleiding
                      0 = Wakker worden, normaal

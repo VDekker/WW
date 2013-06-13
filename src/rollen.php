@@ -69,20 +69,62 @@ function verdeelRol($sid) {
 			$rol = $lijst[$i];
 			$spelflags = 0;
 			if($rol == "Heks") {
-				$spelflags = 48; //beide drankjes
+				$spelflags = 384; //beide drankjes (128 + 256)
 			}
 			else if($rol == "Dorpsoudste") {
-				$spelflags = 64; //extra leven
+				$spelflags = 128; //extra leven
 			}
 			sqlUp(3,"ROL='$rol',SPELFLAGS=$spelflags",
 				"ID=$dezeSpeler");
 			schrijfLog($sid,"$dezeSpeler is nu een $rol.\n");
 			$teller++;
 			$rollen[$i]--;
-		}
+		}//while
 	}//for
+
+	//pas easter-eggs toe
+	easterRol($sid);
 	
 	return;
 }//verdeelRol
+
+//als $rol in het spel zit, verwisselt de rol van $naam
+//met een willekeurige speler met $rol
+//(gebruikt voor easter-eggs)
+function verwisselRol($naam,$rol,$sid) {
+	//pak de rol
+	$resultaat = sqlSel(3,"SID=$sid AND ROL='$rol'");
+	if(sqlNum($resultaat) == 0) { //als rol niet in spel: stop
+		return;
+	}
+
+	//pak de speler
+	$resultaat2 = sqlSel(3,"SID=$sid AND NAAM='$naam'");
+	if(sqlNum($resultaat2) == 0) { //als speler niet in spel: stop
+		return;
+	}
+	$target = sqlFet($resultaat2);
+
+	//pak nu een willekeurige andere speler om mee te verwisselen
+	$spelers = array();
+	while($speler = sqlFet($resultaat)) {
+		array_push($spelers,$speler);
+	}
+	$key = array_rand($spelers);
+	$speler = $spelers[$key];
+
+	//pak de rollen en verwissel
+	$id1 = $target['ID'];
+	$rol1 = $target['ROL'];
+	$flags1 = $target['SPELFLAGS'];
+	$id2 = $speler['ID'];
+	$rol2 = $speler['ROL'];
+	$flags2 = $speler['SPELFLAGS'];
+
+	sqlUp(3,"ROL='$rol2',SPELFLAGS=$flags2","ID=$id1");
+	sqlUp(3,"ROL='$rol1',SPELFLAGS=$flags1","ID=$id2");
+
+	return;
+}//verwisselRol
 
 ?>

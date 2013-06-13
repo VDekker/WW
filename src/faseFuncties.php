@@ -111,8 +111,7 @@ function heeftRol($id) {
 
 //zet de fase van een spel op de gegeven waarde
 function zetFase($waarde,$sid) {
-	$datum = date_create(date('Y-m-d'));
-	$sqlDatum = date_format($datum, 'Y-m-d');
+	$sqlDatum = date('Y-m-d');
 	sqlUp(4,"FASE=$waarde,DUUR='$sqlDatum'","SID=$sid");
 	schrijfLog($sid,"Fase op $waarde gezet.\n");
 	return;
@@ -149,14 +148,14 @@ function heeftGestemd($id) {
 function wordtWakker($id) {
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
-	return(($speler['SPELFLAGS'] & 16384) == 16384);
+	return(($speler['SPELFLAGS'] & 32) == 0);
 }//wordtWakker
 
 //controleert of een speler beschermt is door de Genezer
 function beschermd($id) {
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
-	return (($speler['SPELFLAGS'] & 8192) == 8192);
+	return (($speler['SPELFLAGS'] & 64) == 64);
 }//beschermd
 
 //dood de speler
@@ -246,9 +245,9 @@ function vermoord($id,$sid) {
 		if($dorpsoudsteInSpel && heeftRol($target) == "Dorpsoudste") {
 			$resultaat = sqlSel(3,"ID=$target");
 			$speler = sqlFet($resultaat);
-			if(($speler['SPELFLAGS'] & 64) == 64) {
+			if(($speler['SPELFLAGS'] & 128) == 128) {
 				schrijfLog($sid,"Dorpsoudste $target overleeft de aanval.\n");
-				sqlUp(3,"SPELFLAGS=SPELFLAGS-64",
+				sqlUp(3,"SPELFLAGS=SPELFLAGS-128",
 					"ID=$id");
 				$targets = delArrayElement($targets,$key);
 				continue;
@@ -285,19 +284,19 @@ function vermoord($id,$sid) {
 
 //checkt of een speler door de Waarschuwer(s) gewaarschuwd is
 function isGewaarschuwd($id,$sid) {
-	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 4096) = 4096)");
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 16) = 16)");
 	return sqlNum($resultaat);
 }//isGewaarschuwd
 
 //checkt of een speler door de Schout(en) is opgesloten
 function isOpgesloten($id,$sid) {
-	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 2048) = 2048)");
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 8) = 8)");
 	return sqlNum($resultaat);
 }//isOpgesloten
 
 //checkt of een speler door de Raaf (of Raven) is beschuldigd
 function isBeschuldigd($id,$sid) {
-	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 1024) = 1024)");
+	$resultaat = sqlSel(3,"ID=$id AND ((SPELFLAGS & 4) = 4)");
 	return sqlNum($resultaat);
 }//isBeschuldigd
 
@@ -333,7 +332,7 @@ function stemWaarde($speler,$spel) {
 	$waarde = 1;
 
 	//check of speler gewaarschuwd is
-	if(($speler['SPELFLAGS'] & 4096) == 4096) {
+	if(($speler['SPELFLAGS'] & 16) == 16) {
 		$waarde++;
 	}
 

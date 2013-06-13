@@ -259,7 +259,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					$stem = geldigeStemHeks($bericht,$sid,3);//speler redden
 					$stem2 = geldigeStemHeks($bericht,$sid,1);//vergiftigen
 					if($stem != false && 
-						($stem == -1 || (($drank & 16) == 16))) {
+						($stem == -1 || (($drank & 128) == 128))) {
 						zetStem($id,$stem,$sid,"STEM");
 						$flag += 1;
 						schrijfLog($sid,"Heks $id wil $stem te redden.\n");
@@ -268,7 +268,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						zetStemNULL($id,$sid,"STEM");
 					}
 					if($stem2 != false && $stem2 != $id && 
-						($stem2 == -1 || (($drank & 32) == 32))) {
+						($stem2 == -1 || (($drank & 256) == 256))) {
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
 						$flag += 2;
 						schrijfLog($sid,"Heks $id wil $stem2 vergiftigen.\n");
@@ -277,9 +277,9 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						zetStemNULL($id,$sid,"EXTRA_STEM");
 					}
 					if(($stem == false || 
-						($drank & 16 != 16)) && 
+						($drank & 128 != 128)) && 
 						($stem2 == false || $stem2 == $id || 
-						($drank & 32 != 32))) {
+						($drank & 256 != 256))) {
 						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
@@ -425,8 +425,9 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				else if($rol == "Zondebok" && isNieuwDood($id)) {
 //TODO mail Zondebok
 					$stem = geldigeStemZonde($bericht,$sid);
-					if($stem != false) {
-						zetStem($id,$stem,$sid,"EXTRA_STEM");
+					if($stem !== false) {
+						$stem = "'$stem'";
+						zetStem($id,$stem,$sid,"SPECIALE_STEM");
 						schrijfLog($sid,"Zondebok $id wil schuldgevoel " . 
 							"opwekken in $stem.\n");
 					}

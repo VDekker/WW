@@ -179,7 +179,7 @@ function mailJagerWakker($fase,$spel) {
 	$vlag = false;
 
 	$resultaat = sqlSel(3,"SID=$sid AND ROL='Jager' AND 
-		((LEVEND & 2) = 2) AND ((SPELFLAGS & 4) = 0)");
+		((LEVEND & 2) = 2) AND ((SPELFLAGS & 128) = 0)");
 	if(sqlNum($resultaat) == 0) {
 		return false;
 	}
@@ -295,8 +295,8 @@ function mailActie($id,$fase,$spel,$plek) {
 	$tuplesA = array($speler);
 	$tuplesB = array();
 	$rol = $speler['ROL'];
-	$adres = $speler['EMAIL'];
 	$stem = $speler[$plek];
+	$adres = $speler['EMAIL'];
 	if($rol == "Dwaas") {
 		$rol = "Ziener";
 	}
@@ -406,7 +406,7 @@ function mailCupido($id,$spel) {
 	schrijfLog($sid,"Mail gestuurd naar $id.\n");
 
 	//mail de geliefden met hun verhaaltje
-	$verhaal = geefVerhaal($thema,'Cupido',2,2,0,$ronde,$sid);
+	$verhaal = geefVerhaal($thema,'Cupido',3,2,0,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];

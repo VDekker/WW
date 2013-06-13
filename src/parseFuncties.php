@@ -21,12 +21,17 @@ function inschrijving($adres,$bericht,$sid) {
 		schrijfLog($sid,"Geen naam gevonden.\n");
 		return false;
 	}
-	if(!preg_match('/[^A-Za-z]/',$naam)) { //andere tekens dan gewone letters
-		schrijfLog($sid,"Naam bevatte andere tekens dan letters.\n");
+
+	//pak alle gewone letters
+	if(!preg_match('/^[A-Za-z]+$/',$naam,$naam)) {
+		schrijfLog($sid,"Geen naam gevonden.\n");
 		return false;
 	}
+
+	//zet hoofd- en kleine letters goed: alles klein behalve de eerste
 	$naam = strtolower($naam);
 	$naam = ucfirst($naam);
+
 	schrijfLog($sid,"Naam: $naam\n");
 	$text = delArrayElement($text,0);
 	$bericht = implode(",",$text);
@@ -104,14 +109,14 @@ function geldigeStem($bericht,$sid,$levend) {
 //niet een ontdekte dorpsgek
 function geldigeStemRaaf($bericht,$sid,$levend) {
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1)=$levend) AND 
-		ROL<>'Dorpsgek' AND ((SPELFLAGS & 128) = 0)");
+		(ROL<>'Dorpsgek' OR ((SPELFLAGS & 128) = 0))");
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) { //check op blanco
 		$id = -1;
 	}
 	while($speler = sqlFet($resultaat)) {
-		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
-		if(preg_match("$zoek",$bericht)) {
+		$naam = $speler['NAAM'];
+		if(preg_match("/\b$naam\b/i",$bericht)) {
 			if($naam !== false) { // meerdere namen in bericht
 				return false;
 			}
@@ -202,7 +207,7 @@ function geldigeStemBrand($id,$bericht,$sid) {
 		schrijfLog($sid,"$id voelt zich schuldig en mag niet stemmen.\n");
 		return -1;
 	}
-	if(($speler['SPELFLAGS'] & 2048) == 2048) {
+	if(($speler['SPELFLAGS'] & 8) == 8) {
 		schrijfLog($sid,"$id is opgesloten en mag niet stemmen.\n");
 		return -1;
 	}
@@ -215,7 +220,7 @@ function geldigeStemBrand($id,$bericht,$sid) {
 			schrijfLog($sid,"$id mag niet op Dorpsgek $stem stemmen.\n");
 			return -1;
 		}
-		if(($speler['SPELFLAGS'] & 2048) == 2048) {
+		if(($speler['SPELFLAGS'] & 8) == 8) {
 			schrijfLog($sid,"$id mag niet op opgesloten $stem stemmen.\n");
 			return -1;
 		}
@@ -393,22 +398,22 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 //bij blanco, returned "blanco"
 //anders returned alle gevonden namen, met ","ertussen.
 function geldigeStemZonde($bericht,$sid) {
-	$stem = false;
+	$stem = "";
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(preg_match("/\bblanco\b/i",$bericht)) {
-		$stem = -1;
+		$stem .= "-1";
 	}
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($stem === false) {
-				$stem = $speler['ID'];
+			if(empty($stem)) {
+				$stem .= $speler['ID'];
 			}
-			else if($stem == -1) { //blanco en naam in bericht
+			else if($stem == "-1") { //blanco en naam in bericht
 				return false;
 			}
 			else{
-				$stem = $stem . ", " . $speler['NAAM'];
+				$stem .= "," . $speler['NAAM'];
 			}
 		}//if
 	}//while

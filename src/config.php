@@ -259,6 +259,7 @@ function adminStart($text,$adres) {
 	$resultaat = sqlSel(5,"TNAAM='$tnaam'");
 	if(sqlNum($resultaat) == 0) {
 		schrijfLog(-1,"Opgegeven thema bestaat niet: default genomen\n");
+		$tnaam = "default";
 		$resultaat = sqlSel(5,"TNAAM='default'");
 		if(sqlNum($resultaat) == 0) {
 			$bericht = "Er bestaat geen default thema; ";
@@ -269,10 +270,19 @@ function adminStart($text,$adres) {
 	}//if
 	$thema = sqlFet($resultaat);
 	$tid = $thema['TID'];
-	$sql = "INSERT INTO $tabel(SNAAM,MAX_SPELERS,SNELHEID,STRENGHEID,THEMA) ";
-	$sql .= "VALUES ('$snaam',$max,$snel,$streng,$tid)";
+
+	//pak huidige systeemdatum (voor DUUR)
+	$duur = date('Y-m-d');
+	echo "Datum: $duur.\n";
+	
+	//upload nieuw spel
+	$sql = "INSERT INTO $tabel(SNAAM,MAX_SPELERS,SNELHEID,";
+	$sql .= "STRENGHEID,THEMA,DUUR) ";
+	$sql .= "VALUES ('$snaam',$max,$snel,$streng,$tid,'$duur')";
 	sqlQuery($sql);
 	schrijfLog(-1,"Spel gemaakt: $snaam.\n");
+
+	//mail admin dat het geslaagd is
 	$onderwerp = "Spel aangemaakt: $snaam";
 	$bericht = "Spel $snaam is met succes aangemaakt:<br />";
 	$bericht .= "<br />";
@@ -282,15 +292,26 @@ function adminStart($text,$adres) {
 	$bericht .= "Thema = $tnaam<br />";
 	stuurMail($adres,$onderwerp,$bericht);
 
+	//delete alle gebruikte variabelen (enkel bericht en adressen blijft over)
 	for($i = 0; $i < 5; $i++) {
 		$details = delArrayElement($details,0);
 	}
+
+	//maak uitnodiging
 	$resultaat = sqlSel(4,"SNAAM='$snaam'");
 	$spel = sqlFet($resultaat);
 	$sid = $spel['SID'];
 	$deadline = geefDeadline($sid);
 	$onderwerp = "Uitnodiging: $snaam";
-	$bericht = "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
+
+	$bericht = "";
+	foreach($details as $string) {
+		if(strpos($string,'@') === false) {
+			$bericht .= $string;
+		}
+	}
+	$bericht .= "<br /><br />";
+	$bericht .= "Een nieuw spel Weerwolven over de Mail is aangemaakt; ";
 	$bericht .= "het zal beginnen op $deadline. ";
 	$bericht .= "Als je wilt meedoen met het spel, schrijf je dan in ";
 	$bericht .= "door een email naar $thuis te sturen, ";
@@ -304,12 +325,16 @@ function adminStart($text,$adres) {
 	$bericht .= ($snel == 1) ? "dag" : "dagen";
 	$bericht .= "<br />";
 	$bericht .= "Toegestane inactiviteit: ";
-	$bericht .= "minder dan $streng stemmingen <br />";
+	$bericht .= "minder dan $streng ";
+	$bericht .= ($streng == 1) ? "stemming" : "stemmingen";
+	$bericht .= "<br />";
 	$bericht .= "Thema van het spel: $tnaam";
-	foreach($details as $email) {
-		if(!empty($email)) {
-			stuurMail($email,$onderwerp,$bericht);
-			schrijfLog(-1,"Uitgenodigd: $email.\n");
+
+	//mail de uitnodigingen
+	foreach($details as $string) {
+		if(strpos($string,'@') !== false) {
+			stuurMail($string,$onderwerp,$bericht);
+			schrijfLog(-1,"Uitgenodigd: $string.\n");
 		}
 	}
 

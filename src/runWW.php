@@ -2,6 +2,7 @@
 
 require("config.php");
 require("dbFuncties.php");
+require("easter.php");
 require("faseFuncties.php");
 require("fases.php");
 require("gmailParse.php");
