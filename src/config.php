@@ -4,7 +4,7 @@
 function config($adres,$onderwerp,$bericht) {
 	global $admins;
 
-	$adminPass = "wwwins\r\n";
+	$adminPass = adminPass() . "\r\n";
 	if(strstr($bericht,$adminPass) == false) {
 		schrijfLog(-1,"Wachtwoord fout, commando niet uitgevoerd.\n");
 		return;
