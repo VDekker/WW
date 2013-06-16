@@ -325,7 +325,7 @@ function regelZetNULL1($sid) {
 }//regelZetNULL1
 
 //berekent de zwaarte van de stem van een speler 
-//(+1 als Burgemeester, +1 als Gewaarschuwd)
+//(+0.5 als Burgemeester, +1 als Gewaarschuwd)
 //ontdekte Dorpsgek en spelers opgesloten door de Schout 
 //of aangewezen door de Zondebok moeten door de parser worden afgevangen.
 function stemWaarde($speler,$spel) {
@@ -338,7 +338,7 @@ function stemWaarde($speler,$spel) {
 
 	//check of speler burgemeester is
 	if($speler['ID'] == $spel['BURGEMEESTER']) {
-		$waarde++;
+		$waarde += 0.5;
 	}
 	return $waarde;
 }//stemWaarde

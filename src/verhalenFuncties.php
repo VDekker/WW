@@ -997,12 +997,12 @@ function verkiezingUitslag(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
 		$samenvatting .= "$burgNaam is tot Burgemeester verkozen.<br />";
 	}
 	$samenvatting .= "<br />";
-	$samenvatting = stemmingOverzicht($overzicht);
+	$samenvatting = stemmingOverzicht($overzicht,1);
 
 	return;
 }//verkiezingUitslag
 
-function stemmingOverizcht($overzicht) {
+function stemmingOverizcht($overzicht,$vlag) {
 	$samenvatting = "Uitslag:<br />";
 	$samenvatting .= "<ul>";
 	foreach($overzicht as $stem => $namen) {
@@ -1015,7 +1015,7 @@ function stemmingOverizcht($overzicht) {
 		else {
 			$samenvatting .= "<li>$naam ";
 		}
-		$aantal = count($namen);
+		$aantal = count($namen)/$vlag;
 		$samenvatting .= "($aantal): ";
 		$namen = array_unique($namen);
 		$aantal = count($namen); //opnieuw tellen
@@ -1296,7 +1296,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 
 	//en maak een samenvatting
 	$samenvatting .= "<br />";
-	$samenvatting .= stemmingOverzicht($overzichtTotaal);
+	$samenvatting .= stemmingOverzicht($overzichtTotaal,2);
 	
 	return;
 }//brandstapelUitslag
@@ -1311,14 +1311,14 @@ function brandstapelOverzicht($sid) {
 		$stem = $speler['STEM'];
 		verwijderStem($id,"STEM");
 		$flags = $speler['SPELFLAGS'];
-		$waarde = 1;
+		$waarde = 2;
 		if(($flags & 16) == 16) { //gewaarschuwd
 			$naam .= " (gewaarschuwd)";
-			$waarde++;
+			$waarde += 2;
 		}
 		if($speler['ID'] == $burgemeester) {
 			$naam .= " (Burgemeester)";
-			$waarde++;
+			$waarde += 1;
 		}
 		if(($flags & 2) == 2) { //schuldgevoel
 			$naam .= " (schuldgevoel)";
@@ -1331,10 +1331,10 @@ function brandstapelOverzicht($sid) {
 		}
 		if($stem == "") {
 			$stem = -2;
-			$waarde = 1;
+			$waarde = 2;
 		}
 		if($stem == -1) {
-			$waarde = 1;
+			$waarde = 2;
 		}
 		for($i = 0; $i < $waarde; $i++) {
 			$key = array_search($stem,$overzicht1);
@@ -1345,7 +1345,7 @@ function brandstapelOverzicht($sid) {
 			array_push($overzicht2[$key],$naam);
 		}//for
 		if(($flags & 4) == 4) { //teken van de raaf toevoegen
-			for($i = 0; $i < 2; $i++) {
+			for($i = 0; $i < 4; $i++) {
 				$key = array_search($id,$overzicht1);
 				if($key === false) { //niet eerder op deze speler gestemd
 					array_push($overzicht1,$id);

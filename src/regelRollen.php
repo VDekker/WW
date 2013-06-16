@@ -1181,23 +1181,8 @@ function regelBrand($spel) {
 			zetDood($slachtoffer,$sid);
 			schrijfLog($sid,"Zondebok $slachtoffer gaat op de Brandstapel!\n");
 		}//if
-		else { // anders bepaalt de Burgemeester
-			$resultaat = sqlSel(3,
-				"ID IN (SELECT BURGEMEESTER FROM Spellen WHERE SID=$sid)");
-			$burgemeester = sqlFet($resultaat);
-			$id = $burgemeester['ID'];
-			if($id == -1) { //geen burgemeester, geen slachtoffer
-				schrijfLog($sid,"Geen Burgemeester, geen slachtoffer!\n");
-				return;
-			}
-			$stem = $burgemeester['STEM'];
-			if($stem == "" || $stem == -1) {
-				schrijfLog($sid,"Burgemeester zegt: geen slachtoffer.\n");
-				return;
-			}
-			zetDood($stem,$sid);
-			schrijfLog($sid,"Burgemeester $id zegt dat $stem " . 
-				"op de Brandstapel gaat.\n");
+		else { // anders geen slachtoffer
+			schrijfLog($sid,"Gelijkspel en geen Zondebok: geen slachtoffer.\n");
 			return;
 		}//else
 	}//if
