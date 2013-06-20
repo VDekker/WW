@@ -2,21 +2,6 @@
      TODO:
 ===============
 
-  * Opmerking:  wat als de dode Burgemeester als opvolger een nieuw-dode speler 
-                kiest?--dan wordt zijn keuze niet gepakt (documenteer)
-  * Opmerking:  wat gebeurt er met het Testament als een Burgemeester op de 
-                Brandstapel eindigt?--dan wordt dit 's nachts geregeld 
-                (documenteer)
-  * Opmerking:  als een WW blijft slapen (Klaas Vaak) kan zijn roedel hem wel 
-                opeten (documenteer dit)
-  * Opmerking:  voor FS wordt bijgehouden wie ze hebben betoverd (documenteer 
-                dit, ook in de Let-Op voor Grafrovers)
-  * Opmerking:  als de Dorpsoudste dood gaat, blijven ontdekte Dorpsgekken 
-                leven (documenteer)
-  * Opmerking:  Burgemeester werkt anders: zijn stem is 1,5 waard (documenteer)
-  * Opmerking:  spelers krijgen altijd een overzicht van keuzes mee 
-                (documenteer)
-
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
