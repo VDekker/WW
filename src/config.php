@@ -280,7 +280,8 @@ function adminStart($text,$adres) {
 	$sql .= "STRENGHEID,THEMA,DUUR) ";
 	$sql .= "VALUES ('$snaam',$max,$snel,$streng,$tid,'$duur')";
 	sqlQuery($sql);
-	schrijfLog(-1,"Spel gemaakt: $snaam.\n");
+	$id = sqlID();
+	schrijfLog($id,"Spel gemaakt: $snaam.\n");
 
 	//mail admin dat het geslaagd is
 	$onderwerp = "Spel aangemaakt: $snaam";
@@ -334,7 +335,7 @@ function adminStart($text,$adres) {
 	foreach($details as $string) {
 		if(strpos($string,'@') !== false) {
 			stuurMail($string,$onderwerp,$bericht);
-			schrijfLog(-1,"Uitgenodigd: $string.\n");
+			schrijfLog($id,"Uitgenodigd: $string.\n");
 		}
 	}
 
