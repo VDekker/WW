@@ -948,14 +948,11 @@ function regelDood1($sid) {
 
 //zet alle nieuw_dode spelers op dood
 //en, als Dorpsoudste dood is: verwijder dan de gaven van alle burgers
-//(Opdrachtgever verliest Lijfwacht en ontdekte Dorpsgek sterft)
+//(Opdrachtgever verliest Lijfwacht)
 function regelDood2($sid,$fase) {
 	$resultaat = sqlSel(3,
 		"SID=$sid AND ((LEVEND & 2) = 2) AND ROL='Dorpsoudste'");
 	if(sqlNum($resultaat) > 0) {
-		sqlUp(3,"LEVEND=3,SPELFLAGS=SPELFLAGS+256",
-			"SID=$sid AND ROL='Dorpsgek' AND LEVEND=1 AND 
-			((SPELFLAGS & 128) = 128) AND ((SPELFLAGS & 256) = 0)");
 		sqlUp(3,"ROL='Burger',LIJFWACHT=NULL",
 			"SID=$sid AND LEVEND=1 AND ROL IN (
 			'Cupido',
@@ -982,9 +979,8 @@ function regelDood2($sid,$fase) {
 			)");
 		schrijfLog($sid,"Dorpsoudste is dood, " . 
 			"en iedereen verliest zijn gaven.\n");
-		zetFase($fase,$sid); // opnieuw checken of een geliefde dood moet: loop
-	}
-	else {
+		
+		//zet nieuw-dode spelers in volgende stadium: LEVEND=2
 		sqlUp(3,"LEVEND=2",
 			"SID=$sid AND LEVEND=3");
 		

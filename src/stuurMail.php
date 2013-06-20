@@ -323,6 +323,83 @@ function stuurStem2($naam,$adres,$stem,$stem2,$sid) {
 	return;
 }//stuurStem2
 
+function stuurStemHeks($naam,$adres,$stem,$stem2,$flag,$sid) {
+	global $thuis;
+	$resultaat = sqlSel(4,"SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Stem ontvangen";
+	
+	$bericht .= "Hallo $naam,<br />";
+	$bericht .= "<br />";
+	$bericht .= "Jouw stem is ontvangen: ";
+	if(($flag & 1) == 1) {
+		$bericht .= "je redt $stem met het levenselixer";
+		if(($flag & 2) == 2) {
+			$bericht .= " en doodt $stem2 met het gif";
+		}
+		$bericht .= ".<br />";
+	}//if
+	else if(($flag & 2) == 2) {
+		$bericht .= "je doodt $stem2 met het gif.<br />";
+	}
+	else {
+		$bericht .= "je stemt blanco.<br />";
+	}
+	$bericht .= "<br />";
+	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
+	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
+	$bericht .= "en met de naam van de speler op wie je stemt ";
+	$bericht .= "in het bericht. ";
+	$bericht .= "Zet geen andere namen in het bericht, ";
+	$bericht .= "om problemen te voorkomen. ";
+	
+	stuurMail($adres,$onderwerp,$bericht);
+	return;
+}//stuurStemHeks
+
+function stuurStemZonde($naam,$adres,$stemmen,$sid) {
+	global $thuis;
+	$resultaat = sqlSel(4,"SID=$sid");
+	$spel = sqlFet($resultaat);
+	$snaam = $spel['SNAAM'];
+	$onderwerp = "$snaam: Stem ontvangen";
+	
+	$bericht .= "Hallo $naam,<br />";
+	$bericht .= "<br />";
+	$bericht .= "Jouw stem is ontvangen: ";
+	
+	if($stemmen == "-1") {
+		$bericht .= "je stemt blanco.<br />";
+	}
+	else {
+		$bericht .= "je stemt op ";
+		$stem = explode(",",$stemmen);
+		$aantal = count($stem);
+		for($i = 0; $i < $aantal; $i++) {
+			if($aantal - $i == 1) { //laatste
+				$bericht .= $stem[$i] . ".<br />";
+			}
+			else if($aantal - $i == 2) { //een-na-laatste
+				$bericht .= $stem[$i] . " en ";
+			}
+			else {
+				$bericht .= $stem[$i] . ", ";
+			}
+		}//for
+	}//else
+	$bericht .= "<br />";
+	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
+	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
+	$bericht .= "en met de naam van de speler op wie je stemt ";
+	$bericht .= "in het bericht. ";
+	$bericht .= "Zet geen andere namen in het bericht, ";
+	$bericht .= "om problemen te voorkomen. ";
+	
+	stuurMail($adres,$onderwerp,$bericht);
+	return;
+}//stuurStemZonde
+
 //als een mail binnen is gekomen wanneer een speler niet aan de beurt komt
 function houJeMond($naam,$adres,$sid) {
 	global $thuis;

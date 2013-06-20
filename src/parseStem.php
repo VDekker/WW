@@ -8,6 +8,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
+	$spelflags = $speler['SPELFLAGS'];
 	$sid = $spel['SID'];
 	$init = ($spel['RONDE'] == 0);
 	$fase = $spel['FASE'];
@@ -251,7 +252,6 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 8:
 				if($rol == "Heks") { 
-//TODO mail Heks van haar stemmen
 					$resultaat = sqlSel(3,"ID=$id");
 					$heks = sqlFet($resultaat);
 					$drank = $heks['SPELFLAGS'];
@@ -283,19 +283,23 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
+					else {
+						stuurStemHeks($naam,$adres,$stem,$stem2,$flag,$sid);
+					}
 				}//if
 				else if($rol == "Fluitspeler") { 
-//TODO mail FS met zijn stemmen
 					geldigeStemFS($bericht,$sid,$stem,$stem2);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						if($stem2 != false) {
 							zetStem($id,$stem2,$sid,"EXTRA_STEM");
+							stuurStem2($naam,$adres,$stem,$stem2,$sid);
 							schrijfLog($sid,"$id wil $stem en $stem2 " .
 								"betoveren.\n");
 						}
 						else {
 							zetStemNULL($id,$sid,"EXTRA_STEM");
+							stuurStem($naam,$adres,$stem,$sid);
 							schrijfLog($sid,"$id wil enkel $stem " .
 								"betoveren.\n");
 						}
@@ -422,8 +426,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
-				else if($rol == "Zondebok" && isNieuwDood($id)) {
-//TODO mail Zondebok
+				else if($rol == "Zondebok" && ($spelflags & 256) == 256) {
 					$stem = geldigeStemZonde($bericht,$sid);
 					if($stem !== false) {
 						$stem = "'$stem'";

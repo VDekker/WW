@@ -345,7 +345,12 @@ function stemWaarde($speler,$spel) {
 
 //voor een gegeven array met stemmen, returned de keys van de hoogste stem(men).
 function hoogsteStem($stemmen) {
-	$hoogsteStem = max($stemmen);
+	$hoogsteStem = $stemmen[0];
+	foreach($stemmen as $stem) {
+		if($stem > $hoogsteStem) {
+			$hoogsteStem = $stem;
+		}
+	}
 	$keys = array_keys($stemmen,$hoogsteStem);
 	return $keys;
 }//hoogsteStem

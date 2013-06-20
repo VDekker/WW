@@ -396,7 +396,7 @@ function geldigeStemCupi($bericht,$afzender,$sid,&$id1,&$id2) {
 //bepaalt of een stem een geldige stem is voor de Zondebok
 //zo niet, returned "false"
 //bij blanco, returned "blanco"
-//anders returned alle gevonden namen, met ","ertussen.
+//anders returned alle gevonden ID's, met ","ertussen.
 function geldigeStemZonde($bericht,$sid) {
 	$stem = "";
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");

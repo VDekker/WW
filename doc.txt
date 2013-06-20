@@ -11,6 +11,11 @@
                 opeten (documenteer dit)
   * Opmerking:  voor FS wordt bijgehouden wie ze hebben betoverd (documenteer 
                 dit, ook in de Let-Op voor Grafrovers)
+  * Opmerking:  als de Dorpsoudste dood gaat, blijven ontdekte Dorpsgekken 
+                leven (documenteer)
+  * Opmerking:  Burgemeester werkt anders: zijn stem is 1,5 waard (documenteer)
+  * Opmerking:  spelers krijgen altijd een overzicht van keuzes mee 
+                (documenteer)
 
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
@@ -21,7 +26,8 @@
              Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
   
-  * Mailen:  stuurFoutStem maken voor specifieke rollen
+  * Mailen:  stuurFoutStem maken voor specifieke rollen/specifieke fouten
+  * Mailen:  stuurStem moet namen in het bericht hebben, geen ID's
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  gewonnen
   
@@ -30,12 +36,12 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
+  * Nodig:   parsen checken: enkel de keuzes die de spelers meekrijgen
 
-  * Extra:   SPELFLAGS van spelers logischer/kleiner maken
   * Extra:   optimaliseer gewonnenSpelers()
   * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
   * Extra:   scores implementeren
-  * Extra:   manAdmin.pdf afmaken
+  * Extra:   manAdmin.pdf maken
   * Extra:   manStory.pdf maken
   * Extra:   alle mails in Verzonden zetten
   * Extra:   spelernamen in log ipv. spelerID zetten
@@ -182,7 +188,7 @@ SPELFLAGS:         Vlaggen voor de speler wat betreft zijn staat in het spel:
                    64  = beschermd
                    128 = geteld (Weerwolf, Jager, Zondebok), ontdekt (Dorpsgek),
                          elixer (Heks), extra leven (Dorpsoudste)
-                   256 = gelynched (Dorpsgek, Zondebok), gif (Heks)
+                   256 = gelynched (Zondebok), gif (Heks)
                    512 = hartebreuk (Geliefde)
                    1024 = opgeofferd (Lijfwacht)
 

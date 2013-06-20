@@ -651,7 +651,6 @@ function plakSamenvatting($samenvatting,$text) {
 	return $text;
 }//plakSamenvatting
 
-//TODO verhaal dat alle ontdekte Dorpsgekken dood zijn toevoegen
 function dodeDorpsoudste($fase,&$text,&$samenvatting) {
 	$oud = array();
 	$res = sqlSel(3,"ROL='Dorpsoudste' AND ((LEVEND & 2) = 2)");
@@ -1013,7 +1012,7 @@ function stemmingOverizcht($overzicht,$vlag) {
 			$samenvatting .= "<li>Niet gestemd ";
 		}
 		else {
-			$samenvatting .= "<li>$naam ";
+			$samenvatting .= "<li>$stem ";
 		}
 		$aantal = count($namen)/$vlag;
 		$samenvatting .= "($aantal): ";
@@ -1149,7 +1148,6 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//brandstapelInleiding
 
-//TODO bij gelijkspel->Burgemeesterstem doorslaggevend ander verhaal
 //TODO bij dode Burgemeester: verhaaltje bijvoegen?
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$sid = $spel['SID'];
