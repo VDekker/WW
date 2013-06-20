@@ -336,11 +336,20 @@ function keuzeGroep($text,$rol,$sid) {
 			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
 				(ROL<>'Vampier' OR ((SPELFLAGS & 32) = 32))");
 			break;
-		default: // Fluitspeler
+		case "Fluitspeler":
 			//pak alle niet-dode, niet-betoverde spelers, muv. niet-slapende FS
 			$resultaat = sqlSel(3,
 				"SID=$sid AND ((LEVEND & 1) = 1) AND ((SPELFLAGS & 1) = 0) AND 
 				(ROL<>'Fluitspeler' OR ((SPELFLAGS & 32) = 32))");
+			break;
+		case "Brandstapel":
+			//alle niet-dode, niet-opgesloten, niet-ontdekte spelers
+			$resultaat = sqlSel(3,
+				"SID=$sid AND ((LEVEND & 1) = 1) AND ((SPELFLAGS & 8) = 0) AND 
+				(ROL<>'Dorpsgek' OR ((SPELFLAGS & 128) = 0))");
+			break;
+		default: //burgemeesterverkiezing
+			$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 			break;
 	}
 	if(sqlNum($resultaat) > 0) {

@@ -1089,4 +1089,28 @@ function mailInleiding($spel) {
 	stuurMail($adres,$onderwerp,$text);
 }
 
+function mailGewonnen($fase,$spel) {
+	$text = "";
+	$samenvatting = "";
+	$auteur = array();
+
+	if($fase) {
+		//na brandstapel: maak brandstapelverhaaltje
+		brandstapelInleiding($text,$samenvatting,$auteur,$spel);
+	}
+	else {
+		//na nacht: maak ontwaakverhaaltje
+		ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
+	}
+
+	//maak gewonnenverhaaltje
+
+	//mail naar iedereen in maillijst
+	$adres = maillijst($sid);
+	stuurMail($adres,$onderwerp,$text);
+
+	//meld aan admins dat het spel af is
+
+}//mailGewonnen
+
 ?>

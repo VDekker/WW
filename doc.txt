@@ -2,6 +2,9 @@
      TODO:
 ===============
 
+  * Opmerking: Wat als meerdere Verleidsters op dezelfde speler stemmen? Deze 
+               kan nooit worden vermoord. Voorkomen of erin houden?
+
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
@@ -14,6 +17,7 @@
   * Mailen:  stuurFoutStem maken voor specifieke rollen/specifieke fouten
   * Mailen:  stuurStem moet namen in het bericht hebben, geen ID's
   * Mailen:  mail regelRollen (overdag)
+  * Mailen:  keuzes toevoegen bij brandstapelinleiding, verkiezingsinleiding
   * Mailen:  gewonnen
   
   * Verhaal: maak default verhalen
@@ -21,10 +25,8 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
-  * Nodig:   parsen checken: enkel de keuzes die de spelers meekrijgen
 
   * Extra:   optimaliseer gewonnenSpelers()
-  * Extra:   geldigeStemCupi, geldigeStemFS en geldigeStemGoochel samenbundelen
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf maken
   * Extra:   manStory.pdf maken

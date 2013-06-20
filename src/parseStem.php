@@ -29,7 +29,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 2:
 				if($rol == "Dief") {
-					$stem = geldigeStem($bericht,$sid,1);
+					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -47,7 +47,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 4:
 				if($rol == "Cupido") {
-					geldigeStemCupi($bericht,$id,$sid,$stem,$stem2);
+					geldigeStemUniek2($bericht,$id,$sid,$stem,$stem2,"Cupido");
 					if($stem != false && $stem2 != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
@@ -67,7 +67,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 6: 
 				if($rol == "Opdrachtgever") {
-					$stem = geldigeStemVerleidOpdracht($bericht,$rol,$sid);
+					$stem = geldigeStemOpdracht($bericht,$id,$sid);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -111,8 +111,9 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 4:
 				if($rol == "Klaas Vaak") {
-					$stem = geldigeStem($bericht,$sid,1);
-					if($stem != false && $stem != $speler['VORIGE_STEM']) {
+					$stem = geldigeStemZelfHerhaling($bericht,$sid,1,
+						$id,$speler['VORIGE_STEM']);
+					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
 						schrijfLog($sid,"$id wil $stem laten slapen.\n");
@@ -128,41 +129,27 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				}
 				break;
 			case 6:
-				//ontvang stem van Genezer, Ziener, Priester, Slet en Dwaas
-				if(($rol == "Genezer") || ($rol == "Ziener") || 
-					($rol == "Priester") || ($rol == "Slet") || 
-					($rol == "Dwaas")) {
-					$stem = geldigeStem($bericht,$sid,1);
-					if($stem != false && $stem != $speler['VORIGE_STEM']) {
+				//ontvang stem van Ziener, Priester,  en Dwaas
+				if(($rol == "Psychopaat") || ($rol == "Ziener") || 
+					($rol == "Priester") || ($rol == "Dwaas")) {
+						$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
+						if($stem != false) {
+							zetStem($id,$stem,$sid,"STEM");
+							stuurStem($naam,$adres,$stem,$sid);
+							schrijfLog($sid,"$rol $id kiest $stem.\n");
+						}
+						else {
+							schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+							stuurFoutStem($naam,$adres,$sid);
+						}
+					}//if
+				else if($rol == "Verleidster" || $rol == "Slet") {
+					$stem = geldigeStemZelfHerhaling($bericht,$sid,1,
+						$id,$speler['VORIGE_STEM']);
+					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
 						schrijfLog($sid,"$rol $id kiest $stem.\n");
-					}
-					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
-						stuurFoutStem($naam,$adres,$sid);
-					}
-				}//if
-				else if($rol == "Verleidster") {
-					$stem = geldigeStemVerleidOpdracht($bericht,$rol,$sid);
-					if($stem != false && $stem != $spelers['VORIGE_STEM']) {
-						zetStem($id,$stem,$sid,"STEM");
-						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Verleidster $id wil $stem " . 
-							"verleiden.\n");
-					}
-					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
-						stuurFoutStem($naam,$adres,$sid);
-					}
-				}//else if
-				else if($rol == "Psychopaat") {
-					$stem = geldigeStem($bericht,$sid,1);
-					if($stem != false && $stem != $id) {
-						zetStem($id,$stem,$sid,"STEM");
-						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Psychopaat $id wil $stem " . 
-							"vermoorden.\n");
 					}
 					else {
 						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
@@ -182,7 +169,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 				}//else if
 				else if($rol == "Vampier") {
-					$stem = geldigeStemWWVP($bericht,$sid);
+					$stem = geldigeStemWWVP($bericht,$sid,"Vampier");
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -197,7 +184,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					//kijk of het de WW-stem is, of de WitteWW-stem
 					if(preg_match("/\bwitte\b/i",$onderwerp) || 
 						preg_match("/\bwitte\b/i",$bericht)) {
-						$stem = geldigeStem($bericht,$sid,1);
+						$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 						if($stem != false && $stem != $id && $tweede) {
 							zetStem($id,$stem,$sid,"EXTRA_STEM");
 							stuurStem($naam,$adres,$stem,$sid);
@@ -211,7 +198,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						}
 					}//if
 					else { // anders is het de WW stem
-						$stem = geldigeStemWWVP($bericht,$sid);
+						$stem = geldigeStemWWVP($bericht,$sid,"Weerwolf");
 						if($stem != false) {
 							zetStem($id,$stem,$sid,"STEM");
 							stuurStem($naam,$adres,$stem,$sid);
@@ -226,7 +213,8 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}//else
 				}//else if
 				else if($rol == "Goochelaar") {
-					geldigeStemGoochel($bericht,$id,$sid,$stem,$stem2);
+					geldigeStemUniek2($bericht,$id,$sid,
+						$stem,$stem2,"Goochelaar");
 					if((($stem == -1) || 
 						($stem != false && 
 						$stem2 != false && $stem != $stem2)) &&
@@ -256,8 +244,8 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					$heks = sqlFet($resultaat);
 					$drank = $heks['SPELFLAGS'];
 					$flag = 0; //houdt de keuze bij: voor mailen
-					$stem = geldigeStemHeks($bericht,$sid,3);//speler redden
-					$stem2 = geldigeStemHeks($bericht,$sid,1);//vergiftigen
+					$stem = geldigeStemHeks($bericht,$sid,0,$id);
+					$stem2 = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem != false && 
 						($stem == -1 || (($drank & 128) == 128))) {
 						zetStem($id,$stem,$sid,"STEM");
@@ -323,7 +311,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						preg_match("/testament/i",$bericht) ||
 						preg_match("/opvolger/i",$onderwerp) ||
 						preg_match("/opvolger/i",$bericht))) {
-					$stem = geldigeStemBurg($bericht,$sid,1);
+					$stem = geldigeStemHeks($bericht,$sid,1,$id);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -348,8 +336,9 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 				}//else if
 				else if($rol == "Schout") {
-					$stem = geldigeStem($bericht,$sid,1);
-					if($stem != false && $stem != $speler['VORIGE_STEM']) {
+					$stem = geldigeStemHerhaling($bericht,$sid,1,
+						$speler['VORIGE_STEM']);
+					if($stem != false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
 						schrijfLog($sid,"Schout $id kiest $stem.\n");
@@ -360,7 +349,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 				}//else if
 				else if($rol == "Waarschuwer") { //mag niet op zichzelf stemmen
-					$stem = geldigeStemWaarschuw($bericht,$sid,1);
+					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem != false && $stem != $id) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -372,7 +361,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 				}//else if
 				else if($rol == "Jager" && isNieuwDood($id)) {
-					$stem = geldigeStem($bericht,$sid,1);
+					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
@@ -388,7 +377,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
-			case 13:
+			case 13: //burgemeesterverkiezing
 				$stem = geldigeStem($bericht,$sid,1);
 				if($stem != false) {
 					zetStem($id,$stem,$sid,"STEM");
@@ -415,7 +404,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				break;
 			case 18:
 				if($rol == "Jager" && isNieuwDood($id)) {
-					$stem = geldigeStem($bericht,$sid,1);
+					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem != false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);

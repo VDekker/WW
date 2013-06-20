@@ -305,10 +305,8 @@ function fases() {
 					if(geefFase($sid) == 12) {
 						regelDood2($sid,10);
 						regelZetNULL1($sid);
-						if(gewonnen($sid)) {
+						if(gewonnen(0,$spel)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
-//TODO stuur gewonnen mails
-//kan dit in algemene mail?
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
 							mailAlgemeenVerkiezing($sid);
@@ -381,9 +379,8 @@ function fases() {
 				case 20:
 					regelDood2($sid,17);
 					if(geefFase($sid) == 20) {
-						if(gewonnen($sid)) {
+						if(gewonnen(1,$spel)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
-//TODO stuur gewonnen mails
 						}
 						mailAlgemeenInslapen($sid);
 						zetDood2($sid);

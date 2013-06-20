@@ -472,12 +472,13 @@ function gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,$flag) {
 }//gewonnenSpeler
 
 //checkt of een spel gewonnen is door een team
-function gewonnen($sid) {
+function gewonnen($fase,$spel) {
+	$sid = $spel['SID'];
 	$gewonnenSpelers = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(sqlNum($resultaat) == 0) {
 		schrijfLog($sid,"Alle spelers dood; gelijkspel...\n");
-		return;
+		return true;
 	}
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
@@ -493,6 +494,8 @@ function gewonnen($sid) {
 		schrijfLog($sid,"Niemand heeft nog gewonnen.\n");
 		return false;
 	}
+
+	mailGewonnen($fase,$spel);
 	return true;
 }//gewonnen
 
