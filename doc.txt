@@ -11,7 +11,6 @@
              Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
   
-  * Mailen:  stuurFoutStem maken voor specifieke rollen/specifieke fouten
   * Mailen:  stuurStem moet namen in het bericht hebben, geen ID's
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  keuzes toevoegen bij brandstapelinleiding, verkiezingsinleiding
@@ -21,6 +20,8 @@
   * Config:  insert verhalen verbeteren (thema's vanaf nu met foreign keys)
 
   * Nodig:   alle TODO's afhandelen
+  
+  * Man:     Witte Weerwolf-stem-syntax uitleggen (ook Burgemeester-Testament)
 
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf maken
@@ -32,6 +33,7 @@
   * Extra:   config functie om log te zien
   * Extra:   schrijfLog optimaliseren (niet met elke aanroep laten updaten)
   * Extra:   'via'-mails afvangen/niet parsen
+  * Extra:   speciale foutmeldingen wanneer stemmen worden herhaald
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER

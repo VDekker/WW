@@ -1514,7 +1514,7 @@
        & 5 & Levenden & Specifiek (1) & Speler dood \\
        & 6 & Levenden & - & Gaan slapen \\
       \hline
-      \multirow{5}{*}{Brandstapel} & 0 & & & Inleiding \\
+      \multirow{5}{*}{Brandstapel} & 0 & Levenden & Doden & Inleiding \\
        & 1 & Levenden & Doden & Uitslag, normaal \\
        & 2 & Levenden & Specifiek & Uitslag, speciaal \\
        & 3 & Levenden & Specifiek & Speler dood, aankondiging \\
@@ -1523,8 +1523,8 @@
       \multirow{6}{*}{Burgemeester} & 0 & Burgemeester & - & Wakker worden \\
        & 1 & Burgemeester & Opvolger & Speler gekozen \\
        & 2 & & & Opvolger \\
-       & 3 & & & Stemming, inleiding \\
-       & 4 & & & Stemming, uitslag \\
+       & 3 & Levenden & Specifiek (1) & Stemming, inleiding \\
+       & 4 & Levenden & Burgemeester & Stemming, uitslag \\
        & 9 & Burgemeester & - & Blanco gestemd \\
       \hline
       \multirow{1}{*}{Burger} & -1 & Burger & - & Rolverdeling \\
@@ -1545,9 +1545,8 @@
        & 3 & Doelwit & - & Burger geworden, slachtoffer \\
        & 9 & Dief & - & Blanco gestemd \\
       \hline
-      \multirow{3}{*}{Dorpsgek} & -1 & Dorpsgek & - & Rolverdeling \\
+      \multirow{2}{*}{Dorpsgek} & -1 & Dorpsgek & - & Rolverdeling \\
        & 0 & Levenden & Dorpsgek & Ontdekt op Brandstapel \\
-       & 1 & & & Toch gelynched \\
       \hline
       \multirow{3}{*}{Dorpsoudste} & -1 & Dorpsoudste & - & Rolverdeling \\
        & 0 & Levenden & Dorpsoudsten & Dorpsoudste dood, nacht \\
@@ -1566,13 +1565,16 @@
        & 1 & Genezer & Doelwit & Speler beschermd \\
        & 9 & Genezer & - & Blanco gestemd \\
       \hline
-      \multirow{7}{*}{Gewonnen} & 0 & & & Burgers gewonnen \\
-       & 1 & & & Weerwolven gewonnen \\
-       & 2 & & & Vampiers gewonnen \\
-       & 3 & & & Psychopaat gewonnen \\
-       & 4 & & & Witte Weerwolf gewonnen \\
-       & 5 & & & Fluitspelers gewonnen \\
-       & 6 & & & Overig \\
+      \multirow{9}{*}{Gewonnen} & -1 & Alle & - & Gelijkspel (iedereen dood) \\
+       & 0 & Winnaars & - & Burgers \\
+       & 1 & Winnaars & - & Weerwolven \\
+       & 2 & Winnaars & - & Vampiers \\
+       & 3 & Winnaar & - & Psychopaat \\
+       & 4 & Winnaar & - & Witte Weerwolf \\
+       & 5 & Winnaars & Speficiek & Fluitspelers \\
+       & 6 & Winnaars & Specifiek & Geliefden \\
+       & 7 & Winnaars & Specifiek & Opdrachtgever/Lijfwacht \\
+       & 8 & Winnaars & Specifiek & Overig \\
       \hline
       \multirow{5}{*}{Goochelaar} & -1 & Goochelaar & - & Rolverdeling \\
        & 0 & Goochelaar & - & Wakker worden \\
@@ -1635,7 +1637,7 @@
        & 0 & Raaf & - & Wakker worden \\
        & 1 & Raaf & Raaf & Zichzelf beschuldigd \\
        & 2 & Raaf & Doelwit & Speler beschuldigd \\
-       & 3 & & & Teken van de Raaf \\
+       & 3 & Levenden & Doelwit & Teken van de Raaf \\
        & 9 & Raaf & - & Blanco gestemd \\
       \hline
       \multirow{1}{*}{Rolverdeling} & -1 & Speler & - & Speler rol bepaald \\
@@ -1644,7 +1646,7 @@
        & 0 & Schout & - & Wakker worden \\
        & 1 & Schout & Schout & Zelf opgesloten \\
        & 2 & Schout & Doelwit & Speler opgesloten, Schout \\
-       & 3 & & & Speler opgesloten, algemeen \\
+       & 3 & Levenden & Doelwit & Speler opgesloten, algemeen \\
        & 9 & Schout & - & Blanco gestemd \\
       \hline
       \multirow{4}{*}{Slet} & -1 & Slet & - & Rolverdeling \\
@@ -1689,7 +1691,7 @@
       \multirow{4}{*}{Zondebok} & -1 & Zondebok & - & Rolverdeling \\
        & 0 & Zondebok & - & Wakker worden \\
        & 1 & Zondebok & Doelwitten & Schuldgevoel opgewekt \\
-       & 2 & & Zondebok & Op de Brandstapel \\
+       & 2 & Levenden & Specifiek & Op de Brandstapel \\
        & 9 & Zondebok & - & Blanco gestemd \\
     \end{longtable}
   \end{center}

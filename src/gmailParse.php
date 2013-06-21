@@ -9,9 +9,13 @@ function gmailParse() {
 	schrijfLog(-1,"Totaal aantal emails: $totaal.\n");
 
 	if($emails) {
-		// sorteer de emails (nieuwste eerst)
-		sort($emails);
+		//sorteer de emails met oudste eerst. Voor nieuwste eerst: sort()
+		rsort($emails);
+
+		//ga elke mail langs
 		foreach($emails as $email_nummer) {
+
+			//pak informatie
 			$header = imap_fetch_overview($gmconnect,$email_nummer,0);
 			$bericht1 = imap_fetchbody($gmconnect,$email_nummer,1.1);
 			if(empty($bericht1)) {
@@ -19,11 +23,15 @@ function gmailParse() {
 			}
 			$onderwerp = $header[0]->subject;
 			$afzender = $header[0]->from;
+
+			//pak de echte afzender: slechts het adres
 			$matches = array();
 			preg_match("'<(.*?)>'si",$afzender,$matches);
 			if(!empty($matches)) {
 				$afzender = $matches[1];
 			}
+
+			//mails van onszelf kunnen worden genegeerd
 			if($afzender == $thuis) {
 				continue;
 			}
@@ -32,6 +40,7 @@ function gmailParse() {
 			
 			schrijflog(-1,"Mail van: '$afzender'\n");
 
+			//ga nu parsen: zoek wat voor mail het is
 			if(preg_match("/config/i",$onderwerp)) {
 				schrijfLog(-1,"Config mail gevonden.\n");
 				if(!in_array($afzender,$admins)) {
@@ -43,7 +52,8 @@ function gmailParse() {
 			else if(preg_match("/\bhelp\b/i",$onderwerp)) {
 				help($afzender,$onderwerp,$bericht);
 			}
-			else {
+			else { //anders is het een stem/inschrijving
+				//zoek welk spel
 				$resultaat = sqlSel(4,"");
 				$gevonden = false;
 				while($spel = sqlFet($resultaat)) {
@@ -56,30 +66,35 @@ function gmailParse() {
 				if($gevonden) { // als een speltitel in het onderwerp staat
 					$sid = $spel['SID'];
 					if($spel['STATUS'] > 1) { // voor gewonnen en gestopte spellen
-//TODO betere fout-handling
 						stuurFoutStop($adres,$snaam);
 					}
 					else if ($spel['STATUS'] == 1) {
 						stuurFoutPauze($adres,$snaam);
 					}
-					else {
+					else { //anders: check of speler, of inschrijving-fase
 						$id = spelerID($afzender,$sid);
-						if(!empty($naam) || ($init && $fase == 1)) {
+						if($id == -1 && 
+							($spel['RONDE'] != 0 || $spel['FASE'] != 0)) {
+								//adres niet herkend in het spel
+								schrijfLog($spel['SID'],
+									"Geen speler herkend.\n");
+								stuurFoutAdres($afzender,$spel['SNAAM']);
+						}
+						else if ($id == -2) {
+							//speler is dood en hoeft niet te stemmen
+							schrijfLog($spel['SID'],"Speler is dood.\n");
+							stuurFoutDood($afzender,$spel['SNAAM']);
+						}
+						else {
 							parseStem($id,$afzender,$spel,$bericht,$onderwerp);
 						}
 					}//else
 				}//if
 				else {
+					//geen spelnaam herkend: mail dit naar de afzender
 					schrijfLog(-1,"Verkeerd onderwerp (geen spelnaam " . 
-						"herkend), of verkeerd email-adres (geen afzender " . 
 						"herkend).\n");
-					// je komt hier als:
-					// - email adres niet bekend in het spel
-					// - of de invoer was gewoon fucked (onderwerp verkeerd)
-					// - of de speler is dood en heeft geen reden 
-					//      om naar het systeem te sturen (toch?)
-					// mail dit naar de afzender.
-					stuurFoutAdres($afzender);
+					stuurFoutOnderwerp($afzender);
 				}
 			}//else
 		}//foreach

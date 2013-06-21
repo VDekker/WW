@@ -68,12 +68,18 @@ function inschrijving($adres,$bericht,$sid) {
 }//inschrijving
 
 // geeft naam van speler gebaseerd op email adres en spel,
-// of "" als het adres niet bij het spel hoort.
-// Speler moet levend zijn, anders niet.
+// of -1 als het adres niet bij het spel hoort,
+// of -2 als de speler dood is
 function spelerID($adres,$sid) {
 	$resultaat = sqlSel(3,
-		"SID=$sid AND EMAIL='$adres' AND ((LEVEND & 1) = 1)");
+		"SID=$sid AND EMAIL='$adres'");
+	if(sqlNum($resultaat) == 0) {
+		return -1;
+	}
 	$speler = sqlFet($resultaat);
+	if($speler['LEVEND'] == 0) {
+		return -2;
+	}
 	return $speler['ID'];
 }//spelerID
 
@@ -190,15 +196,15 @@ function geldigeStemOpdracht($bericht,$opdracht,$sid) {
 	if($stem == -1) {
 		return $stem;
 	}
-	$resultaat = sqlSel(3,
-		"SID=$sid AND ((LEVEND & 1) = 1) AND ROL='Opdrachtgever'");
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+		ROL='Opdrachtgever' AND ID<>$opdracht");
 	if(sqlNum($resultaat) == 0) {
 		return $stem;
 	}
 	while($speler = sqlFet($resultaat)) {
-		if($stem == $speler['STEM'] && $opdracht != $speler['ID']) {
+		if($stem == $speler['STEM']) {
 			schrijfLog($sid,"$stem is al eerder gekozen.\n");
-			return false;
+			return -2;
 		}
 	}//while
 	return $stem;
@@ -328,15 +334,13 @@ function geldigeStemUniek2($bericht,$afzender,$sid,&$id1,&$id2,$rol) {
 		if(sqlNum($resultaat) != 0) {
 			while($speler = sqlFet($resultaat)) {
 				if($id1 != false && ($id1 == $speler['STEM'] || 
-					$id1 == $speler['EXTRA_STEM'])) {
-						schrijfLog($sid,"$rol: $id1 is al gekozen.\n");
-						$id1 = false;
-					}//if
-				if($id2 != false && ($id2 == $speler['STEM'] || 
+					$id1 == $speler['EXTRA_STEM']) &&
+					$id2 != false && ($id2 == $speler['STEM'] || 
 					$id2 == $speler['EXTRA_STEM'])) {
-						schrijfLog($sid,"$rol: $id2 is al gekozen.\n");
-						$id2 = false;
-					}//if
+						$id1 = -2;
+						$id2 = -2;
+						break;
+				}//if
 			}//while
 		}//if
 	}//if

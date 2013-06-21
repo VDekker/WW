@@ -1158,6 +1158,7 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 }//brandstapelInleiding
 
 //TODO bij dode Burgemeester: verhaaltje bijvoegen?
+//TODO bij dode Zondebok-Geliefde: wat gebeurt er?
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$sid = $spel['SID'];
 	$ronde  = $spel['RONDE'];
