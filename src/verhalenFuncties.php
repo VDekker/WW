@@ -961,6 +961,21 @@ function verkiezingInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 		$samenvatting .= "De Burgemeesterverkiezing begint.<br />";
 	}
 
+	//keuzes toevoegen
+	$keuzes = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($keuzes,$speler['NAAM']);
+	}
+	array_push($keuzes,"blanco");
+
+	$samenvatting .= "Er kan gestemd worden op:<br />";
+	$samenvatting .= "<ul>";
+	foreach($keuzes as $naam) {
+		$samenvatting .= "<li>$naam</li>";
+	}
+	$samenvatting .= "</ul><br />";
+
 	return;
 }//verkiezingInleiding
 
@@ -1154,11 +1169,27 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	//samenvatting maken
 	$samenvatting .= "De Brandstapelstemming begint.<br />";
 
+	//keuzes toevoegen
+	$keuzes = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1) AND 
+		(ROL<>'Dorpsgek' OR ((SPELFLAGS & 128) = 0)) AND 
+		((SPELFLAGS & 8) = 0)");
+	while($speler = sqlFet($resultaat)) {
+		array_push($keuzes,$speler['NAAM']);
+	}
+	array_push($keuzes,"blanco");
+
+	$samenvatting .= "Er kan gestemd worden op:<br />";
+	$samenvatting .= "<ul>";
+	foreach($keuzes as $naam) {
+		$samenvatting .= "<li>$naam</li>";
+	}
+	$samenvatting .= "</ul><br />";
+
 	return;
 }//brandstapelInleiding
 
-//TODO bij dode Burgemeester: verhaaltje bijvoegen?
-//TODO bij dode Zondebok-Geliefde: wat gebeurt er?
+//TODO bij dode Zondebok-Geliefde: speciale inleiding maken
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$sid = $spel['SID'];
 	$ronde  = $spel['RONDE'];

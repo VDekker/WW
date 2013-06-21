@@ -325,13 +325,11 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				}
 				break;
 			case 11:
-				if(isDodeBurg($speler,$spel) &&
-					(preg_match("/burgemeester/i",$onderwerp) || 
-						preg_match("/burgemeester/i",$bericht) ||
-						preg_match("/testament/i",$onderwerp) ||
-						preg_match("/testament/i",$bericht) ||
-						preg_match("/opvolger/i",$onderwerp) ||
-						preg_match("/opvolger/i",$bericht))) {
+				if(isDodeBurg($speler,$spel) && 
+					(($rol != "Raaf" && $rol != "Schout" && 
+					$rol != "Waarschuwer" && $rol != "Jager") || 
+					preg_match("/burgemeester/i",$onderwerp) || 
+					preg_match("/burgemeester/i",$bericht))) {
 					$stem = geldigeStemHeks($bericht,$sid,1,$id);
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");

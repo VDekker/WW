@@ -10,10 +10,7 @@
   * Testen:  infodump bij Onschuldige Meisje, Zondebok en keuzes van Heks en 
              Jager, kloppen deze?
   * Testen:  spel pauzeren/hervatten
-  
-  * Mailen:  stuurStem moet namen in het bericht hebben, geen ID's
-  * Mailen:  mail regelRollen (overdag)
-  * Mailen:  keuzes toevoegen bij brandstapelinleiding, verkiezingsinleiding
+  * Testen:  alles!
   
   * Verhaal: maak default verhalen
   
@@ -21,8 +18,6 @@
 
   * Nodig:   alle TODO's afhandelen
   
-  * Man:     Witte Weerwolf-stem-syntax uitleggen (ook Burgemeester-Testament)
-
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf maken
   * Extra:   manStory.pdf maken
