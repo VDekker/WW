@@ -531,13 +531,12 @@ function help($afzender,$onderwerp,$bericht) {
 	$message .= "HID: $hid <br />";
 	$message .= "<br />";
 	$message .= $bericht;
+
+	//pak de adressen van de admins
 	$alleAdmins = $admins[0];
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
-	schrijfLog(-1,"$onderwerp\n");
-	schrijfLog(-1,"$message\n");
-	schrijfLog(-1,"$hid\n");
 	stuurMail($alleAdmins,$subject,$message);
 	return;
 }//help

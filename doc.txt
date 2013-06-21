@@ -2,9 +2,6 @@
      TODO:
 ===============
 
-  * Opmerking: Wat als meerdere Verleidsters op dezelfde speler stemmen? Deze 
-               kan nooit worden vermoord. Voorkomen of erin houden?
-
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
@@ -18,7 +15,6 @@
   * Mailen:  stuurStem moet namen in het bericht hebben, geen ID's
   * Mailen:  mail regelRollen (overdag)
   * Mailen:  keuzes toevoegen bij brandstapelinleiding, verkiezingsinleiding
-  * Mailen:  gewonnen
   
   * Verhaal: maak default verhalen
   
@@ -26,7 +22,6 @@
 
   * Nodig:   alle TODO's afhandelen
 
-  * Extra:   optimaliseer gewonnenSpelers()
   * Extra:   scores implementeren
   * Extra:   manAdmin.pdf maken
   * Extra:   manStory.pdf maken
@@ -37,8 +32,6 @@
   * Extra:   config functie om log te zien
   * Extra:   schrijfLog optimaliseren (niet met elke aanroep laten updaten)
   * Extra:   'via'-mails afvangen/niet parsen
-  * Extra:   alleen spel-mails parsen wanneer de juiste fase aangebroken is...?
-             (anders terugzetten op ongelezen...?)
 
 ==========================================
      DOCUMENTATIE VAN WWautoVERTELLER
@@ -784,13 +777,16 @@ Zondebok:           -1 = Rolverdeling mailen
                      1 = Speler(s) gekozen (hoeveel?)
                      2 = Zondebok op de Brandstapel
                      9 = Blanco gestemd
-Gewonnen:            0 = Burgers gewonnen
+Gewonnen:           -1 = Gelijkspel (iedereen dood)
+                     0 = Burgers gewonnen
                      1 = Weerwolven gewonnen
                      2 = Vampiers gewonnen
                      3 = Psychopaat gewonnen
                      4 = Witte Weerwolf gewonnen
                      5 = Fluitspelers gewonnen
-                     6 = Overig (Geliefden/Opdrachtgever gewonnen oid)
+                     6 = Geliefden gewonnen
+                     7 = Opdrachtgever/Lijfwacht gewonnen
+                     8 = Overig (Geliefden + Lijfwacht)
 
 Opbouw:
 -------

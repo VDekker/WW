@@ -117,6 +117,25 @@ function stuurResultaatHTML($adres,$bericht,$resultaat) {
 	return;
 }//stuurResultaatHTML
 
+function stuurGewonnenAdmins($spel) {
+	global $admins;
+	$sid = $spel['SID'];
+	$snaam = $spel['SNAAM'];
+	
+	$onderwerp = "Spel gewonnen: $snaam";
+	$bericht = "Het spel $snaam (ID: $sid) is gewonnen. ";
+	$bericht .= "Dit spel zal dus niet voorzetten, ";
+	$bericht .= "en kan verwijderd worden als dat nodig is.";
+
+	//pak de adressen van de admins
+	$alleAdmins = $admins[0];
+	for($i = 1; $i < count($admins); $i++) {
+		$alleAdmins .= ", $admins[$i]";
+	}
+	stuurMail($alleAdmins,$onderwerp,$bericht);
+	return;
+}//stuurGewonnenAdmins
+
 function stuurStop($sid) {
 	$resultaat = sqlSel(4,"SID=$sid");
 	$spel = sqlFet($resultaat);

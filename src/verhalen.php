@@ -1089,7 +1089,11 @@ function mailInleiding($spel) {
 	stuurMail($adres,$onderwerp,$text);
 }
 
-function mailGewonnen($fase,$spel) {
+function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
+	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
+	$thema = $spel['THEMA'];
+
 	$text = "";
 	$samenvatting = "";
 	$auteur = array();
@@ -1103,14 +1107,127 @@ function mailGewonnen($fase,$spel) {
 		ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
 	}
 
+	//pak alle levende, niet-gewonnen spelers
+	$verlorenSpelers = array();
+	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+	while($speler = sqlFet($resultaat)) {
+		if(!in_array($speler,$gewonnenSpelers)) {
+			array_push($verlorenSpelers,$speler);
+		}
+	}
+
 	//maak gewonnenverhaaltje
+	$verhaal = geefVerhaal($thema,"Gewonnen",$gewonnen,count($gewonnenSpelers),
+		count($verlorenSpelers),$ronde,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulIn($gewonnenSpelers,$verlorenSpelers,"",$text,$geswoorden);
+
+	//maak samenvatting
+	switch($gewonnen) {
+		case -1:
+			$samenvatting .= "Alle spelers zijn dood; ";
+			$samenvatting .= "het spel eindigt in gelijkspel.<br />";
+			break;
+		case 0:
+			$samenvatting .= "De Burgers hebben gewonnen.<br />";
+			break;
+		case 1:
+			$samenvatting .= "De Weerwolven hebben gewonnen.<br />";
+			break;
+		case 2:
+			$samenvatting .= "De Vampiers hebben gewonnen.<br />";
+			break;
+		case 3:
+			$samenvatting .= "De Psychopaat heeft gewonnen.<br />";
+			break;
+		case 4:
+			$samenvatting .= "De Witte Weerwolf heeft gewonnen.<br />";
+			break;
+		case 5:
+			$samenvatting .= "De Fluitspelers hebben gewonnen.<br />";
+			break;
+		case 6:
+			$samenvatting .= "De Geliefden hebben gewonnen.<br />";
+			break;
+		case 7:
+			$samenvatting .= "De Opdrachtgever en Lijfwacht ";
+			$samenvatting .= "hebben gewonnen.<br />";
+			break;
+		default: //case 8:
+			$samenvatting .= "Het spel is gewonnen.<br />";
+			break;
+	}//switch
+
+	//maak het totale speleroverzicht
+	$samenvatting .= totaalOverzicht($gewonnenSpelers,$spel);
+
+	//voeg samenvatting achter het verhaal
+	$text = plakSamenvatting($samenvatting,$text);
+	$text = auteur($auteur,$text);
 
 	//mail naar iedereen in maillijst
 	$adres = maillijst($sid);
 	stuurMail($adres,$onderwerp,$text);
 
 	//meld aan admins dat het spel af is
-
+	stuurGewonnenAdmins($spel);
+	return;
 }//mailGewonnen
+
+function totaalOverzicht($gewonnenSpelers,$spel) {
+	$sid = $spel['SID'];
+	$burg = $spel['BURGEMEESTER'];
+	$resultaat = sqlSel(3,"SID=$sid");
+	if(sqlNum($resultaat) == 0) {
+		return "";
+	}
+
+	$samenvatting = "Speleroverzicht:<br />";
+	$samenvatting .= "<table border='1'><tr>";
+	$samenvatting .= "<th>Naam</th>";
+	$samenvatting .= "<th>Gewonnen?</th>";
+	$samenvatting .= "<th>Levend?</th>";
+	$samenvatting .= "<th>Rol</th>";
+	$samenvatting .= "<th>Geliefde</th>";
+	$samenvatting .= "<th>Lijfwacht</th>";
+	$samenvatting .= "<th>Burgemeester?</th>";
+	$samenvatting .= "</tr>";
+
+	while($speler = sqlFet($resultaat)) {
+		$naam = $speler['NAAM'];
+		$gewonnen = (in_array($speler,$gewonnenSpelers))? "Ja" : "";
+		$levend = ($speler['LEVEND'] & 1)? "Ja" : "";
+		$rol = $speler['ROL'];
+		$geliefde = "";
+		if($speler['GELIEFDE'] != "") {
+			$gid = $speler['GELIEFDE'];
+			$res = sqlSel(3,"ID=$gid");
+			$sp = sqlFet($res);
+			$geliefde = $sp['NAAM'];
+		}
+		$lijfwacht = "";
+		if($rol == "Opdrachtgever" && $speler['LIJFWACHT'] != "") {
+			$lid = $speler['LIJFWACHT'];
+			$res = sqlSel(3,"ID=$lid");
+			$sp = sqlFet($res);
+			$lijfwacht = $sp['NAAM'];
+		}
+		$burgemeester = ($burg == $speler['ID'])? "Ja" : "";
+		$samenvatting .= "<tr>";
+		$samenvatting .= "<th>$naam</th>";
+		$samenvatting .= "<th>$gewonnen</th>";
+		$samenvatting .= "<th>$levend</th>";
+		$samenvatting .= "<th>$rol</th>";
+		$samenvatting .= "<th>$geliefde</th>";
+		$samenvatting .= "<th>$lijfwacht</th>";
+		$samenvatting .= "<th>$burgemeester</th>";
+		$samenvatting .= "</tr>";
+	}
+	$samenvatting .= "</table>";
+
+	return $samenvatting;
+}//totaalOverzicht
 
 ?>

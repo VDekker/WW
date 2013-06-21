@@ -434,21 +434,23 @@ function gewonnenB($sid,$uitzondering,$uitzondering2) {
 //als geliefde -> geliefde moet ook winnen
 //en dan -> check of zijn rol wint (optimalisatie mogelijk...)
 //flag is true als een geliefde wordt gecheckt
-function gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,$flag) {
+function gewonnenSpeler($sp,$sid,$flag) {
+	$id = $sp['ID'];
+	$rol = $sp['ROL'];
+	$geliefde = $sp['GELIEFDE'];
+	$lijfwacht = $sp['LIJFWACHT'];
 	$resultaat = sqlSel(3,
 		"SID=$sid AND ((LEVEND & 1) = 1) AND LIJFWACHT=$id");
 	if(sqlNum($resultaat) == 1) { //als je een lijfwacht bent...
 		$opdracht = sqlFet($resultaat);
-		if(!gewonnenSpeler($opdracht['ID'],$opdracht['ROL'],
-			$opdracht['GELIEFDE'],$id,$sid,false)) {
+		if(!gewonnenSpeler($opdracht,$sid,false)) {
 			return false;
 		}
 	}
 	if(!empty($geliefde) && !$flag) { //als je geliefde bent...
 		$resultaat = sqlSel(3,"ID=$geliefde");
 		$speler = sqlFet($resultaat);
-		if(!gewonnenSpeler($speler['ID'],$speler['ROL'],$id,
-			$speler['LIJFWACHT'],$sid,true)) {
+		if(!gewonnenSpeler($speler,$sid,true)) {
 			return false;
 		}
 	}
@@ -476,18 +478,115 @@ function gewonnen($fase,$spel) {
 	$sid = $spel['SID'];
 	$gewonnenSpelers = array();
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+
+	//check op gelijkspel
 	if(sqlNum($resultaat) == 0) {
-		schrijfLog($sid,"Alle spelers dood; gelijkspel...\n");
+		schrijfLog($sid,"Alle spelers dood; gelijkspel.\n");
+		$resultaat = sqlSel(3,"SID=$sid");
+		while($speler = sqlFet($resultaat)) {
+			array_push($gewonnenSpelers,$speler);
+		}
+		mailGewonnen(-1,$gewonnenSpelers,$fase,$spel);
 		return true;
 	}
-	while($speler = sqlFet($resultaat)) {
+
+	//check of er 1 speler over is (deze is dan de winnaar)
+	if(sqlNum($resultaat) == 1) {
+		$speler = sqlFet($resultaat);
 		$id = $speler['ID'];
-		$rol = $speler['ROL'];
-		$geliefde = $speler['GELIEFDE'];
-		$lijfwacht = $speler['LIJFWACHT'];
-		if(gewonnenSpeler($id,$rol,$geliefde,$lijfwacht,$sid,false)) {
+		schrijfLog($sid,"Enkele speler over: $id wint.\n");
+		array_push($gewonnenSpelers,$speler);
+		$rol = 0;
+		switch($speler['ROL']) {
+			case "Fluitspeler":
+				$rol = 5;
+				break;
+			case "Weerwolf":
+			case "Welp":
+				$rol = 1;
+				break;
+			case "Vampier":
+				$rol = 2;
+				break;
+			case "Psychopaat":
+				$rol = 3;
+				break;
+			case "Witte Weerwolf":
+				$rol = 4;
+				break;
+			default: //burger
+				$rol = 0;
+				break;
+		}
+		mailGewonnen($rol,$gewonnenSpelers,$fase,$spel);
+		return true;
+	}
+	
+	//check of een hele groep heeft gewonnen:
+	//teams is boolean array (Burgers, WW, VP, Psycho, Witte, FS)
+	$teams = array(true,true,true,true,true,true);
+	while($speler = sqlFet($resultaat)) {
+		array_push($gewonnenSpelers,$speler);
+		switch($speler['ROL']) {
+			case "Fluitspeler":
+				$teams[0] = false;
+				$teams[1] = false;
+				$teams[2] = false;
+				$teams[3] = false;
+				$teams[4] = false;
+				break;
+			case "Weerwolf":
+			case "Welp":
+				$teams[0] = false;
+				$teams[2] = false;
+				$teams[3] = false;
+				$teams[4] = false;
+				break;
+			case "Vampier":
+				$teams[0] = false;
+				$teams[1] = false;
+				$teams[3] = false;
+				$teams[4] = false;
+				break;
+			case "Psychopaat":
+				$teams[0] = false;
+				$teams[1] = false;
+				$teams[2] = false;
+				$teams[4] = false;
+				break;
+			case "Witte Weerwolf":
+				$teams[0] = false;
+				$teams[1] = false;
+				$teams[2] = false;
+				$teams[3] = false;
+				break;
+			default: //burger
+				$teams[1] = false;
+				$teams[2] = false;
+				$teams[3] = false;
+				$teams[4] = false;
+				break;
+		}//switch
+		if($speler['ROL'] != "Fluitspeler" && 
+			(($speler['SPELFLAGS'] & 1) != 1)) {
+				$teams[5] = false;
+		}
+	}//while
+
+	$key = array_search(true,$teams);
+	if($key !== false) {
+		schrijfLog($sid,"Team $key wint.\n");
+		mailGewonnen($key,$gewonnenSpelers,$fase,$spel);
+		return true;
+	}
+	$gewonnenSpelers = array();
+
+	//check of geliefden/opdrachtgevers-lijfwachten hebben gewonnen
+	$resultaat = sqlSel(3,"SID=$sid AND (GELIEFDE<>NULL OR LIJFWACHT<>NULL)");
+	while($speler = sqlFet($resultaat)) {
+		if(gewonnenSpeler($speler,$sid,false)) {
 			schrijfLog($sid,"$id heeft gewonnen!\n");
-			array_push($gewonnenSpelers,$naam);
+			array_push($gewonnenSpelers,$speler);
 		}
 	}
 	if(empty($gewonnenSpelers)) { //niemand gewonnen
@@ -495,7 +594,20 @@ function gewonnen($fase,$spel) {
 		return false;
 	}
 
-	mailGewonnen($fase,$spel);
+	//check of gewonnenSpelers Geliefden of Lijfwachten, of beiden zijn
+	if(count($gewonnenSpelers) == 2) {
+		if($gewonnenSpelers[0]['GELIEFDE'] == $gewonnenSpelers[1]['ID']) {
+			$rol = 6;
+		}
+		else {
+			$rol = 7;
+		}
+	}//if
+	else {
+		$rol = 8;
+	}
+
+	mailGewonnen($rol,$gewonnenSpelers,$fase,$spel);
 	return true;
 }//gewonnen
 
