@@ -1000,7 +1000,7 @@ function mailAlgemeenInslapen($spel) {
 	$onderwerp = "$snaam: Dag $ronde";
 	$tuplesL = array();
 
-	//pak brandstapel-uitslag-verhaal TODO
+	//pak brandstapel-uitslag-verhaal
 	$text = "";
 	$samenvatting = "";
 	$auteur = array();

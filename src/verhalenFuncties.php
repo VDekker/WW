@@ -569,8 +569,40 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 	return $vlag;
 }//geefGebeurd
 
+function burgemeesterOpvolger(&$text,&$samenvatting,&$auteur,$levenden,$spel) {
+	$sid = $spel['SID'];
+	$ronde = $spel['RONDE'];
+
+	$vorigeBurgID = $spel['VORIGE_BURG'];
+	$burgID = $spel['BURGEMEESTER'];
+	if($vorigeBurgID == "" || $burgID == "" || $burgID == -1) {
+		return;
+	}
+	$resultaat = sqlSel(3,"ID=$vorigeBurgID AND ((LEVEND & 1) = 1)");
+	if(sqlNum($resultaat) == 0) {
+		return;
+	}
+	$vorigeBurg = sqlFet($resultaat);
+	$resultaat = sqlSel(3,"ID=$burgID");
+	$burg = sqlFet($resultaat);
+	$alleBurg = array($burg,$vorigeBurg);
+
+	$verhaal = geefVerhaal($thema,"Burgemeester",2,
+		count($levenden),2,$ronde,$sid);
+	$text .= $verhaal['VERHAAL'];
+	$geswoorden = $verhaal['GESLACHT'];
+	array_push($auteur,$verhaal['AUTEUR']);
+	$text = vulIn($tuplesL,$alleBurg,"",$text,$geswoorden);
+
+	$vorigeNaam = $vorigeBurg['NAAM'];
+	$burgNaam = $burg['NAAM'];
+	$samenvatting .= "$vorigeNaam heeft $burgNaam als opvolger benoemt: ";
+	$samenvatting .= "$burgNaam is de nieuwe Burgemeester.<br />";
+
+	return;
+}//burgemeesterOpvolger
+
 //maakt het ontwaak-deel van een algemene mail
-//TODO dode burgemeester (plus opvolger) afvangen
 function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	$tuplesL = array(); //L voor levende spelers
 	$tuplesD = array(); //D voor dode spelers
@@ -606,6 +638,8 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 			schrijfLog($sid,"Dorpsoudste dood.\n");
 			dodeDorpsoudste(0,$text,$samenvatting);
 		}//if
+
+		burgemeesterOpvolger($text,$samenvatting,$auteur,$tuplesL,$spel);
 
 		$samenvatting .= "Dag $ronde begint.<br />";
 		return;
@@ -646,6 +680,8 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 		//dorpsoudste dood
 		dodeDorpsoudste(0,$text,$samenvatting);
 	}
+
+	burgemeesterOpvolger($text,$samenvatting,$auteur,$tuplesL,$spel);
 
 	$samenvatting .= "Dag $ronde begint.<br />";
 	return;
@@ -924,16 +960,16 @@ function array_search_recursive($needle, $haystack, &$indexes=array()) {
 function verkiezingInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	$burgID = $spel['VORIGE_BURG'];
 	$vlag = false;
+	$burgArray = array();
 	if($burgID == "") {
 		//geen vorige burgemeester
 		$vlag = true;
-		$burgArray = array();
 	}
 	else {
 		$resultaat = sqlSel(3,"ID=$burgID");
 		$burgemeester = sqlFet($resultaat);
 		$burgNaam = $burgemeester['NAAM'];
-		$burgArray = array($burgemeester);
+		array_push($burgArray,$burgemeester);
 	}
 	$tuplesL = array(); //L voor levende spelers
 	$thema = $spel['THEMA'];
@@ -1189,7 +1225,6 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//brandstapelInleiding
 
-//TODO bij dode Zondebok-Geliefde: speciale inleiding maken
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$sid = $spel['SID'];
 	$ronde  = $spel['RONDE'];
@@ -1249,7 +1284,7 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 				array_push($auteur,$verhaal['AUTEUR']);
 				$text = vulIn($tuplesL,$zonde,"",$text,$geswoorden);
 			}
-			else if(($flags & 32768) == 32768) {
+			else if(($flags & 1024) == 1024) {
 				//dode lijfwacht (met diens Opdrachtgever in tuplesD[1]):
 				$resultaat = sqlSel(3,"ROL='Opdrachtgever' AND LIJFWACHT=$id");
 				$opdrachtgever = sqlFet($resultaat);
@@ -1300,15 +1335,43 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 		$boom = array();
 		$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
 
-		//begin
+		//begin: check of zondebok-intro, of normale
 		$levend = count($tuplesL) + count($tuplesS);
-		$verhaal = geefVerhaal($thema,"Brandstapel",2,$levend,
-			count($tuplesD),$ronde,$sid);
-		$text .= $verhaal['VERHAAL'];
-		$geswoorden = $verhaal['GESLACHT'];
-		array_push($auteur,$verhaal['AUTEUR']);
-		$text = vulIn(array_merge($tuplesL,$tuplesS),
-			$tuplesD,"",$text,$geswoorden);
+		$resultaat = sqlSel(3,"SID=$sid AND ROL='Zondebok' AND 
+			((LEVEND & 1) = 1) AND ((SPELFLAGS & 256) = 256)");
+		if(sqlNum($resultaat) > 0) { //zondebok-intro
+			$schuldgevoel = array();
+			$resultaat = sqlSel(3,"LEVEND=1 AND ((SPELFLAGS & 2) = 2)");
+			if(sqlNum($resultaat) > 0) {
+				while($sp = sqlFet($resultaat)) {
+					$key = array_search($sp,$tuplesL);
+					if($key !== false) {
+						$tuplesL = delArrayElement($tuplesL,$key);
+						array_push($schuldgevoel,$sp);
+					}
+				}
+			}
+			shuffle($schuldgevoel);
+			$zonde = $tuplesD + $schuldgevoel;
+
+			$verhaal = geefVerhaal($thema,"Zondebok",3,$levend,
+				count($zonde),$ronde,$sid);
+			$verhaal = geefVerhaal($thema,"Zondebok",2,count($tuplesL),
+				count($zonde),$ronde,$sid);
+			$text .= $verhaal['VERHAAL'];
+			$geswoorden = $verhaal['GESLACHT'];
+			array_push($auteur,$verhaal['AUTEUR']);
+			$text = vulIn($tuplesL,$zonde,"",$text,$geswoorden);
+		}
+		else { //normale introductie
+			$verhaal = geefVerhaal($thema,"Brandstapel",2,$levend,
+				count($tuplesD),$ronde,$sid);
+			$text .= $verhaal['VERHAAL'];
+			$geswoorden = $verhaal['GESLACHT'];
+			array_push($auteur,$verhaal['AUTEUR']);
+			$text = vulIn(array_merge($tuplesL,$tuplesS),
+				$tuplesD,"",$text,$geswoorden);
+		}
 
 		//tuplesS bijvullen (beginnende jagers/geliefden toevoegen)
 		//en samenvatting maken
