@@ -312,14 +312,14 @@ function geldigeStemFS($bericht,$sid,&$id1,&$id2) {
 		$speler = sqlFet($resultaat);
 		if(($speler['SPELFLAGS'] & 1) == 1 || 
 			($speler['ROL'] == "Fluitspeler" && 
-			(($speler['SPELFLAGS'] & 32) == 0)) {
+			(($speler['SPELFLAGS'] & 32) == 0))) {
 				$id2 = false;
 			}
 	}
 	$resultaat = sqlSel(3,"ID=$id1");
 	$speler = sqlFet($resultaat);
 	if(($speler['SPELFLAGS'] & 1) == 1 || ($speler['ROL'] == "Fluitspeler" && 
-		(($speler['SPELFLAGS'] & 32) == 0)) {
+		(($speler['SPELFLAGS'] & 32) == 0))) {
 			$id1 = $id2;
 		}
 	return;

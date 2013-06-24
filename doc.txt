@@ -2,6 +2,9 @@
      TODO:
 ===============
 
+  * Documenteren: Als WW,VP,FS gelijkspel hebben: geen slachtoffer (extra verhaal:
+                  Weerwolf/Vampier 2, FS 5)
+
   * Testen:  kan een spel winnen?
   * Testen:  burgemeesterverkiezing na opschonen
   * Testen:  regelZetNULL, en herhaalde keuze bij: Genezer, Schout, Slet,
@@ -694,10 +697,12 @@ Goochelaar:         -1 = Rolverdeling mailen
 Weerwolf:           -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Speler vermoord
+                     2 = Gelijkspel
                      9 = Niemand vermoord
 Vampier:            -1 = Rolverdeling mailen
                      0 = Wakker worden
                      1 = Speler vermoord
+                     2 = Gelijkspel
                      9 = Niemand vermoord
 Onschuldige Meisje: -1 = Rolverdeling mailen
                      0 = Weerwolven bespied
@@ -726,6 +731,7 @@ Fluitspeler:        -1 = Rolverdeling mailen
                      2 = Spelers betoverd
                      3 = Enkele Betoverde mailen
                      4 = Betoverden mailen
+                     5 = Gelijkspel: geen slachtoffer
                      9 = Blanco gestemd (DOOD = 2)
 Waarschuwer:        -1 = Rolverdeling mailen
                      0 = Wakker worden

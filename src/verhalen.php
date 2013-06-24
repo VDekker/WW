@@ -13,7 +13,7 @@ function mailRolverdeling($spel) {
 		$tuple = array($speler);
 		$adres = $speler['EMAIL'];
 
-		$verhaal = geefVerhaalRolverdeling($thema,$rollen[0],$sid);
+		$verhaal = geefVerhaalRolverdeling($thema,$speler['ROL'],$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
 		$auteur = $verhaal['AUTEUR'];
@@ -307,6 +307,9 @@ function mailActie($id,$fase,$spel,$plek) {
 	}
 
 	schrijfLog($sid,"$rol $id heeft op $stem gestemd.\n");
+
+	return; //TODO delete
+
 	$verhaal = geefVerhaal($thema,$rol,$fase,1,count($tuplesB),
 		$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -342,6 +345,8 @@ function mailDief($id,$spel) {
 	$adres2 = $speler['EMAIL'];
 	
 	schrijfLog($sid,"Dief $id steelt de rol van $stem.\n");
+
+	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Dief',2,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -393,6 +398,8 @@ function mailCupido($id,$spel) {
 
 	schrijfLog($sid,"Cupido $id maakt $stem en $stem2 verliefd op elkaar.\n");
 
+	return; //TODO delete
+
 	//maak Cupido's verhaaltje en stuur deze naar hem
 	$verhaal = geefVerhaal($thema,'Cupido',1,1,2,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -440,6 +447,8 @@ function mailOpdracht($id,$spel) {
 
 	schrijfLog($sid,"Opdrachtgever $id stelt $stem aan tot zijn lijfwacht.\n");
 
+	return; //TODO delete
+
 	$verhaal = geefVerhaal($thema,'Opdrachtgever',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -465,6 +474,8 @@ function mailWelp($id,$spel) {
 	$adres = $speler['EMAIL'];
 
 	schrijfLog($sid,"Welp $id wordt een Weerwolf.\n");
+
+	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Welp',0,1,0,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -500,6 +511,8 @@ function mailKlaas($id,$spel) {
 	$adres2 = $speler['EMAIL'];
 
 	schrijfLog($sid,"Klaas Vaak $id laat $stem slapen.\n");
+
+	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Klaas Vaak',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -541,6 +554,8 @@ function mailDwaas($id,$gezien,$spel) {
 
 	schrijfLog($sid,"Dwaas $id denkt dat $stem een $gezien is.\n");
 
+	return; //TODO delete
+
 	$verhaal = geefVerhaal($thema,'Ziener',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -577,7 +592,9 @@ function mailGoochel($id,$spel) {
 	$speler = sqlFet($resultaat);
 	array_push($tuplesB,$speler);
 
-	schrijfLog($sid,"Goochelaar $id verwisselt $stem en $stem2 met elkaar.\n");
+	schrijfLog($sid,"Goochelaar $id verwisselt $stem1 en $stem2 met elkaar.\n");
+
+	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Goochelaar',2,1,2,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -618,6 +635,8 @@ function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$spel) {
 	else {
 		schrijfLog($sid,"$rol: Niemand vermoord.\n");
 	}
+
+	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,$rol,$fase,count($tuplesA),
 		count($tuplesB),$ronde,$sid);
@@ -744,7 +763,7 @@ function mailFSActie($spelers,$betoverd1,$betoverd2,$fase,$spel) {
 	}
 
 	$tuplesB = array();
-	if($fase != 9) {
+	if($fase != 9 && $fase != 5) {
 		$resultaat = sqlSel(3,"ID=$betoverd1");
 		$speler = sqlFet($resultaat);
 		array_push($tuplesB,$speler);
@@ -1042,12 +1061,12 @@ function mailInleiding($spel) {
 
 	//pak alle spelers
 	$resultaat = sqlSel(3,"SID=$sid");
-	while($spelers = sqlFet($resultaat)) {
+	while($speler = sqlFet($resultaat)) {
 		array_push($tuplesL,$speler);
 	}
 
 	//pak het verhaal
-	$verhaal = geefVerhaal($thema,"Algemeen"-1,$aantal,0,$ronde,$sid);
+	$verhaal = geefVerhaal($thema,"Algemeen",-1,$aantal,0,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
 	$auteur = $verhaal['AUTEUR'];

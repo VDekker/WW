@@ -24,15 +24,16 @@ function geefVerhaal($thema,$rol,$fase,$numA,$numB,$ronde,$sid) {
 					$tuple = sqlFet($resultaat);
 					if($tuple['TNAAM'] == "default") {
 						stuurError2("Geen default verhaal voor fase $fase " . 
-							"van $rol, met $levend levende spelers " .
-							"en $dood slachtoffers.",$sid);
+							"van $rol, met $numA levende spelers " .
+							"en $numB slachtoffers.",$sid);
+						return;
 					}
 					schrijfLog($sid,"Geen verhalen, probeer default...\n");
 					$resultaat = sqlSel(5,"TNAAM='default'");
 					$tuple = sqlFet($resultaat);
 					$thema = $tuple['TID'];
 					return geefVerhaal($thema,$rol,$fase,
-						$levend,$dood,$sid);
+						$numA,$numB,$ronde,$sid);
 				}//if
 			}//if
 		}//if
@@ -72,13 +73,14 @@ function geefVerhaal2($thema,$rol,$fase,$levend,$dood,$ronde,$sid) {
 						stuurError2("Geen default verhaal voor fase $fase " . 
 							"van $rol, met $levend levende spelers " .
 							"en $dood slachtoffers.",$sid);
+						return;
 					}
 					schrijfLog($sid,"Geen verhalen, probeer default...\n");
 					$resultaat = sqlSel(5,"TNAAM='default'");
 					$tuple = sqlFet($resultaat);
 					$thema = $tuple['TID'];
 					return geefVerhaal($thema,$rol,$fase,
-						$levend,$dood,$sid);
+						$levend,$dood,$ronde,$sid);
 				}//if
 			}//if
 		}//if
@@ -106,6 +108,7 @@ function geefVerhaalRolverdeling($thema,$rol,$sid) {
 			$tuple = sqlFet($resultaat);
 			if($tuple['TNAAM'] == "default") {
 				stuurError2("Geen default verhaal rolverdeling.",$sid);
+				return;
 			}
 			schrijfLog($sid,"Geen verhalen, probeer default.\n");
 			$resultaat = sqlSel(5,"TNAAM='default'");
@@ -572,6 +575,7 @@ function geefGebeurd(&$tuplesL,&$tuplesD,&$tuplesS,&$resArray,$spel) {
 function burgemeesterOpvolger(&$text,&$samenvatting,&$auteur,$levenden,$spel) {
 	$sid = $spel['SID'];
 	$ronde = $spel['RONDE'];
+	$thema = $spel['THEMA'];
 
 	$vorigeBurgID = $spel['VORIGE_BURG'];
 	$burgID = $spel['BURGEMEESTER'];
@@ -647,9 +651,7 @@ function ontwaakVerhaal(&$text,&$samenvatting,&$auteur,$spel) {
 	
 	//maak de boom van jagers/geliefden
 	$boom = array();
-	var_dump($tuplesS);
 	$boom = maakBoom(-1,$tuplesS,$boom,0,$resArray);
-	var_dump($boom);
 
 	//ontwaken/begin
 	$verhaal = geefVerhaal($thema,"Algemeen",1,$levend,$dood,$ronde,$sid);
@@ -1061,7 +1063,7 @@ function verkiezingUitslag(&$text,&$samenvatting,&$auteur,$overzicht,$spel) {
 	return;
 }//verkiezingUitslag
 
-function stemmingOverizcht($overzicht,$vlag) {
+function stemmingOverzicht($overzicht,$vlag) {
 	$samenvatting = "Uitslag:<br />";
 	$samenvatting .= "<ul>";
 	foreach($overzicht as $stem => $namen) {
@@ -1227,11 +1229,12 @@ function brandstapelInleiding(&$text,&$samenvatting,&$auteur,$spel) {
 
 function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	$sid = $spel['SID'];
-	$ronde  = $spel['RONDE'];
+	$ronde = $spel['RONDE'];
+	$thema = $spel['THEMA'];
 	$burgemeester = $spel['BURGEMEESTER'];
 
 	//maak een stem-overzicht
-	$overzichtTotaal = brandstapelOverzicht($sid);
+	$overzichtTotaal = brandstapelOverzicht($spel);
 	
 	//verhaal maken
 	$tuplesL = array(); //L voor levende spelers
@@ -1403,7 +1406,10 @@ function brandstapelUitslag(&$text,&$samenvatting,&$auteur,$spel) {
 	return;
 }//brandstapelUitslag
 
-function brandstapelOverzicht($sid) {
+function brandstapelOverzicht($spel) {
+	$sid = $spel['SID'];
+	$burgemeester = $spel['BURGEMEESTER'];
+	
 	$overzicht1 = array();
 	$overzicht2 = array();
 	$resultaat = sqlSel(3,"SID=$sid AND LEVEND<>0");

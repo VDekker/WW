@@ -66,7 +66,9 @@ function stuurError($error) {
 		$alleAdmins .= ", $admins[$i]";
 	}
 	stuurMail($alleAdmins,$onderwerp,$error);
-	die($error);
+	//die($error); TODO uncomment
+	echo $error;
+	return;
 }//stuurError
 
 //TODO error in log ipv die()
@@ -81,9 +83,11 @@ function stuurError2($error,$sid) {
 	}
 	stuurMail($alleAdmins,$onderwerp,$error);
 
-	sqlUp(4,"STATUS=1","SID=$sid");
-	schrijfLog($sid,"Spel gepauzeerd.\n");
-	die($error);
+	//sqlUp(4,"STATUS=1","SID=$sid"); TODO uncomment
+	//schrijfLog($sid,"Spel gepauzeerd.\n"); TODO uncomment
+	//die($error); TODO uncomment
+	echo $error;
+	return;
 }//stuurError2
 
 function stuurResultaatHTML($adres,$bericht,$resultaat) {

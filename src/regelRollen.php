@@ -488,6 +488,9 @@ function regelWWVP($rol,$spel) {
 	}
 	else {
 		$keys = hoogsteStem($stemmen); //bepaalt de hoogste stem
+		if(count($keys) > 1) { //gelijkspel: geen slachtoffer
+			mailWWVPActie($spelers,NULL,$rol,2,$spel);
+		}
 		$slachtoffer = $alleTargets[array_rand($keys)];
 		shuffle($spelers); // randomise spelers
 		mailWWVPActie($spelers,$slachtoffer,$rol,1,$spel);
@@ -679,6 +682,9 @@ function regelFluit($spel) {
 		return;
 	}
 	$keys = hoogsteStem($stemmen);
+	if(count($keys) > 2) { //gelijkspel
+		mailFSActie($spelers,NULL,NULL,5,$spel);
+	}
 	if(count($keys) > 1) { // meerdere slachtoffers met evenveel stemmen
 		shuffle($keys);
 		$slachtoffer = $alleTargets[$keys[0]];
