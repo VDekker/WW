@@ -96,12 +96,6 @@ function isLevend($id) {
 	return (($speler['LEVEND'] & 1) == 1);
 }//isLevend
 
-function isNieuwDood($id) {
-	$resultaat = sqlSel(3,"ID=$id");
-	$speler = sqlFet($resultaat);
-	return (($speler['LEVEND'] & 2) == 2);
-}//isNieuwDood
-
 //geeft de rol van een speler
 function heeftRol($id) {
 	$resultaat = sqlSel(3,"ID=$id");

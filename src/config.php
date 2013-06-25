@@ -67,7 +67,7 @@ function adminQuery($text,$adres) {
 					$onderwerp = "Query";
 					$bericht = "De query gaf geen resultaten.<br />";
 					$bericht .= "Query: $query<br />";
-					stuurMail($adres,$onderwerp,$bericht);
+					stuurMail($adres,$onderwerp,$bericht,NULL);
 					return;
 				}
 			}
@@ -78,7 +78,7 @@ function adminQuery($text,$adres) {
 				$bericht = "In jouw query stond het woord 'DROP'. ";
 				$bericht .= "Tabellen mogen niet verwijderd worden; ";
 				$bericht .= "dus jouw query is niet uitgevoerd.";
-				stuurMail($adres,$onderwerp,$bericht);
+				stuurMail($adres,$onderwerp,$bericht,NULL);
 				return;
 			}
 			sqlQuery($query);
@@ -86,7 +86,7 @@ function adminQuery($text,$adres) {
 			$onderwerp = "Query";
 			$bericht = "De query is met succes uitgevoerd.<br />";
 			$bericht .= "Query: $query<br />";
-			stuurMail($adres,$onderwerp,$bericht);
+			stuurMail($adres,$onderwerp,$bericht,NULL);
 			return;
 		}
 	}//foreach
@@ -110,14 +110,14 @@ function adminPause($text,$adres) {
 		$onderwerp = "Spel gepauzeerd: $snaam";
 		$bericht = "Het spel $snaam is met succes gepauzeerd, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}//while
 	if(!$vlag) {
 		schrijfLog(-1,"Geen spel gevonden.\n");
 		$onderwerp = "Spel pauzeren mislukt";
 		$bericht = "Er is geen geldige spelnaam van een lopend spel gevonden ";
 		$bericht .= "in jouw bericht; er is geen enkel spel gepauzeerd.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//adminPause
@@ -141,14 +141,14 @@ function adminContinue($text,$adres) {
 		$onderwerp = "Spel hervat: $snaam";
 		$bericht = "Het spel $snaam is met succes hervat, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}//while
 	if(!$vlag) {
 		schrijfLog(-1,"Geen spel gevonden.\n");
 		$onderwerp = "Spel hervatten mislukt";
 		$bericht = "Er is geen geldige spelnaam van een gepauzeerd spel gevonden ";
 		$bericht .= "in jouw bericht; er is geen enkel spel hervat.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//adminContinue
@@ -170,14 +170,14 @@ function adminStop($text,$adres) {
 		$onderwerp = "Spel gestopt: $snaam";
 		$bericht = "Het spel $snaam is met succes gestopt, ";
 		$bericht .= "en alle spelers zijn hiervan op de hoogte gesteld.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}//while
 	if(!$vlag) {
 		schrijfLog(-1,"Geen spel gevonden.\n");
 		$onderwerp = "Spel stoppen mislukt";
 		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel gestopt.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//adminStop
@@ -194,15 +194,27 @@ function adminDelete($text,$adres) {
 		if(!in_array($snaam,$spellen)) {
 			continue;
 		}
+		if($sid == -1) { //mag blanco spel niet verwijderen 
+			             //(dan gaat het systeem kapot)
+			schrijfLog(-1,"Blanco spel kan niet verwijderd worden.\n");
+			$onderwerp = "Verwijdering mislukt: $snaam";
+			$bericht = "Spel $snaam is vitaal voor het systeem ";
+			$bericht .= "en kan derhalve niet verwijderd worden. ";
+			$bericht .= "Probeer het niet te verwijderen, ";
+			$bericht .= "want dan gaat heel het systeem kapot.";
+			stuurMail($adres,$onderwerp,$bericht,NULL);
+			continue;
+		}
 		$vlag = true;
 		if($spel['STATUS'] == 0 || $spel['STATUS'] == 1) {
-			schrijfLog(-1,"Spel is nog bezig, kan niet worden verwijderd: $snaam.\n");
+			schrijfLog(-1,"Spel is nog bezig, " . 
+				"kan niet worden verwijderd: $snaam.\n");
 			$onderwerp = "Verwijdering mislukt: $snaam";
 			$bericht = "Spel $snaam is nog bezig ";
-			$bericht .= "en kan niet worden verwijderd.";
+			$bericht .= "en kan niet worden verwijderd. ";
 			$bericht .= "Om het toch te verwijderen, ";
 			$bericht .= "moet het eerst stopgezet worden.";
-			stuurMail($adres,$onderwerp,$bericht);
+			stuurMail($adres,$onderwerp,$bericht,NULL);
 			continue;
 		}
 		$sql = "DELETE FROM $tabel WHERE SID=$sid";
@@ -210,14 +222,14 @@ function adminDelete($text,$adres) {
 		schrijfLog(-1,"Spel verwijderd: $snaam.\n");
 		$onderwerp = "Spel verwijderd: $snaam";
 		$bericht = "Spel $snaam is met succes van de database verwijderd.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}//while
 	if(!$vlag) {
 		schrijfLog(-1,"Geen spel gevonden.\n");
 		$onderwerp = "Spel verwijderen mislukt";
 		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "er is geen enkel spel verwijderd.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//adminDelete
@@ -239,7 +251,7 @@ function adminStart($text,$adres) {
 		$bericht .= "en eventueel een MAX_SPELERS, SNELHEID, STRENGHEID ";
 		$bericht .= "en THEMA (in deze volgorde, gescheiden door [enter]). ";
 		$bericht .= "Probeer het nog eens.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 		return;
 	}
 	if(empty($max) || !is_int($max)) {
@@ -291,7 +303,7 @@ function adminStart($text,$adres) {
 	$bericht .= "Snelheid = $snel<br />";
 	$bericht .= "Strengheid = $streng<br />";
 	$bericht .= "Thema = $tnaam<br />";
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 
 	//delete alle gebruikte variabelen (enkel bericht en adressen blijft over)
 	for($i = 0; $i < 5; $i++) {
@@ -308,7 +320,7 @@ function adminStart($text,$adres) {
 	$bericht = "";
 	foreach($details as $string) {
 		if(strpos($string,'@') === false) {
-			$bericht .= $string;
+			$bericht .= "$string ";
 		}
 	}
 	$bericht .= "<br /><br />";
@@ -316,7 +328,8 @@ function adminStart($text,$adres) {
 	$bericht .= "het zal beginnen op $deadline. ";
 	$bericht .= "Als je wilt meedoen met het spel, schrijf je dan in ";
 	$bericht .= "door een email naar $thuis te sturen, ";
-	$bericht .= "met daarin je naam en je geslacht, ";
+	$bericht .= "met als onderwerp de spelnaam, ";
+	$bericht .= "en in het bericht je naam en je geslacht, ";
 	$bericht .= "gescheiden door een komma.<br />";
 	$bericht .= "<br />";
 	$bericht .= "<u>Speldetails:</u><br />";
@@ -334,7 +347,7 @@ function adminStart($text,$adres) {
 	//mail de uitnodigingen
 	foreach($details as $string) {
 		if(strpos($string,'@') !== false) {
-			stuurMail($string,$onderwerp,$bericht);
+			stuurMail($string,$onderwerp,$bericht,NULL);
 			schrijfLog($id,"Uitgenodigd: $string.\n");
 		}
 	}
@@ -363,7 +376,7 @@ function adminPlayers($bericht,$adres) {
 			$onderwerp = "Spelers zoeken mislukt";
 			$bericht = "Spel $snaam heeft geen spelers; ";
 			$bericht .= "zo zijn er geen spelers gevonden.";
-			stuurMail($adres,$onderwerp,$bericht);
+			stuurMail($adres,$onderwerp,$bericht,NULL);
 			continue;
 		}
 		schrijfLog(-1,"Spelers van spel $snaam verzonden.\n");
@@ -376,7 +389,7 @@ function adminPlayers($bericht,$adres) {
 		$onderwerp = "Spelers zoeken mislukt";
 		$bericht = "Er is geen geldige spelnaam gevonden in jouw bericht; ";
 		$bericht .= "geen enkele speler is gevonden.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//adminPlayers
@@ -406,7 +419,7 @@ function adminNoMail($bericht,$adres) {
 				$onderwerp = "$naam: uit maillijst";
 				$bericht = "$naam in spel $snaam was al uit de maillijst ";
 				$bericht .= "gehaalt.";
-				stuurMail($adres,$onderwerp,$bericht);
+				stuurMail($adres,$onderwerp,$bericht,NULL);
 				continue;
 			}
 			$spelerflag -= 2;
@@ -415,7 +428,7 @@ function adminNoMail($bericht,$adres) {
 			$onderwerp = "$naam: uit maillijst";
 			$bericht = "$naam in spel $snaam is uit de maillijst gehaald, ";
 			$bericht .= "en zal geen mails van dit spel meer ontvangen.";
-			stuurMail($adres,$onderwerp,$bericht);
+			stuurMail($adres,$onderwerp,$bericht,NULL);
 		}//while
 		schrijfLog(-1,"Geen speler in spel $snaam gevonden.\n");
 	}//while
@@ -425,7 +438,7 @@ function adminNoMail($bericht,$adres) {
 		$bericht = "Er is geen speler uit de maillijst gehaald. ";
 		$bericht .= "Zijn de spelnaam en speler-naam goed gespeld, ";
 		$bericht .= "en is de speler dood?";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 }//adminNoMail
 
@@ -435,7 +448,7 @@ function adminGames($adres) {
 		schrijfLog(-1,"Geen spellen aanwezig.\n");
 		$onderwerp = "Spellen zoeken mislukt";
 		$bericht = "Er zijn geen spellen in de database.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 		return;
 	}
 	schrijfLog(-1,"Spellen verzonden.\n");
@@ -493,7 +506,7 @@ function adminHelp($bericht,$onderwerp,$adres) {
 		schrijfLog(-1,"Geen HID gevonden.\n");
 		$onderwerp = "Help antwoorden mislukt";
 		$bericht = "Er was geen HID gevonden in het onderwerp.";
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 		return;
 	}
 	$hid = implode('', $nummers[0]);
@@ -502,11 +515,11 @@ function adminHelp($bericht,$onderwerp,$adres) {
 	$help = sqlFet($resultaat);
 	$ontvanger = $help['ADRES'];
 	$onderwerp = "RE:Help";
-	stuurMail($ontvanger,$onderwerp,$bericht);
+	stuurMail($ontvanger,$onderwerp,$bericht,NULL);
 	
 	$onderwerp = "Help verzonden";
 	$bericht = "De help-mail is verzonden: HID $hid is beantwoord.";
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;	
 }//adminHelp
 
@@ -514,7 +527,7 @@ function adminHelp($bericht,$onderwerp,$adres) {
 //en $bericht het originele bericht
 function help($afzender,$onderwerp,$bericht) {
 	global $admins,$tabellen;
-	$tabel = $tabellen[1];
+	$tabel = $tabellen[0];
 	$sql = "INSERT INTO $tabel(ADRES) VALUES('$afzender')";
 	sqlQuery($sql);
 	$hid = sqlID();
@@ -537,7 +550,7 @@ function help($afzender,$onderwerp,$bericht) {
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
-	stuurMail($alleAdmins,$subject,$message);
+	stuurMail($alleAdmins,$subject,$message,NULL);
 	return;
 }//help
 

@@ -8,6 +8,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 	$speler = sqlFet($resultaat);
 	$rol = $speler['ROL'];
 	$naam = $speler['NAAM'];
+	$levend = $speler['LEVEND'];
 	$spelflags = $speler['SPELFLAGS'];
 	$sid = $spel['SID'];
 	$init = ($spel['RONDE'] == 0);
@@ -58,6 +59,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						}
 					else if($stem == -1) { //blanco
 						zetStem($id,$stem,$sid,"STEM");
+						zetStem($id,"NULL",$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
 						schrijfLog($sid,"$id stemt blanco.\n");
 					}
@@ -195,10 +197,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				}//else if
 				else if($rol == "Witte Weerwolf") {
 					//kijk of het de WW-stem is, of de WitteWW-stem
-					if(preg_match("/\bwitte\b/i",$onderwerp) || 
-						preg_match("/\bwitte\b/i",$bericht)) {
+					if($tweede && (preg_match("/\bwitte\b/i",$onderwerp) || 
+						preg_match("/\bwitte\b/i",$bericht))) {
 						$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
-						if($stem !== false && $tweede) {
+						if($stem !== false) {
 							zetStem($id,$stem,$sid,"EXTRA_STEM");
 							stuurStem($naam,$adres,$stem,$sid);
 							schrijfLog($sid,"Witte WW $id wil $stem " . 
@@ -271,10 +273,11 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						($stem == -1 || (($drank & 128) == 128))) {
 						zetStem($id,$stem,$sid,"STEM");
 						$flag += 1;
-						schrijfLog($sid,"Heks $id wil $stem te redden.\n");
+						schrijfLog($sid,"Heks $id wil $stem redden.\n");
 					}
 					else{
 						zetStemNULL($id,$sid,"STEM");
+						schrijfLog($sid,"Heks $id wil niemand redden.\n");
 					}
 					if($stem2 !== false && $stem2 != $id && 
 						($stem2 == -1 || (($drank & 256) == 256))) {
@@ -284,6 +287,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 					else{
 						zetStemNULL($id,$sid,"EXTRA_STEM");
+						schrijfLog($sid,"Heks $id wil niemand vergiftigen.\n");
 					}
 					if(($stem === false || 
 						($drank & 128 != 128)) && 
@@ -379,7 +383,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
-				else if($rol == "Jager" && isNieuwDood($id)) {
+				else if($rol == "Jager" && (($speler['LEVEND'] & 2) == 2)) {
 					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
@@ -422,7 +426,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				}
 				break;
 			case 18:
-				if($rol == "Jager" && isNieuwDood($id)) {
+				if($rol == "Jager" && (($speler['LEVEND'] & 2) == 2)) {
 					$stem = geldigeStemUitzondering($bericht,$sid,1,$id);
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
@@ -435,7 +439,7 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					}
 				}//if
 				else if($rol == "Zondebok" && ($spelflags & 256) == 256) {
-					$stem = geldigeStemZonde($bericht,$sid);
+					$stem = geldigeStemZonde($bericht,$id,$sid);
 					if($stem !== false) {
 						$stem = "'$stem'";
 						zetStem($id,$stem,$sid,"SPECIALE_STEM");

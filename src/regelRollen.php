@@ -682,7 +682,7 @@ function regelFluit($spel) {
 		return;
 	}
 	$keys = hoogsteStem($stemmen);
-	if(count($keys) > 2) { //gelijkspel
+	if(count($keys) > 2) { //gelijkspel: geen slachtoffers
 		mailFSActie($spelers,NULL,NULL,5,$spel);
 	}
 	if(count($keys) > 1) { // meerdere slachtoffers met evenveel stemmen
@@ -699,7 +699,10 @@ function regelFluit($spel) {
 			return;
 		}
 		$keys = hoogsteStem($stemmen);
-		$slachtoffer2 = $alleTargets[array_rand($keys)];
+		if(count($keys) > 1) { //gelijkspel voor 2e plek: 1 slachtoffer
+			mailFSActie($spelers,$slachtoffer,NULL,1,$spel);
+		}
+		$slachtoffer2 = $alleTargets[$keys[0]];
 	}//else
 	mailFSActie($spelers,$slachtoffer,$slachtoffer2,2,$spel);
 	sqlUp(3,"SPELFLAGS=SPELFLAGS+1",
@@ -1192,16 +1195,14 @@ function regelBrand($spel) {
 	//bij geen gelijkspel
 	$slachtoffer = $kandidaten[$keys[0]];
 	$aantal = $stemmen[$keys[0]];
-	if($dorpsgek) { //check op Dorpsgek
-		$resultaat = sql(3,
-			"ID=$slachtoffer AND ROL='Dorpsgek'");
-		if(sqlNum($resultaat) > 0) { // slachtoffer is gek
-			schrijfLog($sid,"$slachtoffer is gek verklaard en mag leven.\n");
-			sqlUp(3,"SPELFLAGS=SPELFLAGS+128",
-				"ID=$slachtoffer");
-			return;
-		}
-	}//if
+	$resultaat = sqlSel(3,
+		"ID=$slachtoffer AND ROL='Dorpsgek'");
+	if(sqlNum($resultaat) > 0) { // slachtoffer is gek
+		schrijfLog($sid,"$slachtoffer is gek verklaard en mag leven.\n");
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+128",
+			"ID=$slachtoffer");
+		return;
+	}
 	zetDood($slachtoffer,$sid);
 	schrijfLog($sid,"$slachtoffer eindigt op de Brandstapel " . 
 		"met $aantal stemmen.\n");

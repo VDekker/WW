@@ -72,7 +72,7 @@ function gmailParse() {
 						stuurFoutPauze($adres,$snaam);
 					}
 					else { //anders: check of speler, of inschrijving-fase
-						$id = spelerID($afzender,$sid);
+						$id = spelerID($bericht,$onderwerp,$afzender,$spel);
 						if($id == -1 && 
 							($spel['RONDE'] != 0 || $spel['FASE'] != 0)) {
 								//adres niet herkend in het spel

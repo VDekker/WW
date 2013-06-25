@@ -29,7 +29,7 @@ function inschrijving($adres,$bericht,$sid) {
 	}
 
 	//zet hoofd- en kleine letters goed: alles klein behalve de eerste
-	$naam = strtolower($naam);
+	$naam = strtolower($naam[0]);
 	$naam = ucfirst($naam);
 
 	schrijfLog($sid,"Naam: $naam\n");
@@ -47,12 +47,13 @@ function inschrijving($adres,$bericht,$sid) {
 		schrijfLog($sid,"Geen geslacht gevonden.\n");
 		return false;
 	}
+	$geslacht += 2; // voor maillijst-flag
 	if($vlag) {
 		sqlUp(3,"NAAM='$naam',SPELERFLAGS=$geslacht",
 			"SID=$sid AND EMAIL='$adres'");
 	}
 	else {
-		$sql = "INSERT INTO $tabel(NAAM,SPELERFLAGS,EMAIL,SPEL) 
+		$sql = "INSERT INTO $tabel(NAAM,SPELERFLAGS,EMAIL,SID) 
 			VALUES ('$naam',$geslacht,'$adres',$sid)";
 		sqlQuery($sql);
 		$resultaat = sqlSel(4,"SID=$sid");
@@ -70,14 +71,26 @@ function inschrijving($adres,$bericht,$sid) {
 // geeft naam van speler gebaseerd op email adres en spel,
 // of -1 als het adres niet bij het spel hoort,
 // of -2 als de speler dood is
-function spelerID($adres,$sid) {
+function spelerID($bericht,$onderwerp,$adres,$spel) {
+	$sid = $spel['SID'];
+
 	$resultaat = sqlSel(3,
 		"SID=$sid AND EMAIL='$adres'");
 	if(sqlNum($resultaat) == 0) {
 		return -1;
 	}
 	$speler = sqlFet($resultaat);
+	$rol = $speler['ROL'];
 	if($speler['LEVEND'] == 0) {
+		//als dode burgemeester: hij mag nog testament geven
+		if($spel['BURGEMEESTER'] == $speler['ID'] && 
+			$spel['FASE'] == 11 && 
+			(($rol != "Raaf" && $rol != "Schout" && 
+			$rol != "Waarschuwer" && $rol != "Jager") || 
+			preg_match("/burgemeester/i",$onderwerp) || 
+			preg_match("/burgemeester/i",$bericht))) {
+				return $speler['ID'];
+		}
 		return -2;
 	}
 	return $speler['ID'];
@@ -102,7 +115,7 @@ function geldigeStem($bericht,$sid,$levend) {
 	while($speler = sqlFet($resultaat)) {
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
-			if($naam !== false) { // meerdere namen in bericht
+			if($id !== false) { // meerdere namen in bericht
 				return false;
 			}
 			$id = $speler['ID'];
@@ -218,7 +231,7 @@ function geldigeStemHeks($bericht,$sid,$flag,$id) {
 		$resultaat = sqlSel(3,"SID=$sid AND LEVEND=1 AND ID<>$id");
 	}
 	else {
-		$resultaat = sqlSel(3,"SID=$sid AND LEVEND=3");
+		$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 2) = 2)");
 	}
 	$id = false;
 	if(preg_match("/\bblanco\b/i",$bericht)) {
@@ -263,11 +276,11 @@ function geldigeStemBrand($id,$bericht,$sid) {
 		if($speler['ROL'] == "Dorpsgek" && 
 			($speler['SPELFLAGS'] & 128) == 128) {
 			schrijfLog($sid,"$id mag niet op Dorpsgek $stem stemmen.\n");
-			return -1;
+			return false;
 		}
 		if(($speler['SPELFLAGS'] & 8) == 8) {
 			schrijfLog($sid,"$id mag niet op opgesloten $stem stemmen.\n");
-			return -1;
+			return false;
 		}
 	}
 	return $stem;
@@ -352,13 +365,16 @@ function geldigeStemUniek2($bericht,$afzender,$sid,&$id1,&$id2,$rol) {
 //zo niet, returned "false"
 //bij blanco, returned "blanco"
 //anders returned alle gevonden ID's, met ","ertussen.
-function geldigeStemZonde($bericht,$sid) {
+function geldigeStemZonde($bericht,$id,$sid) {
 	$stem = "";
 	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
 	if(preg_match("/\bblanco\b/i",$bericht)) {
 		$stem .= "-1";
 	}
 	while($speler = sqlFet($resultaat)) {
+		if($speler['ID'] == $id) {
+			continue;
+		}
 		$zoek = "/\b" . $speler['NAAM'] . "\b/i";
 		if(preg_match("$zoek",$bericht)) {
 			if(empty($stem)) {
@@ -368,7 +384,7 @@ function geldigeStemZonde($bericht,$sid) {
 				return false;
 			}
 			else{
-				$stem .= "," . $speler['NAAM'];
+				$stem .= "," . $speler['ID'];
 			}
 		}//if
 	}//while

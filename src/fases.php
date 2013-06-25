@@ -382,10 +382,10 @@ function fases() {
 						if(gewonnen(1,$spel)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
 						}
-						mailAlgemeenInslapen($sid);
-						zetDood2($sid);
-						zetFase(0,$sid);
-						sqlUp(4,"RONDE=RONDE+1","SID=$sid");
+						mailAlgemeenInslapen($spel);
+						//zetDood2($sid); TODO uncomment
+						//zetFase(0,$sid);
+						//sqlUp(4,"RONDE=RONDE+1","SID=$sid");
 					}
 					break;
 			}//switch

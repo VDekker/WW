@@ -1,27 +1,56 @@
 <?php
 
-function footnote() {
+function footnote($auteurs) {
 	global $thuis,$handleiding;
+
+	if(!empty($auteurs)) {
+		$auteurs = array_unique($auteurs);
+	}
+	$max = count($auteurs);
 
 	$footnote = "<br />";
 	$footnote .= "<br />";
 	$footnote .= "<hr>";
 	$footnote .= "<font size='1'>";
-	$footnote .= "Automatische Verteller, gemaakt door Victor Dekker. ";
-	$footnote .= "Gebaseerd op het spel <i>'De Weerwolven van Wakkerdam'</i> ";
+
+	if($max == 1) {
+		$footnote .= "Verhaaltje geschreven door " . $auteurs[0] . ".<br />";
+	}
+	else if($max > 1) {
+		$footnote .= "Verhaaltje geschreven door ";
+		for($i = 0; $i < $max; $i++) {
+			if($max - $i == 1) { //de laatste auteur
+				$footnote .= $auteurs[$i] . ".<br />";
+			}
+			else if($max - $i == 2) { //de een-na laatste auteur
+				$footnote .= $auteurs[$i] . " en ";
+			}
+			else {
+				$footnote .= $auteurs[$i] . ", ";
+			}
+		}
+	}
+
+	$footnote .= "De Automatische Verteller, gemaakt door Victor Dekker, is ";
+	$footnote .= "gebaseerd op het spel <i>'De Weerwolven van Wakkerdam'</i> ";
 	$footnote .= "van Philippe des Pallières en Hervé Marly, ";
 	$footnote .= "en de uitbreidingen <i>'Volle Maan in Wakkerdam'</i> en ";
 	$footnote .= "<i>'Het Dorp'</i>.<br />";
 	$footnote .= "Voor hulp bij het gebruik van de Automatische Verteller, ";
 	$footnote .= "zie <a href=$handleiding>handleiding</a>, ";
-	$footnote .= "of stuur een email met onderwerp 'Help' naar $thuis: ";
+	$footnote .= "of stuur een email met onderwerp 'Help' naar ";
+	$footnote .= '<a href="mailto:' . "$thuis" . '?subject=Help';
+	$footnote .= "&body=Als deze mail anoniem is: ";
+	$footnote .= "voeg 'anoniem' toe aan het onderwerp ";
+	$footnote .= 'en zet hier niet je naam in!">';
+	$footnote .= "$thuis</a>; ";
 	$footnote .= "deze mail zal zo snel mogelijk worden beantwoord.";
 	$footnote .= "</font>";
 	return $footnote;
 }//footnote
 
 //stuurt een mail en slaat deze ook op in de tabel Mails
-function stuurMail($adres,$onderwerp,$bericht) {
+function stuurMail($adres,$onderwerp,$bericht,$auteurs) {
 	global $thuis,$tabellen;
 	$tabel = $tabellen[1];
 	$from = "From: $thuis";
@@ -35,7 +64,7 @@ function stuurMail($adres,$onderwerp,$bericht) {
 		</head>
 		<body>";
 	$message .= $bericht;
-	$bericht .= footnote();
+	$bericht .= footnote($auteurs);
 	$bericht .= "
 		</body>
 		</html>";
@@ -65,7 +94,7 @@ function stuurError($error) {
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
-	stuurMail($alleAdmins,$onderwerp,$error);
+	stuurMail($alleAdmins,$onderwerp,$error,NULL);
 	//die($error); TODO uncomment
 	echo $error;
 	return;
@@ -81,7 +110,7 @@ function stuurError2($error,$sid) {
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
-	stuurMail($alleAdmins,$onderwerp,$error);
+	stuurMail($alleAdmins,$onderwerp,$error,NULL);
 
 	//sqlUp(4,"STATUS=1","SID=$sid"); TODO uncomment
 	//schrijfLog($sid,"Spel gepauzeerd.\n"); TODO uncomment
@@ -119,7 +148,7 @@ function stuurResultaatHTML($adres,$bericht,$resultaat) {
 		$bericht .= "</tr>";
 	}//while
 	$bericht .= "</table>";
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurResultaatHTML
 
@@ -138,7 +167,7 @@ function stuurGewonnenAdmins($spel) {
 	for($i = 1; $i < count($admins); $i++) {
 		$alleAdmins .= ", $admins[$i]";
 	}
-	stuurMail($alleAdmins,$onderwerp,$bericht);
+	stuurMail($alleAdmins,$onderwerp,$bericht,NULL);
 	return;
 }//stuurGewonnenAdmins
 
@@ -165,7 +194,7 @@ function stuurStop($sid) {
 	$bericht .= "<br /><br />";
 	$bericht .= "Excuses voor het ongemak.";
 	foreach($adressen as $adres) {
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//stuurStop
@@ -194,7 +223,7 @@ function stuurPauze($sid) {
 	$bericht .= "<br /><br />";
 	$bericht .= "Excuses voor het ongemak.";
 	foreach($adressen as $adres) {
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//stuurPauze
@@ -220,7 +249,7 @@ function stuurHervat($sid) {
 	$bericht .= "<br /><br />";
 	$bericht .= "Nog veel speelplezier!";
 	foreach($adressen as $adres) {
-		stuurMail($adres,$onderwerp,$bericht);
+		stuurMail($adres,$onderwerp,$bericht,NULL);
 	}
 	return;
 }//stuurHervat
@@ -235,7 +264,7 @@ function stuurFoutStop($adres,$snaam) {
 
 	$bericht .= disclaimer();
 
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutStop
 
@@ -251,7 +280,7 @@ function stuurFoutPauze($adres,$snaam) {
 
 	$bericht .= disclaimer();
 
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutPauze
 
@@ -281,7 +310,7 @@ function stuurInschrijving($adres,$sid) {
 	$bericht .= "en in het bericht je eigen naam, gevolgd door een komma, ";
 	$bericht .= "en vervolgens of je een man (m) of vrouw (v) bent.";
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurInschrijving
 
@@ -296,11 +325,12 @@ function stuurInschrijvingFout($adres,$sid) {
 	$bericht .= "Probeer het nog eens door een bericht te sturen naar: ";
 	$bericht .= "$thuis. Zet in het onderwerp de naam van het spel, ";
 	$bericht .= "en in het bericht je eigen naam, gevolgd door een komma, ";
-	$bericht .= "en vervolgens of je een man (m) of vrouw (v) bent.";
+	$bericht .= "en vervolgens of je een man (m) of vrouw (v) bent.<br />";
+	$bericht .= "De naam mag enkel bestaan uit alfabetische letters.";
 
 	$bericht .= disclaimer();
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurInschrijving
 
@@ -329,15 +359,9 @@ function stuurStem($naam,$adres,$stem,$sid) {
 	else {
 		$bericht .= "Jouw stem is ontvangen: je stemt op $stem.<br />";
 	}
-	$bericht .= "<br />";
-	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
-	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
-	$bericht .= "en met de naam van de speler op wie je stemt ";
-	$bericht .= "in het bericht. ";
-	$bericht .= "Zet geen andere namen in het bericht, ";
-	$bericht .= "om problemen te voorkomen. ";
+	$bericht .= stem($snaam);
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurStem
 
@@ -358,18 +382,12 @@ function stuurStem2($naam,$adres,$stem,$stem2,$sid) {
 	$speler = sqlFet($resultaat);
 	$stem2 = $speler['NAAM'];
 
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Jouw stem is ontvangen: je stemt op $stem en $stem2.<br />";
-	$bericht .= "<br />";
-	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
-	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
-	$bericht .= "en met de naam van de speler op wie je stemt ";
-	$bericht .= "in het bericht. ";
-	$bericht .= "Zet geen andere namen in het bericht, ";
-	$bericht .= "om problemen te voorkomen. ";
+	$bericht .= stem($snaam);
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurStem2
 
@@ -380,7 +398,7 @@ function stuurStemHeks($naam,$adres,$stem,$stem2,$flag,$sid) {
 	$snaam = $spel['SNAAM'];
 	$onderwerp = "$snaam: Stem ontvangen";
 	
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Jouw stem is ontvangen: ";
 	if($stem == -1) {
@@ -408,15 +426,9 @@ function stuurStemHeks($naam,$adres,$stem,$stem2,$flag,$sid) {
 	else {
 		$bericht .= "je stemt blanco.<br />";
 	}
-	$bericht .= "<br />";
-	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
-	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
-	$bericht .= "en met de naam van de speler op wie je stemt ";
-	$bericht .= "in het bericht. ";
-	$bericht .= "Zet geen andere namen in het bericht, ";
-	$bericht .= "om problemen te voorkomen. ";
+	$bericht .= stem($snaam);
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurStemHeks
 
@@ -427,7 +439,7 @@ function stuurStemZonde($naam,$adres,$stemmen,$sid) {
 	$snaam = $spel['SNAAM'];
 	$onderwerp = "$snaam: Stem ontvangen";
 	
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Jouw stem is ontvangen: ";
 	
@@ -454,15 +466,9 @@ function stuurStemZonde($naam,$adres,$stemmen,$sid) {
 			}
 		}//for
 	}//else
-	$bericht .= "<br />";
-	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
-	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$spel', ";
-	$bericht .= "en met de naam van de speler op wie je stemt ";
-	$bericht .= "in het bericht. ";
-	$bericht .= "Zet geen andere namen in het bericht, ";
-	$bericht .= "om problemen te voorkomen. ";
+	$bericht .= stem($snaam);
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurStemZonde
 
@@ -474,7 +480,7 @@ function houJeMond($naam,$adres,$sid) {
 	$snaam = $spel['SNAAM'];
 	$onderwerp = "$snaam: Stemmen mislukt";
 	
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Het systeem is momenteel niet open voor jouw stem. ";
 	$bericht .= "Kan het zo zijn dat het wellicht jouw beurt niet is? ";
@@ -485,7 +491,7 @@ function houJeMond($naam,$adres,$sid) {
 
 	$bericht .= disclaimer();
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//houJeMond
 
@@ -500,7 +506,7 @@ function stuurFoutAdres($adres,$snaam) {
 
 	$bericht .= disclaimer();
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutAdres
 
@@ -516,7 +522,7 @@ function stuurFoutDood($adres,$snaam) {
 
 	$bericht .= disclaimer();
 
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }
 
@@ -538,7 +544,7 @@ function stuurFoutOnderwerp($adres) {
 
 	$bericht .= disclaimer();
 	
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutOnderwerp
 
@@ -549,7 +555,7 @@ function stuurFoutStem($naam,$adres,$sid) {
 	$snaam = $spel['SNAAM'];
 	$onderwerp = "$snaam: Fout bij stemmen";
 	
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Jouw stem was onduidelijk, en dus niet geteld; ";
 	$bericht .= "het kon niet door het systeem worden geparsed. ";
@@ -569,7 +575,7 @@ function stuurFoutStem($naam,$adres,$sid) {
 
 	$bericht .= disclaimer();
 
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutStem
 
@@ -580,7 +586,7 @@ function stuurFoutStem2($naam,$adres,$sid) {
 	$snaam = $spel['SNAAM'];
 	$onderwerp = "$snaam: Fout bij stemmen";
 	
-	$bericht .= "Hallo $naam,<br />";
+	$bericht = "Hallo $naam,<br />";
 	$bericht .= "<br />";
 	$bericht .= "Jouw keuze is helaas niet geteld door het systeem: ";
 	$bericht .= "het leverde een onverwachte fout op. ";
@@ -591,7 +597,7 @@ function stuurFoutStem2($naam,$adres,$sid) {
 
 	$bericht .= disclaimer();
 
-	stuurMail($adres,$onderwerp,$bericht);
+	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;
 }//stuurFoutStem2
 
@@ -604,11 +610,25 @@ function maillijst($sid) {
 		array_push($adressen,$speler['EMAIL']);
 	}
 	$adres = $adressen[0];
-	for($i = 1; $i < count($adres); $i++) {
+	for($i = 1; $i < count($adressen); $i++) {
 		$adres .= ", " . $adressen[$i];
 	}
 	return $adres;
 }
+
+function stem($snaam) {
+	global $thuis;
+
+	$bericht = "<br />";
+	$bericht .= "Mocht dit verkeerd zijn, stem dan zo snel mogelijk opnieuw. ";
+	$bericht .= "Stuur een bericht naar $thuis, met als onderwerp '$snaam', ";
+	$bericht .= "en met de naam (of namen) van de speler(s) op wie je stemt ";
+	$bericht .= "in het bericht. ";
+	$bericht .= "Zet geen andere namen in het bericht, ";
+	$bericht .= "om problemen te voorkomen. ";
+	
+	return $bericht;
+}//stem
 
 //een beetje algemene hulp bij foutmeldingen
 function disclaimer() {
