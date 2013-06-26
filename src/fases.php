@@ -309,12 +309,12 @@ function fases() {
 							sqlUp(4,"STATUS=3","SID=$sid");
 						}
 						else if(empty($spel['BURGEMEESTER'])) {
-							mailAlgemeenVerkiezing($sid);
+							mailAlgemeenVerkiezing($spel);
 							zetDood2($sid);
 							zetFase(13,$sid);
 						}
 						else {
-							mailAlgemeenBrandstapel(0,array(),$sid);
+							mailAlgemeenBrandstapel(0,array(),$spel);
 							zetDood2($sid);
 							zetFase(15,$sid);
 						}
@@ -330,7 +330,7 @@ function fases() {
 					}
 				case 14:
 					$overzicht = regelBurgVerk($sid);
-					mailAlgemeenBrandstapel(1,$overzicht,$sid);
+					mailAlgemeenBrandstapel(1,$overzicht,$spel);
 					zetFase(15,$sid);
 				case 15:
 					if(genoegGewacht($sid)) {
@@ -382,11 +382,13 @@ function fases() {
 						if(gewonnen(1,$spel)) {
 							sqlUp(4,"STATUS=3","SID=$sid");
 						}
-						mailAlgemeenInslapen($spel);
-						//zetDood2($sid); TODO uncomment
-						//zetFase(0,$sid);
-						//sqlUp(4,"RONDE=RONDE+1","SID=$sid");
-					}
+						else {
+							mailAlgemeenInslapen($spel);
+							zetDood2($sid);
+							zetFase(0,$sid);
+							sqlUp(4,"RONDE=RONDE+1","SID=$sid");
+						}
+					}//if
 					break;
 			}//switch
 

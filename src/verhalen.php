@@ -53,7 +53,7 @@ function mailWakker($rol,$spel) {
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
 
-		$text .= "<br /><hr />";
+		$text .= "<br /><br />-=-=-=-<br /><br />";
 		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeVeel($text,$speler,$rol,$sid);
 
@@ -99,7 +99,7 @@ function mailGroepWakker($rol,$spel) {
 		return;
 	}
 	$adres = $adressen[0];
-	for($i = 0; $i < count($adressen); $i++) {
+	for($i = 1; $i < count($adressen); $i++) {
 		$adres .= ", " . $adressen[$i];
 	}
 
@@ -110,8 +110,14 @@ function mailGroepWakker($rol,$spel) {
 	shuffle($tuples);
 	$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
 
-	$text .= "<br /><hr />";
-	$text .= "Jullie hebben tot $deadline om je keuze te maken.<br />";
+	$text .= "<br /><br />-=-=-=-<br /><br />";
+	if(count($adressen) > 1) {
+		$text .= "Jullie hebben ";
+	}
+	else {
+		$text .= "Je hebt ";
+	}
+	$text .= "tot $deadline om je keuze te maken.<br />";
 	$text = keuzeGroep($text,$rol,$sid);
 
 	stuurMail($adres,$onderwerp,$text,array($auteur));
@@ -161,7 +167,7 @@ function mailHeksWakker($spel) {
 				$deadline,$text,$geswoorden);
 		}
 
-		$text .= "<br /><hr />";
+		$text .= "<br /><br />-=-=-=-<br /><br />";
 		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeHeks($text,$speler['NAAM'],$tuplesD,$sid);
 
@@ -199,7 +205,7 @@ function mailJagerWakker($fase,$spel) {
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
 
-		$text .= "<br /><hr />";
+		$text .= "<br /><br />-=-=-=-<br /><br />";
 		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeJager($text,$speler['NAAM'],$sid);
 
@@ -212,6 +218,9 @@ function mailJagerWakker($fase,$spel) {
 //mailt de Burgemeester wakker als hij dood is (voor testament)
 function mailBurgWakker($spel) {
 	$burg = $spel['BURGEMEESTER'];
+	if(empty($burg)) {
+		return;
+	}
 
 	//is er een dode burgemeester?
 	$resultaat = sqlSel(3,"LEVEND<>1 AND ID=$burg");
@@ -236,7 +245,7 @@ function mailBurgWakker($spel) {
 	$auteur = $verhaal['AUTEUR'];
 	$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
 
-	$text .= "<br /><hr />";
+	$text .= "<br /><br />-=-=-=-<br /><br />";
 	$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 	$text = keuzeTestament($text,$sid);
 
@@ -271,7 +280,7 @@ function mailZondeWakker($spel) {
 		$auteur = $verhaal['AUTEUR'];
 		$text = vulIn($tuples,"",$deadline,$text,$geswoorden);
 	
-		$text .= "<br /><hr />";
+		$text .= "<br /><br />-=-=-=-<br /><br />";
 		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
 		$text = keuzeZonde($text,$speler['NAAM'],$sid);
 
@@ -308,8 +317,6 @@ function mailActie($id,$fase,$spel,$plek) {
 
 	schrijfLog($sid,"$rol $id heeft op $stem gestemd.\n");
 
-	return; //TODO delete
-
 	$verhaal = geefVerhaal($thema,$rol,$fase,1,count($tuplesB),
 		$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -344,8 +351,6 @@ function mailDief($id,$spel) {
 	$adres2 = $speler['EMAIL'];
 	
 	schrijfLog($sid,"Dief $id steelt de rol van $stem.\n");
-
-	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Dief',2,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -395,8 +400,6 @@ function mailCupido($id,$spel) {
 
 	schrijfLog($sid,"Cupido $id maakt $stem en $stem2 verliefd op elkaar.\n");
 
-	return; //TODO delete
-
 	//maak Cupido's verhaaltje en stuur deze naar hem
 	$verhaal = geefVerhaal($thema,'Cupido',1,1,2,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -442,8 +445,6 @@ function mailOpdracht($id,$spel) {
 
 	schrijfLog($sid,"Opdrachtgever $id stelt $stem aan tot zijn lijfwacht.\n");
 
-	return; //TODO delete
-
 	$verhaal = geefVerhaal($thema,'Opdrachtgever',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -468,8 +469,6 @@ function mailWelp($id,$spel) {
 	$adres = $speler['EMAIL'];
 
 	schrijfLog($sid,"Welp $id wordt een Weerwolf.\n");
-
-	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Welp',0,1,0,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -504,8 +503,6 @@ function mailKlaas($id,$spel) {
 	$adres2 = $speler['EMAIL'];
 
 	schrijfLog($sid,"Klaas Vaak $id laat $stem slapen.\n");
-
-	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Klaas Vaak',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -545,8 +542,6 @@ function mailDwaas($id,$gezien,$spel) {
 
 	schrijfLog($sid,"Dwaas $id denkt dat $stem een $gezien is.\n");
 
-	return; //TODO delete
-
 	$verhaal = geefVerhaal($thema,'Ziener',1,1,1,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
 	$geswoorden = $verhaal['GESLACHT'];
@@ -583,8 +578,6 @@ function mailGoochel($id,$spel) {
 	array_push($tuplesB,$speler);
 
 	schrijfLog($sid,"Goochelaar $id verwisselt $stem1 en $stem2 met elkaar.\n");
-
-	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,'Goochelaar',2,1,2,$ronde,$sid);
 	$text = $verhaal['VERHAAL'];
@@ -624,8 +617,6 @@ function mailWWVPActie($spelers,$slachtoffer,$rol,$fase,$spel) {
 	else {
 		schrijfLog($sid,"$rol: Niemand vermoord.\n");
 	}
-
-	return; //TODO delete
 
 	$verhaal = geefVerhaal($thema,$rol,$fase,count($tuplesA),
 		count($tuplesB),$ronde,$sid);
@@ -945,7 +936,6 @@ function mailAlgemeenVerkiezing($spel) {
 	verkiezingInleiding($text,$samenvatting,$auteur,$spel);
 	
 	//samenvatting: levende en dode spelers
-	$samenvatting .= "<br />";
 	$samenvatting .= spelerOverzicht($spel);
 
 	//en voeg samenvatting samen met text
@@ -976,7 +966,6 @@ function mailAlgemeenBrandstapel($vlag,$overzicht,$spel) {
 	brandstapelInleiding($text,$samenvatting,$auteur,$spel);
 	
 	//maak samenvatting
-	$samenvatting .= "<br />";
 	$samenvatting .= spelerOverzicht($spel);
 
 	//en voeg samenvatting samen met text
@@ -1017,11 +1006,14 @@ function mailAlgemeenInslapen($spel) {
 	$samenvatting .= "Nacht $nieuweRonde begint.<br />";
 	
 	//en voeg samenvatting samen met text
+	$samenvatting .= spelerOverzicht($spel);
 	$text = plakSamenvatting($samenvatting,$text);
 
 	//mail naar iedereen in maillijst
 	$adres = maillijst($sid);
 	stuurMail($adres,$onderwerp,$text,$auteur);
+
+	return;
 }//mailAlgemeenInslapen
 
 function mailInleiding($spel) {
@@ -1085,8 +1077,10 @@ function mailInleiding($spel) {
 
 function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
 	$sid = $spel['SID'];
+	$snaam = $spel['SNAAM'];
 	$ronde = $spel['RONDE'];
 	$thema = $spel['THEMA'];
+	$onderwerp = "$snaam: Dag $ronde";
 
 	$text = "";
 	$samenvatting = "";
@@ -1094,7 +1088,7 @@ function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
 
 	if($fase) {
 		//na brandstapel: maak brandstapelverhaaltje
-		brandstapelInleiding($text,$samenvatting,$auteur,$spel);
+		brandstapelUitslag($text,$samenvatting,$auteur,$spel);
 	}
 	else {
 		//na nacht: maak ontwaakverhaaltje
@@ -1166,6 +1160,7 @@ function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
 
 	//meld aan admins dat het spel af is
 	stuurGewonnenAdmins($spel);
+
 	return;
 }//mailGewonnen
 
@@ -1177,7 +1172,9 @@ function totaalOverzicht($gewonnenSpelers,$spel) {
 		return "";
 	}
 
-	$samenvatting = "Speleroverzicht:<br />";
+	$samenvatting = "<br />-=-=-=-<br /><br />";
+	$samenvatting .= "Speleroverzicht:<br />";
+	$samenvatting .= "<br />";
 	$samenvatting .= "<table border='1'><tr>";
 	$samenvatting .= "<th>Naam</th>";
 	$samenvatting .= "<th>Gewonnen?</th>";
@@ -1209,13 +1206,13 @@ function totaalOverzicht($gewonnenSpelers,$spel) {
 		}
 		$burgemeester = ($burg == $speler['ID'])? "Ja" : "";
 		$samenvatting .= "<tr>";
-		$samenvatting .= "<th>$naam</th>";
-		$samenvatting .= "<th>$gewonnen</th>";
-		$samenvatting .= "<th>$levend</th>";
-		$samenvatting .= "<th>$rol</th>";
-		$samenvatting .= "<th>$geliefde</th>";
-		$samenvatting .= "<th>$lijfwacht</th>";
-		$samenvatting .= "<th>$burgemeester</th>";
+		$samenvatting .= "<td align='center'>$naam</td>";
+		$samenvatting .= "<td align='center'>$gewonnen</td>";
+		$samenvatting .= "<td align='center'>$levend</td>";
+		$samenvatting .= "<td align='center'>$rol</td>";
+		$samenvatting .= "<td align='center'>$geliefde</td>";
+		$samenvatting .= "<td align='center'>$lijfwacht</td>";
+		$samenvatting .= "<td align='center'>$burgemeester</td>";
 		$samenvatting .= "</tr>";
 	}
 	$samenvatting .= "</table>";

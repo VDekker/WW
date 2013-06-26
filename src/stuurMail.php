@@ -5,6 +5,7 @@ function footnote($auteurs) {
 
 	if(!empty($auteurs)) {
 		$auteurs = array_unique($auteurs);
+		$auteurs = array_values($auteurs);
 	}
 	$max = count($auteurs);
 
@@ -52,25 +53,24 @@ function footnote($auteurs) {
 //stuurt een mail en slaat deze ook op in de tabel Mails
 function stuurMail($adres,$onderwerp,$bericht,$auteurs) {
 	global $thuis,$tabellen;
+	$adres = "eudyptes.crestatus@gmail.com"; //TODO delete
 	$tabel = $tabellen[1];
 	$from = "From: $thuis";
 	$headers = "MIME-Version: 1.0\r\n";
-	$headers .= "Content-type: text/html; charset=iso-8859-1\r\n";
+	$headers .= "Content-type: text/html; charset=UTF-8\r\n";
+	$headers .= "Content-Transfer-Encoding: base64\r\n";
 	$headers .= $from;
-	$message = "
-		<html>
-		<head>
-		  <title>$onderwerp</title>
-		</head>
-		<body>";
+	$message = "<html><head><title>$onderwerp</title></head><body>";
 	$message .= $bericht;
-	$bericht .= footnote($auteurs);
-	$bericht .= "
-		</body>
-		</html>";
-	
-	mail($adres,$onderwerp,$bericht,$headers);
-	$text = sqlEscape($bericht);
+	$message .= footnote($auteurs);
+	$message .= "</body></html>";
+
+	//tegen willekeurige spaties
+	$message2 = chunk_split(base64_encode($message));
+	mail($adres,$onderwerp,$message2,$headers);
+
+	//zet in database
+	$text = sqlEscape($message);
 	$sql = "INSERT INTO $tabel(ADRES,ONDERWERP,BERICHT,HEADERS)
 		VALUES ('$adres','$onderwerp','$text','$headers')";
 	sqlQuery($sql);
@@ -141,9 +141,9 @@ function stuurResultaatHTML($adres,$bericht,$resultaat) {
 			if(is_int($key)) {
 				continue;
 			}//if
-			$bericht .= "<th>";
+			$bericht .= "<td align='center'>";
 			$bericht .= htmlspecialchars($value);
-			$bericht .= "</th>";
+			$bericht .= "</td>";
 		}//foreach
 		$bericht .= "</tr>";
 	}//while
