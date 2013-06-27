@@ -151,7 +151,7 @@ function mailHeksWakker($spel) {
 		$adres = $speler['EMAIL'];
 		$key = array_search($speler,$tuplesD);
 		if($key === false) {
-			$verhaal = geefVerhaal($thema,"Heks",0,1,$aantal,$ronde,$sid);
+			$verhaal = geefVerhaal2($thema,"Heks",0,1,$aantal,$ronde,$sid);
 			$text = $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			$auteur = $verhaal['AUTEUR'];
@@ -159,7 +159,7 @@ function mailHeksWakker($spel) {
 		}
 		else {
 			$tuplesTemp = delArrayElement($tuplesD,$key);
-			$verhaal = geefVerhaal($thema,"Heks",3,1,$aantal-1,$ronde,$sid);
+			$verhaal = geefVerhaal2($thema,"Heks",3,1,$aantal-1,$ronde,$sid);
 			$text = $verhaal['VERHAAL'];
 			$geswoorden = $verhaal['GESLACHT'];
 			$auteur = $verhaal['AUTEUR'];
@@ -199,6 +199,7 @@ function mailJagerWakker($fase,$spel) {
 		$vlag = true;
 		$tuples = array($speler);
 		$adres = $speler['EMAIL'];
+		$naam = $speler['NAAM'];
 		$verhaal = geefVerhaal($thema,"Jager",$fase,1,0,$ronde,$sid);
 		$text = $verhaal['VERHAAL'];
 		$geswoorden = $verhaal['GESLACHT'];
@@ -207,10 +208,10 @@ function mailJagerWakker($fase,$spel) {
 
 		$text .= "<br /><br />-=-=-=-<br /><br />";
 		$text .= "Je hebt tot $deadline om je keuze te maken.<br />";
-		$text = keuzeJager($text,$speler['NAAM'],$sid);
+		$text = keuzeJager($text,$naam,$sid);
 
 		stuurMail($adres,$onderwerp,$text,array($auteur));
-		schrijfLog($sid,"Mail gestuurd naar $namen[0].\n");
+		schrijfLog($sid,"Mail gestuurd naar $naam.\n");
 	}//while
 	return $vlag;
 }//mailJagerWakker
@@ -1095,14 +1096,21 @@ function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
 		ontwaakVerhaal($text,$samenvatting,$auteur,$spel);
 	}
 
-	//pak alle levende, niet-gewonnen spelers
+	//pak alle levende, niet-gewonnen spelers (alleen van toepassing bij FS)
+	$gew = "('" . $gewonnenSpelers[0]['NAAM'] . "'";
+	for($i = 1; $i < count($gewonnenSpelers); $i++) {
+		$gew .= ", '" . $gewonnenSpelers[$i]['NAAM'] . "'";
+	}
+	$gew .= ")";
 	$verlorenSpelers = array();
-	$resultaat = sqlSel(3,"SID=$sid AND ((LEVEND & 1) = 1)");
+	$resultaat = sqlSel(3,"SID=$sid AND LEVEND= 1");
 	while($speler = sqlFet($resultaat)) {
-		if(!in_array($speler,$gewonnenSpelers)) {
+		if(!check_in_array($speler,$gewonnenSpelers)) {
 			array_push($verlorenSpelers,$speler);
 		}
 	}
+
+	var_dump($verlorenSpelers);
 
 	//maak gewonnenverhaaltje
 	$verhaal = geefVerhaal($thema,"Gewonnen",$gewonnen,count($gewonnenSpelers),
@@ -1187,7 +1195,7 @@ function totaalOverzicht($gewonnenSpelers,$spel) {
 
 	while($speler = sqlFet($resultaat)) {
 		$naam = $speler['NAAM'];
-		$gewonnen = (in_array($speler,$gewonnenSpelers))? "Ja" : "";
+		$gewonnen = (check_in_array($speler,$gewonnenSpelers))? "Ja" : "";
 		$levend = ($speler['LEVEND'] & 1)? "Ja" : "";
 		$rol = $speler['ROL'];
 		$geliefde = "";

@@ -849,18 +849,17 @@ function regelJager($fase,$spel) {
 				$stem == $spel['BURGEMEESTER']) { //opnieuw naar regeldood1
 					schrijfLog($sid,"$stem is een Jager, Geliefde, " . 
 						"Burgemeester of heeft een Lijfwacht.\n");
-					zetFase($fase,$sid);
+					if($fase == 2) {
+						zetFase(10,$sid);
+					}
+					else if($fase == 3) {
+						zetFase(17,$sid);
+					}
 					$flag = true;
 			}
 		}
+		sqlUp(3,"SPELFLAGS=SPELFLAGS+128","ID=$id");
 	}//while
-	if($flag) {
-		sqlData($resultaat,0);
-		while($speler = sqlFet($resultaat)) {
-			$id = $speler['ID'];
-			sqlUp(3,"SPELFLAGS=SPELFLAGS+128","ID=$id");
-		}
-	}
 	return;
 }//regelJager
 
@@ -970,15 +969,15 @@ function regelDood2($sid,$fase) {
 	if(sqlNum($resultaat) > 0) {
 		sqlUp(3,"ROL='Burger',LIJFWACHT=NULL",
 			"SID=$sid AND LEVEND=1 AND ROL IN (
-			'Cupido',
-			'Dief',
-			'Dorpsgek',
-			'Dorpsoudste',
-			'Dwaas',
-			'Genezer',
-			'Goochelaar',
-			'Grafrover',
-			'Heks',
+				'Cupido',
+				'Dief',
+				'Dorpsgek',
+				'Dorpsoudste',
+				'Dwaas',
+				'Genezer',
+				'Goochelaar',
+				'Grafrover',
+				'Heks',
 			'Jager',
 			'Klaas Vaak',
 			'Onschuldige Meisje',

@@ -74,6 +74,9 @@ function stuurMail($adres,$onderwerp,$bericht,$auteurs) {
 	$sql = "INSERT INTO $tabel(ADRES,ONDERWERP,BERICHT,HEADERS)
 		VALUES ('$adres','$onderwerp','$text','$headers')";
 	sqlQuery($sql);
+
+	$text = str_replace("<br /","\n",$text);
+	echo "$text\n\n";//TODO delete
 	return;
 }//stuurMail
 
