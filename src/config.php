@@ -573,8 +573,8 @@ function adminRoles($bericht,$adres) {
 	echo $rolverdeling;
 
 	$tabel = $tabellen[2];
-	$sql = "INSERT INTO $tabel('RID','AANTAL','ROLLEN','BURGEMEESTER') ";
-	$sql .= "VALUES(NULL,'$aantal','$rolverdeling','$bur')";
+	$sql = "INSERT INTO $tabel(AANTAL,ROLLEN,BURGEMEESTER) ";
+	$sql .= "VALUES($aantal,'$rolverdeling',$burg)";
 	sqlQuery($sql);
 
 	$subject = "Rolverdeling ingevoegd";
