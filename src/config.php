@@ -571,7 +571,6 @@ function adminRoles($bericht,$adres) {
 		$aantal += $count;
 	}
 	$rolverdeling = implode(',',$rolverdeling);
-	echo $rolverdeling;
 
 	$tabel = $tabellen[2];
 	$sql = "INSERT INTO $tabel(AANTAL,ROLLEN,BURGEMEESTER) ";
