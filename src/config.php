@@ -44,6 +44,9 @@ function config($adres,$onderwerp,$bericht) {
 	if(preg_match("/help/i",$onderwerp)) {
 		adminHelp($bericht,$onderwerp,$adres);
 	}
+	if(preg_match("/roles/i",$onderwerp)) {
+		adminRoles($bericht,$adres);
+	}
 	return;
 }//config
 
@@ -521,6 +524,66 @@ function adminHelp($bericht,$onderwerp,$adres) {
 	stuurMail($adres,$onderwerp,$bericht,NULL);
 	return;	
 }//adminHelp
+
+function adminRoles($bericht,$adres) {
+	global $tabellen;
+
+	$burg = strpos($bericht,'Burgemeester');
+	if($burg === false) {
+		$burg = 0;
+	}
+	else {
+		$burg = 1;
+	}
+	$rolverdeling = array();
+	$rolverdeling[15] = substr_count($bericht,'Witte Weerwolf');
+	$bericht = str_replace('Witte Weerwolf','',$bericht);
+	$rolverdeling[0] = substr_count($bericht,'Burger');
+	$rolverdeling[1] = substr_count($bericht,'Weerwolf');
+	$rolverdeling[2] = substr_count($bericht,'Ziener');
+	$rolverdeling[3] = substr_count($bericht,'Heks');
+	$rolverdeling[4] = substr_count($bericht,'Cupido');
+	$rolverdeling[5] = substr_count($bericht,'Jager');
+	$rolverdeling[6] = substr_count($bericht,'Genezer');
+	$rolverdeling[7] = substr_count($bericht,'Slet');
+	$rolverdeling[8] = substr_count($bericht,'Dorpsoudste');
+	$rolverdeling[9] = substr_count($bericht,'Dorpsgek');
+	$rolverdeling[10] = substr_count($bericht,'Raaf');
+	$rolverdeling[11] = substr_count($bericht,'Goochelaar');
+	$rolverdeling[12] = substr_count($bericht,'Grafrover');
+	$rolverdeling[13] = substr_count($bericht,'Vampier');
+	$rolverdeling[14] = substr_count($bericht,'Welp');
+	$rolverdeling[16] = substr_count($bericht,'Klaas Vaak');
+	$rolverdeling[17] = substr_count($bericht,'Zondebok');
+	$rolverdeling[18] = substr_count($bericht,'Dwaas');
+	$rolverdeling[19] = substr_count($bericht,'Schout');
+	$rolverdeling[20] = substr_count($bericht,'Fluitspeler');
+	$rolverdeling[21] = substr_count($bericht,'Onschuldige Meisje');
+	$rolverdeling[22] = substr_count($bericht,'Priester');
+	$rolverdeling[23] = substr_count($bericht,'Psychopaat');
+	$rolverdeling[24] = substr_count($bericht,'Verleidster');
+	$rolverdeling[25] = substr_count($bericht,'Opdrachtgever');
+	$rolverdeling[26] = substr_count($bericht,'Dief');
+	$rolverdeling[27] = substr_count($bericht,'Waarschuwer');
+	$aantal = 0;
+	foreach($rolverdeling as $count) {
+		$aantal += $count;
+	}
+	$rolverdeling = implode(',',$rolverdeling);
+	echo $rolverdeling;
+
+	$tabel = $tabellen[2];
+	$sql = "INSERT INTO $tabel('RID','AANTAL','ROLLEN','BURGEMEESTER') ";
+	$sql .= "VALUES(NULL,'$aantal','$rolverdeling','$bur')";
+	sqlQuery($sql);
+
+	$subject = "Rolverdeling ingevoegd";
+	$message = "De rolverdeling is succesvol in de database gezet.<br />";
+	$message .= "Rolverdeling: $rolverdeling.";
+
+	stuurMail($adres,$subject,$message,NULL);
+	return;
+}//adminRoles
 
 //hulp aangevraagd: $onderwerp is het originele onderwerp, 
 //en $bericht het originele bericht

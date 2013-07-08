@@ -1112,6 +1112,17 @@ function mailGewonnen($gewonnen,$gewonnenSpelers,$fase,$spel) {
 
 	var_dump($verlorenSpelers);
 
+	//in case of opdrachtgever/lijfwacht:
+	//opdrachtgever in [0] en lijfwacht in [1]
+	if($gewonnen == 7) {
+		if($gewonnenSpelers[0]['ROL'] != "Opdrachtgever" || 
+			$gewonnenSpelers[0]['LIJFWACHT'] != $gewonnenSpelers[1]['ID']) {
+				$tmp = $gewonnenSpelers[0];
+				$gewonnenSpelers[0] = $gewonnenSpelers[1];
+				$gewonnenSpelers[1] = $tmp;
+			}
+	}
+
 	//maak gewonnenverhaaltje
 	$verhaal = geefVerhaal($thema,"Gewonnen",$gewonnen,count($gewonnenSpelers),
 		count($verlorenSpelers),$ronde,$sid);
