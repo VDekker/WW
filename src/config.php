@@ -536,7 +536,7 @@ function adminRoles($bericht,$adres) {
 		$burg = 1;
 	}
 	$rolverdeling = array();
-	$rolverdeling[15] = substr_count($bericht,'Witte Weerwolf');
+	$witte = substr_count($bericht,'Witte Weerwolf');
 	$bericht = str_replace('Witte Weerwolf','',$bericht);
 	$rolverdeling[0] = substr_count($bericht,'Burger');
 	$rolverdeling[1] = substr_count($bericht,'Weerwolf');
@@ -553,6 +553,7 @@ function adminRoles($bericht,$adres) {
 	$rolverdeling[12] = substr_count($bericht,'Grafrover');
 	$rolverdeling[13] = substr_count($bericht,'Vampier');
 	$rolverdeling[14] = substr_count($bericht,'Welp');
+	$rolverdeling[15] = $witte;
 	$rolverdeling[16] = substr_count($bericht,'Klaas Vaak');
 	$rolverdeling[17] = substr_count($bericht,'Zondebok');
 	$rolverdeling[18] = substr_count($bericht,'Dwaas');
