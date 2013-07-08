@@ -285,7 +285,6 @@ function adminStart($text,$adres) {
 
 	//pak huidige systeemdatum (voor DUUR)
 	$duur = date('Y-m-d');
-	echo "Datum: $duur.\n";
 	
 	//upload nieuw spel
 	$sql = "INSERT INTO $tabel(SNAAM,MAX_SPELERS,SNELHEID,";

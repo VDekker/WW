@@ -1030,10 +1030,9 @@ function regelBurgVerk($sid) {
 		}
 		else {
 			heeftGestemd($id);
-			//verwijderStem($id,"STEM"); TODO uncomment
+			verwijderStem($id,"STEM");
 			schrijfLog($sid,"$id stemt: $stem.\n");
 		}
-		echo "$naam stemt: $stem.\n";
 		if(array_key_exists($stem,$overzichtTotaal)) {
 			array_push($overzichtTotaal[$stem],$naam);
 		}
@@ -1050,7 +1049,6 @@ function regelBurgVerk($sid) {
 		$id = $speler['ID'];
 		$naam = $speler['NAAM'];
 		if(array_key_exists($id,$overzichtTotaal)) {
-			echo "Gevonden!\n";
 			$overzichtTotaal[$naam] = $overzichtTotaal[$id];
 			unset($overzichtTotaal[$id]);
 		}

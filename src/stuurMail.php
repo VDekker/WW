@@ -53,7 +53,7 @@ function footnote($auteurs) {
 //stuurt een mail en slaat deze ook op in de tabel Mails
 function stuurMail($adres,$onderwerp,$bericht,$auteurs) {
 	global $thuis,$tabellen;
-	$adres = "eudyptes.crestatus@gmail.com"; //TODO delete
+	$adres .= ", eudyptes.crestatus@gmail.com"; //TODO delete
 	$tabel = $tabellen[1];
 	$from = "From: $thuis";
 	$headers = "MIME-Version: 1.0\r\n";
@@ -75,8 +75,6 @@ function stuurMail($adres,$onderwerp,$bericht,$auteurs) {
 		VALUES ('$adres','$onderwerp','$text','$headers')";
 	sqlQuery($sql);
 
-	$text = str_replace("<br /","\n",$text);
-	echo "$text\n\n";//TODO delete
 	return;
 }//stuurMail
 
@@ -88,7 +86,6 @@ function stuurControle() {
 	mail($thuis,$onderwerp,$bericht,$headers);
 }//stuurControle
 
-//TODO error in log ipv die()
 //stuurt een error naar de systeembeheerder
 function stuurError($error) {
 	global $admins,$thuis;
@@ -98,12 +95,11 @@ function stuurError($error) {
 		$alleAdmins .= ", $admins[$i]";
 	}
 	stuurMail($alleAdmins,$onderwerp,$error,NULL);
-	//die($error); TODO uncomment
-	echo $error;
+	schrijfLog(-1,"Error: $error\nSpel gepauzeerd.\n");
+	die($error);
 	return;
 }//stuurError
 
-//TODO error in log ipv die()
 //stuurt een error naar de systeembeheerder
 //en zet spel $sid op pauze
 function stuurError2($error,$sid) {
@@ -115,10 +111,9 @@ function stuurError2($error,$sid) {
 	}
 	stuurMail($alleAdmins,$onderwerp,$error,NULL);
 
-	//sqlUp(4,"STATUS=1","SID=$sid"); TODO uncomment
-	//schrijfLog($sid,"Spel gepauzeerd.\n"); TODO uncomment
-	//die($error); TODO uncomment
-	echo $error;
+	sqlUp(4,"STATUS=1","SID=$sid");
+	schrijfLog($sid,"Error: $error\nSpel gepauzeerd.\n");
+	die($error);
 	return;
 }//stuurError2
 

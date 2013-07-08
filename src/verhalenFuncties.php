@@ -1604,7 +1604,6 @@ function brandstapelOverzicht($spel) {
 		if($speler['ID'] == $burgemeester) {
 			$naam .= " (Burgemeester)";
 			$waarde += 1;
-			echo $speler['NAAM'] . " is burgemeester.\n";
 		}
 		if(($flags & 2) == 2) { //schuldgevoel
 			$naam .= " (schuldgevoel)";
