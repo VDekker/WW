@@ -4,7 +4,8 @@ function fases() {
 	$resultaat = sqlSel(4,"STATUS=0");
 	while($spel = sqlFet($resultaat)) { // voor elk spel...
 		$sid = $spel['SID'];
-		schrijfLog($sid,"Ongewonnen spel gevonden: $sid.\n");
+		schrijfLog(-1,"Ongewonnen spel gevonden: $sid.\n");
+		schrijfLog($sid,"Begin regelen.\n");
 		$fase = $spel['FASE'];
 		$duur = $spel['DUUR'];
 		schrijfLog($sid,"Fase: $fase, sinds $duur.\n");

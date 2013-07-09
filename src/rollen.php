@@ -43,6 +43,9 @@ function verdeelRol($sid) {
 			"van spel $sid.\n",$sid);
 		return;
 	}
+	schrijfLog($sid,"Speleraantal: $aantal.\n");
+
+	//pak willekeurige rolverdeling
 	while($rolverdeling = sqlFet($resultaat)) {
 		array_push($rolTuples,$rolverdeling);
 	}
@@ -50,8 +53,8 @@ function verdeelRol($sid) {
 	$rolverdeling = $rolTuples[$key];
 	$rid = $rolverdeling['RID'];
 	schrijfLog($sid,"Gekozen rolverdeling: $rid.\n");
-	$rollen = explode(",",$rolverdeling['ROLLEN']);
-	shuffle($alleSpelers);
+
+	//regel de (eventuele) burgemeester
 	if($rolverdeling['BURGEMEESTER']) {
 		$burgemeester = "NULL";
 		schrijfLog($sid,"Met Burgemeester.\n");
@@ -62,6 +65,10 @@ function verdeelRol($sid) {
 	}
 	sqlUp(4,"LEVEND=$aantal,DOOD=0,ROLLEN=$rid,BURGEMEESTER=$burgemeester",
 		"SID=$sid");
+
+	//verdeel de rollen, willekeurig
+	$rollen = explode(",",$rolverdeling['ROLLEN']);
+	shuffle($alleSpelers);
 	$teller = 0;
 	for($i = 0; $i < count($rollen); $i++) {
 		while($rollen[$i] > 0) {
@@ -76,7 +83,7 @@ function verdeelRol($sid) {
 			}
 			sqlUp(3,"ROL='$rol',SPELFLAGS=$spelflags",
 				"ID=$dezeSpeler");
-			schrijfLog($sid,"$dezeSpeler is nu een $rol.\n");
+			schrijfLog($sid,"$dezeSpeler krijgt rol: $rol.\n");
 			$teller++;
 			$rollen[$i]--;
 		}//while
@@ -92,6 +99,7 @@ function verdeelRol($sid) {
 //met een willekeurige speler met $rol
 //(gebruikt voor easter-eggs)
 function verwisselRol($naam,$rol,$sid) {
+
 	//pak de rol
 	$resultaat = sqlSel(3,"SID=$sid AND ROL='$rol'");
 	if(sqlNum($resultaat) == 0) { //als rol niet in spel: stop
@@ -120,9 +128,12 @@ function verwisselRol($naam,$rol,$sid) {
 	$id2 = $speler['ID'];
 	$rol2 = $speler['ROL'];
 	$flags2 = $speler['SPELFLAGS'];
+	$naam2 = $speler['NAAM'];
 
 	sqlUp(3,"ROL='$rol2',SPELFLAGS=$flags2","ID=$id1");
 	sqlUp(3,"ROL='$rol1',SPELFLAGS=$flags1","ID=$id2");
+
+	schrijfLog($sid,"$naam is altijd $rol: $naam2 is van rol veranderd.\n");
 
 	return;
 }//verwisselRol

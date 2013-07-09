@@ -5,8 +5,6 @@ function gmailParse() {
 
 	$berichtstatus = "UNSEEN";
 	$emails = imap_search($gmconnect,$berichtstatus);
-	$totaal = imap_num_msg($gmconnect);
-	schrijfLog(-1,"Totaal aantal emails: $totaal.\n");
 
 	if($emails) {
 		//sorteer de emails met oudste eerst. Voor nieuwste eerst: sort()
@@ -38,21 +36,24 @@ function gmailParse() {
 
 			$bericht = htmlentities($bericht1);
 			
-			schrijflog(-1,"Mail van: '$afzender'\n");
+			schrijfLog(-1,"Mail van: '$afzender'\n");
 
 			//ga nu parsen: zoek wat voor mail het is
 			if(preg_match("/config/i",$onderwerp)) {
-				schrijfLog(-1,"Config mail gevonden.\n");
+				schrijfLog(-1,"Config-mail.\n");
 				if(!in_array($afzender,$admins)) {
 					schrijfLog(-1,"Afzender is geen admin; doe niets.\n");
 					continue;
 				}
 				config($afzender,$onderwerp,$bericht);
-			}
+			}//if
 			else if(preg_match("/\bhelp\b/i",$onderwerp)) {
+				schrijfLog(-1,"Help-mail.\n");
 				help($afzender,$onderwerp,$bericht);
 			}
 			else { //anders is het een stem/inschrijving
+				schrijfLog(-1,"Spel-mail.\n");
+
 				//zoek welk spel
 				$resultaat = sqlSel(4,"");
 				$gevonden = false;
@@ -76,24 +77,30 @@ function gmailParse() {
 						if($id == -1 && 
 							($spel['RONDE'] != 0 || $spel['FASE'] != 0)) {
 								//adres niet herkend in het spel
-								schrijfLog($spel['SID'],
-									"Geen speler herkend.\n");
+								schrijfLog($sid,"Adres '$afzender' " . 
+									"is niet bekend in dit spel.\n");
+								schrijfLog(-1,
+									"Adres niet bekend in spel $sid.\n");
 								stuurFoutAdres($afzender,$spel['SNAAM']);
 						}
 						else if ($id == -2) {
 							//speler is dood en hoeft niet te stemmen
-							schrijfLog($spel['SID'],"Speler is dood.\n");
+							schrijfLog(-1,"Speler is dood in spel $sid.\n");
+							schrijfLog($sid,"Dood adres '$afzender' " . 
+								"probeert te stemmen.\n");
 							stuurFoutDood($afzender,$spel['SNAAM']);
 						}
 						else {
+							schrijfLog(-1,"Spel-mail voor spel $sid.\n");
+							schrijfLog($sid,"Mail van '$afzender'");
 							parseStem($id,$afzender,$spel,$bericht,$onderwerp);
 						}
 					}//else
 				}//if
 				else {
 					//geen spelnaam herkend: mail dit naar de afzender
-					schrijfLog(-1,"Verkeerd onderwerp (geen spelnaam " . 
-						"herkend).\n");
+					schrijfLog(-1,
+						"Verkeerd onderwerp (geen spelnaam herkend).\n");
 					stuurFoutOnderwerp($afzender);
 				}
 			}//else

@@ -34,15 +34,15 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id wil van $stem stelen.\n");
+						schrijfLog($sid,"Dief $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Dief: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -54,26 +54,26 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						zetStem($id,$stem,$sid,"STEM");
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
 						stuurStem2($naam,$adres,$stem,$stem2,$sid);
-						schrijfLog($sid,"$id wil $stem en $stem2 " . 
-						   "verliefd maken.\n");
+						schrijfLog($sid,
+							"Cupido $naam kiest $stem en $stem2.\n");
 						}
 					else if($stem == -1) { //blanco
 						zetStem($id,$stem,$sid,"STEM");
 						zetStem($id,"NULL",$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id stemt blanco.\n");
+						schrijfLog($sid,"Cupido $naam kiest -1.\n");
 					}
 					else if($stem == -2) {
-						schrijfLog($sid,"Speler is al gekozen.\n");
+						schrijfLog($sid,"Cupido: speler is al gekozen.\n");
 						stuurFoutStem2($naam,$adres,$sid);
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Cupido: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -83,24 +83,27 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false && $stem != -2) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id wil $stem als Lijfwacht.\n");
+						schrijfLog($sid,"Opdrachtgever $naam kiest $stem.\n");
 					}
 					else if($stem == -2) {
-						schrijfLog($sid,"Speler was al gekozen.\n");
+						schrijfLog($sid,
+							"Opdrachtgever: speler was al gekozen.\n");
 						stuurFoutStem2($naam,$adres,$sid);
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Opdrachtgever: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
 			default:
 				//spel zit in een niet-wachtfase
+				schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 				houJeMond($naam,$adres,$sid);
 				break;
 		}//switch
@@ -113,15 +116,16 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id wil van $stem roven.\n");
+						schrijfLog($sid,"Grafrover $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Grafrover: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -132,15 +136,16 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id wil $stem laten slapen.\n");
+						schrijfLog($sid,"Klaas Vaak $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Klaas Vaak: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -151,10 +156,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						if($stem !== false) {
 							zetStem($id,$stem,$sid,"STEM");
 							stuurStem($naam,$adres,$stem,$sid);
-							schrijfLog($sid,"$rol $id kiest $stem.\n");
+							schrijfLog($sid,"$rol $naam kiest $stem.\n");
 						}
 						else {
-							schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+							schrijfLog($sid,"$rol: geen goede stem gevonden.\n");
 							stuurFoutStem($naam,$adres,$sid);
 						}
 					}//if
@@ -164,10 +169,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$rol $id kiest $stem.\n");
+						schrijfLog($sid,"$rol $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"$rol: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -176,10 +181,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Weerwolf $id wil $stem opeten.\n");
+						schrijfLog($sid,"Weerwolf $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Weerwolf: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -188,10 +193,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Vampier $id wil $stem bijten.\n");
+						schrijfLog($sid,"Vampier $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Vampier: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -203,12 +208,11 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						if($stem !== false) {
 							zetStem($id,$stem,$sid,"EXTRA_STEM");
 							stuurStem($naam,$adres,$stem,$sid);
-							schrijfLog($sid,"Witte WW $id wil $stem " . 
-								"verscheuren.\n");
+							schrijfLog($sid,"Witte WW $naam kiest $stem.\n");
 						}
 						else {
-							schrijfLog($sid,"Error: geen goede stem " . 
-								"gevonden.\n");
+							schrijfLog($sid,
+								"Witte Weerwolf: geen goede stem gevonden.\n");
 							stuurFoutStem($naam,$adres,$sid);
 						}
 					}//if
@@ -217,12 +221,12 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						if($stem !== false) {
 							zetStem($id,$stem,$sid,"STEM");
 							stuurStem($naam,$adres,$stem,$sid);
-							schrijfLog($sid,"Witte WW $id wil $stem " . 
-								"opeten.\n");
+							schrijfLog($sid,
+								"Witte WW $naam kiest $stem (Weerwolf).\n");
 						}
 						else {
-							schrijfLog($sid,"Error: geen goede stem " .
-								"gevonden.\n");
+							schrijfLog($sid,"Witte Weerwolf: " . 
+								"geen goede stem gevonden (Weerwolf).\n");
 							stuurFoutStem($naam,$adres,$sid);
 						}
 					}//else
@@ -239,25 +243,27 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						zetStem($id,$stem,$sid,"STEM");
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
 						stuurStem2($naam,$adres,$stem,$stem2,$sid);
-						schrijfLog($sid,"$id wil $stem en $stem2 " .
+						schrijfLog($sid,"$naam wil $stem en $stem2 " .
 							"verwisselen.\n");
 						}
 					else if ($stem == -1) { //blanco
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$id stemt blanco.\n");
+						schrijfLog($sid,"Goochelaar $naam kiest -1.\n");
 					}
 					else if($stem == -2) {
-						schrijfLog($sid,"Speler was al gekozen.\n");
+						schrijfLog($sid,
+							"Goochelaar: speler was al gekozen.\n");
 						stuurFoutStem2($naam,$adres,$sid);
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Goochelaar: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -273,27 +279,29 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						($stem == -1 || (($drank & 128) == 128))) {
 						zetStem($id,$stem,$sid,"STEM");
 						$flag += 1;
-						schrijfLog($sid,"Heks $id wil $stem redden.\n");
+						schrijfLog($sid,"Heks $naam wil $stem redden.\n");
 					}
 					else{
 						zetStemNULL($id,$sid,"STEM");
-						schrijfLog($sid,"Heks $id wil niemand redden.\n");
+						schrijfLog($sid,"Heks $naam wil niemand redden.\n");
 					}
 					if($stem2 !== false && $stem2 != $id && 
 						($stem2 == -1 || (($drank & 256) == 256))) {
 						zetStem($id,$stem2,$sid,"EXTRA_STEM");
 						$flag += 2;
-						schrijfLog($sid,"Heks $id wil $stem2 vergiftigen.\n");
+						schrijfLog($sid,
+							"Heks $naam wil $stem2 vergiftigen.\n");
 					}
 					else{
 						zetStemNULL($id,$sid,"EXTRA_STEM");
-						schrijfLog($sid,"Heks $id wil niemand vergiftigen.\n");
+						schrijfLog($sid,
+							"Heks $naam wil niemand vergiftigen.\n");
 					}
 					if(($stem === false || 
 						($drank & 128 != 128)) && 
 						($stem2 === false || $stem2 == $id || 
 						($drank & 256 != 256))) {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Heks: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 					else {
@@ -307,24 +315,23 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 						if($stem2 !== false) {
 							zetStem($id,$stem2,$sid,"EXTRA_STEM");
 							stuurStem2($naam,$adres,$stem,$stem2,$sid);
-							schrijfLog($sid,"$id wil $stem en $stem2 " .
-								"betoveren.\n");
+							schrijfLog($sid,
+								"Fluitspeler $naam kiest $stem en $stem2.\n");
 						}
 						else {
 							zetStemNULL($id,$sid,"EXTRA_STEM");
 							stuurStem($naam,$adres,$stem,$sid);
-							schrijfLog($sid,"$id wil enkel $stem " .
-								"betoveren.\n");
+							schrijfLog($sid,"Fluitspeler $naam kiest $stem.\n");
 						}
 					}//if
 					else {
-						schrijfLog($sid,"Error: geen geldige stemmen " .
-							"gevonden.\n");
+						schrijfLog($sid,
+							"Fluitspeler: geen geldige stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -338,11 +345,11 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Burgemeester $id wil dat " .
-							"$stem hem opvolgt.\n");
+						schrijfLog($sid,"Burgemeester $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Burgemeester: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
@@ -351,10 +358,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Raaf $id kiest $stem.\n");
+						schrijfLog($sid,"Raaf $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Raaf: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -364,10 +371,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Schout $id kiest $stem.\n");
+						schrijfLog($sid,"Schout $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Schout: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -376,10 +383,11 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false && $stem != $id) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"$rol $id kiest $stem.\n");
+						schrijfLog($sid,"Waarschuwer $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Waarschuwer: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
@@ -388,15 +396,15 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"EXTRA_STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Jager $id wil $stem neerschieten.\n");
+						schrijfLog($sid,"Jager $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Jager: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler...\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
@@ -405,10 +413,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				if($stem !== false) {
 					zetStem($id,$stem,$sid,"STEM");
 					stuurStem($naam,$adres,$stem,$sid);
-					schrijfLog($sid,"$id stemt op $stem als Burgemeester.\n");
+					schrijfLog($sid,"$naam stemt op $stem (Burgemeester).\n");
 				}
 				else {
-					schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+					schrijfLog($sid,"Burgemeester: geen goede stem gevonden.\n");
 					stuurFoutStem($naam,$adres,$sid);
 				}
 				break;
@@ -417,11 +425,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 				if($stem !== false) {
 					zetStem($id,$stem,$sid,"STEM");
 					stuurStem($naam,$adres,$stem,$sid);
-					schrijfLog($sid,"$id stemt op $stem voor " . 
-						"de Brandstapel.\n");
+					schrijfLog($sid,"$naam stemt op $stem (Brandstapel).\n");
 				}
 				else {
-					schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+					schrijfLog($sid,"Brandstapel: geen goede stem gevonden.\n");
 					stuurFoutStem($naam,$adres,$sid);
 				}
 				break;
@@ -431,10 +438,10 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						zetStem($id,$stem,$sid,"STEM");
 						stuurStem($naam,$adres,$stem,$sid);
-						schrijfLog($sid,"Jager $id wil $stem neerschieten.\n");
+						schrijfLog($sid,"Jager $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,"Jager: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//if
@@ -443,21 +450,22 @@ function parseStem($id,$adres,$spel,$bericht,$onderwerp) {
 					if($stem !== false) {
 						$stem = "'$stem'";
 						zetStem($id,$stem,$sid,"SPECIALE_STEM");
-						schrijfLog($sid,"Zondebok $id wil schuldgevoel " . 
-							"opwekken in $stem.\n");
+						schrijfLog($sid,"Zondebok $naam kiest $stem.\n");
 					}
 					else {
-						schrijfLog($sid,"Error: geen goede stem gevonden.\n");
+						schrijfLog($sid,
+							"Zondebok: geen goede stem gevonden.\n");
 						stuurFoutStem($naam,$adres,$sid);
 					}
 				}//else if
 				else {
-					schrijfLog($sid,"Error: verkeerde rol/speler.\n");
+					schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 					houJeMond($naam,$adres,$sid);
 				}
 				break;
 			default:
 				//spel zit in een niet-wachtfase
+				schrijfLog($sid,"Error: speler mag niet stemmen.\n");
 				houJeMond($naam,$adres,$sid);
 				break;
 

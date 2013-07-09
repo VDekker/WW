@@ -12,39 +12,51 @@ function config($adres,$onderwerp,$bericht) {
 	$bericht = str_replace($adminPass,"",$bericht);
 
 	if(preg_match("/query/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Query.\n");
 		adminQuery($bericht,$adres);
 	}
 	if(preg_match("/pause/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Pause.\n");
 		adminPause($bericht,$adres);
 	}
 	if(preg_match("/continue/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Continue.\n");
 		adminContinue($bericht,$adres);
 	}
 	if(preg_match("/stop/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Stop.\n");
 		adminStop($bericht,$adres);
 	}
 	if(preg_match("/delete/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Delete.\n");
 		adminDelete($bericht,$adres);
 	}
 	if(preg_match("/start/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Start.\n");
 		adminStart($bericht,$adres);
 	}
 	if(preg_match("/players/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Players.\n");
 		adminPlayers($bericht,$adres);
 	}
 	if(preg_match("/nomail/i",$onderwerp)) {
+		schrijfLog(-1,"Config: NoMail.\n");
 		adminNoMail($bericht,$adres);
 	}
 	if(preg_match("/games/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Games.\n");
 		adminGames($adres);
 	}
 	if(preg_match("/story/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Story.\n");
 		adminStory($bericht,$adres);
 	}
 	if(preg_match("/help/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Help.\n");
 		adminHelp($bericht,$onderwerp,$adres);
 	}
 	if(preg_match("/roles/i",$onderwerp)) {
+		schrijfLog(-1,"Config: Roles.\n");
 		adminRoles($bericht,$adres);
 	}
 	return;
@@ -76,7 +88,7 @@ function adminQuery($text,$adres) {
 			}
 		else {
 			if(preg_match("/\bdrop\b/i",$query)) {
-				schrijfLog(-1,"Tabellen verwijderen mag niet.\n");
+				schrijfLog(-1,"Poging tabel te verwijderen afgekeurd.\n");
 				$onderwerp = "Foute query: 'DROP' mag niet";
 				$bericht = "In jouw query stond het woord 'DROP'. ";
 				$bericht .= "Tabellen mogen niet verwijderd worden; ";
@@ -259,7 +271,6 @@ function adminStart($text,$adres) {
 	}
 	if(empty($max) || !is_int($max)) {
 		//standaard spel:
-		schrijfLog(-1,"Standaard spel gevraagd.\n");
 		$max = 18;
 	}
 	if(empty($snel) || !is_int($snel)) {
@@ -277,6 +288,7 @@ function adminStart($text,$adres) {
 		$tnaam = "default";
 		$resultaat = sqlSel(5,"TNAAM='default'");
 		if(sqlNum($resultaat) == 0) {
+			schrijfLog(-1,"Default thema mist: error.\n");
 			$bericht = "Er bestaat geen default thema; ";
 			$bericht .= "maak dit aan, anders loopt het hele systeem vast!";
 			stuurError($bericht);
@@ -296,6 +308,10 @@ function adminStart($text,$adres) {
 	sqlQuery($sql);
 	$id = sqlID();
 	schrijfLog($id,"Spel gemaakt: $snaam.\n");
+	schrijfLog($id,"Max spelers: $max.\n");
+	schrijfLog($id,"Snelheid: $snel.\n");
+	schrijfLog($id,"Strengheid: $streng.\n");
+	schrijfLog($id,"Thema: $tnaam.\n");
 
 	//mail admin dat het geslaagd is
 	$onderwerp = "Spel aangemaakt: $snaam";
@@ -512,7 +528,7 @@ function adminHelp($bericht,$onderwerp,$adres) {
 		return;
 	}
 	$hid = implode('', $nummers[0]);
-	schrijfLog(-1,"$hid beantwoord.\n");
+	schrijfLog(-1,"Help #$hid beantwoord.\n");
 	$resultaat = sqlSel(1,"HID=$hid");
 	$help = sqlFet($resultaat);
 	$ontvanger = $help['ADRES'];
@@ -576,10 +592,11 @@ function adminRoles($bericht,$adres) {
 	$sql = "INSERT INTO $tabel(AANTAL,ROLLEN,BURGEMEESTER) ";
 	$sql .= "VALUES($aantal,'$rolverdeling',$burg)";
 	sqlQuery($sql);
+	schrijfLog(-1,"Rolverdeling ingevoegd: $rolverdeling.\n");
 
 	$subject = "Rolverdeling ingevoegd";
 	$message = "De rolverdeling is succesvol in de database gezet.<br />";
-	$message .= "Rolverdeling: $rolverdeling.";
+	$message .= "Rolverdeling:<br />$rolverdeling.";
 
 	stuurMail($adres,$subject,$message,NULL);
 	return;
@@ -599,7 +616,6 @@ function help($afzender,$onderwerp,$bericht) {
 		$message = "Anonieme hulp gevraagd.<br />";
 	}
 	else {
-		schrijfLog(-1,"Hulp gevraagd door $afzender.\n");
 		$message = "Hulp gevraagd door $afzender:<br />";
 	}
 	$message .= "Onderwerp: $onderwerp <br />";

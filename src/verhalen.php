@@ -10,6 +10,7 @@ function mailRolverdeling($spel) {
 	$resultaat = sqlSel(3,"SID=$sid");
 	while($speler = sqlFet($resultaat)) {
 		$id = $speler['ID'];
+		$naam = $speler['NAAM'];
 		$tuple = array($speler);
 		$adres = $speler['EMAIL'];
 
@@ -21,7 +22,7 @@ function mailRolverdeling($spel) {
 		$text = vulIn($tuple,"","",$text,$geswoorden);
 
 		stuurMail($adres,$onderwerp,$text,array($auteur));
-		schrijfLog($sid,"Rol naar $id gemaild.\n");
+		schrijfLog($sid,"Rol naar $naam gemaild.\n");
 	}//while
 	return 0;
 }//mailRolverdeling
@@ -45,6 +46,7 @@ function mailWakker($rol,$spel) {
 		if(!wordtWakker($id,$sid)) {
 			continue;
 		}
+		$naam = $speler['NAAM'];
 		$tuples = array($speler);
 		$adres = $speler['EMAIL'];
 		$verhaal = geefVerhaal($thema,$rol,0,1,0,$ronde,$sid);
@@ -58,10 +60,15 @@ function mailWakker($rol,$spel) {
 		$text = keuzeVeel($text,$speler,$rol,$sid);
 
 		stuurMail($adres,$onderwerp,$text,array($auteur));
-		schrijfLog($sid,"Mail gestuurd naar $id.\n");
+		schrijfLog($sid,"$rol $naam is wakker gemaild.\n");
 	}//while
 	return;
 }//mailWakker
+
+
+//TODO
+//Vanaf hier verder met schrijfLogs. 
+//Also: al het regelen/fases nog doen met schrijfLogs
 
 //maakt een groep spelers wakker:
 //Weerwolven (inc. Witte), Vampiers of Fluitspelers
@@ -121,7 +128,7 @@ function mailGroepWakker($rol,$spel) {
 	$text = keuzeGroep($text,$rol,$sid);
 
 	stuurMail($adres,$onderwerp,$text,array($auteur));
-	schrijfLog($sid,"Mail gestuurd naar $adres.\n");
+	schrijfLog($sid,"$rol: Mail gestuurd naar $adres.\n");
 	
 	return;
 }//mailGroepWakker

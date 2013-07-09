@@ -216,7 +216,6 @@ function geldigeStemOpdracht($bericht,$opdracht,$sid) {
 	}
 	while($speler = sqlFet($resultaat)) {
 		if($stem == $speler['STEM']) {
-			schrijfLog($sid,"$stem is al eerder gekozen.\n");
 			return -2;
 		}
 	}//while
@@ -257,16 +256,17 @@ function geldigeStemHeks($bericht,$sid,$flag,$id) {
 function geldigeStemBrand($id,$bericht,$sid) {
 	$resultaat = sqlSel(3,"ID=$id");
 	$speler = sqlFet($resultaat);
+	$naam = $speler['NAAM'];
 	if($speler['ROL'] == "Dorpsgek" && ($speler['SPELFLAGS'] & 128) == 128) {
-		schrijfLog($sid,"Dorpsgek $id mag niet stemmen.\n");
+		schrijfLog($sid,"Dorpsgek $naam mag niet stemmen.\n");
 		return -1;
 	}
 	if(($speler['SPELFLAGS'] & 2) == 2) {
-		schrijfLog($sid,"$id voelt zich schuldig en mag niet stemmen.\n");
+		schrijfLog($sid,"$naam voelt zich schuldig en mag niet stemmen.\n");
 		return -1;
 	}
 	if(($speler['SPELFLAGS'] & 8) == 8) {
-		schrijfLog($sid,"$id is opgesloten en mag niet stemmen.\n");
+		schrijfLog($sid,"$naam is opgesloten en mag niet stemmen.\n");
 		return -1;
 	}
 	$stem = geldigeStem($bericht,$sid,1);
@@ -275,11 +275,11 @@ function geldigeStemBrand($id,$bericht,$sid) {
 		$speler = sqlFet($resultaat);
 		if($speler['ROL'] == "Dorpsgek" && 
 			($speler['SPELFLAGS'] & 128) == 128) {
-			schrijfLog($sid,"$id mag niet op Dorpsgek $stem stemmen.\n");
+			schrijfLog($sid,"$naam mag niet op Dorpsgek $stem stemmen.\n");
 			return false;
 		}
 		if(($speler['SPELFLAGS'] & 8) == 8) {
-			schrijfLog($sid,"$id mag niet op opgesloten $stem stemmen.\n");
+			schrijfLog($sid,"$naam mag niet op opgesloten $stem stemmen.\n");
 			return false;
 		}
 	}
