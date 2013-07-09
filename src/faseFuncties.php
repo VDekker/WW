@@ -179,6 +179,7 @@ function zetDood2($sid) {
 //check of de speler niet beschermd wordt, danwel aanwezig is
 //en vermoord hem (en eventueel andere slachtoffers...)
 function vermoord($id,$sid) {
+	schrijfLog($sid,"Speler $id wordt vermoord.\n");
 	$rol = heeftRol($id);
 	$dorpsoudsteInSpel = inSpel("Dorpsoudste",$sid);
 	$targets = array($id); // Voeg alle targets toe aan deze array!
@@ -270,7 +271,7 @@ function vermoord($id,$sid) {
 		}//if
 		
 		//vermoord...
-		schrijfLog($sid,"$target wordt vermoord...\n");
+		schrijfLog($sid,"$target is dood.\n");
 		zetDood($target,$sid);
 	}//foreach
 	return;
@@ -315,6 +316,9 @@ function regelZetNULL1($sid) {
 		sqlUp(3,"STEM=NULL,VORIGE_STEM='$stem'",
 			"ID=$id");
 	}
+
+	//zet ook stemmen van slapende spelers op NULL
+	sqlUp(3,"STEM=NULL,EXTRA_STEM=NULL","SID=$sid AND ((SPELFLAGS & 32) = 32)");
 	return;
 }//regelZetNULL1
 
@@ -488,7 +492,8 @@ function gewonnen($fase,$spel) {
 	if(sqlNum($resultaat) == 1) {
 		$speler = sqlFet($resultaat);
 		$id = $speler['ID'];
-		schrijfLog($sid,"Enkele speler over: $id wint.\n");
+		$naam = $speler['NAAM'];
+		schrijfLog($sid,"Enkele speler over: $naam wint.\n");
 		array_push($gewonnenSpelers,$speler);
 		$rol = 0;
 		switch($speler['ROL']) {
@@ -579,7 +584,8 @@ function gewonnen($fase,$spel) {
 	$resultaat = sqlSel(3,"SID=$sid AND (GELIEFDE<>NULL OR LIJFWACHT<>NULL)");
 	while($speler = sqlFet($resultaat)) {
 		if(gewonnenSpeler($speler,$sid,false)) {
-			schrijfLog($sid,"$id heeft gewonnen!\n");
+			$naam = $speler['NAAM'];
+			schrijfLog($sid,"$naam heeft gewonnen.\n");
 			array_push($gewonnenSpelers,$speler);
 		}
 	}

@@ -95,7 +95,7 @@ function stuurError($error) {
 		$alleAdmins .= ", $admins[$i]";
 	}
 	stuurMail($alleAdmins,$onderwerp,$error,NULL);
-	schrijfLog(-1,"Error: $error\nSpel gepauzeerd.\n");
+	schrijfLog(-1,"Error: $error\nGeen spel gepauzeerd.\n");
 	die($error);
 	return;
 }//stuurError
